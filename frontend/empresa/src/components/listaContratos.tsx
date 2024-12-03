@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { contasReceberService, contratosService, notasFiscaisService } from '@/services/api';
+import { contasReceberService, contratosService } from '@/services/api';
 import {
     ContratoExpandido,
     ContasReceberResponse,

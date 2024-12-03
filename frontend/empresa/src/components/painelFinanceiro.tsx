@@ -56,7 +56,7 @@ interface SortConfig {
 const sortData = <T extends Record<string, any>>(
     data: T[],
     sortConfig: SortConfig,
-    type: 'receber' | 'pagar' = 'receber'
+    _type: 'receber' | 'pagar' = 'receber'
 ): T[] => {
     if (!sortConfig.key || !sortConfig.direction) return data;
 
@@ -157,12 +157,7 @@ const FinancialDashboard = () => {
         tituloId: 0,
         novoStatus: '',
     });
-    const [confirmDialog, setConfirmDialog] = useState({
-        isOpen: false,
-        title: '',
-        message: '',
-        onConfirm: () => { },
-    });
+    
 
     // Função de atualização de status
     const handleStatusChange = async (
@@ -293,27 +288,6 @@ const FinancialDashboard = () => {
         }));
     };
 
-    const SummaryCard = ({ title, total, count, onClick, isExpanded }: {
-        title: string;
-        total: number;
-        count: number;
-        onClick: () => void;
-        isExpanded: boolean;
-    }) => (
-        <Card className="cursor-pointer hover:bg-gray-50" onClick={onClick}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </CardHeader>
-            <CardContent>
-                <div className="text-lg font-bold">
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
-                        .format(total)}
-                </div>
-                <p className="text-xs text-muted-foreground">{count} títulos</p>
-            </CardContent>
-        </Card>
-    );
 
     const [sortConfig, setSortConfig] = useState<SortConfig>({
         key: '',
@@ -369,11 +343,6 @@ const FinancialDashboard = () => {
                 </TableHeader>
                 <TableBody>
                     {sortData(titulos, sortConfig, tipo).map((titulo) => {
-                        /*  console.log('Renderizando linha:', {
-                             tituloId: titulo.id,
-                             status: titulo.status,
-                             historico: titulo.historico
-                         }); */
                         return (
                             <TableRow key={titulo.id}>
                                 <TableCell className="flex items-center gap-2">
