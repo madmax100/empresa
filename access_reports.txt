@@ -1,0 +1,982 @@
+Relatório dos Bancos de Dados do Access:
+
+Banco de Dados 1:
+Tabela: Compras
+Colunas: Codigo, Mes, Comprador, Total das Compras
+
+Tabela: Evolucao
+Colunas: Codigo, Total das Vendas, Vendedores, Mes
+
+Tabela: EvolucaoCompras
+Colunas: Codigo, Total das Compras, Compradores, Mes
+
+Tabela: Meses
+Colunas: Codigo, Mes, Nome
+
+Tabela: Vendas
+Colunas: Codigo, Total das Vendas, Vendedores, Mes
+
+Tabela: Vendas Refinadas
+Colunas: Codigo, Total das Vendas, Vendedores
+
+
+
+Banco de Dados 2:
+Tabela: Bancos
+Colunas: Codigo, Nome, Endereco, Bairro, Agencia, Contato, Fone, Fax
+
+Tabela: Categorias
+Colunas: Codigo, Categoria
+
+Tabela: Cheques
+Colunas: Codigo, Cheque, Banco, Cliente, Valor, Vencimento, Destino, ValorPago, Historico, Responsavel, Cgc, Cpf, Compensado, Devolvido, DataDev, Repassado, DataPagto, Confirmado, Status, Terceiros, Data
+
+Tabela: ChequesEmitidos
+Colunas: Cheque, Banco, Destinatario, Valor, Vencimento, Destino, ValorPago, Historico, Responsavel, Cgc, Cpf, Compensado, Devolvido, DataDev, Repassado, DataPagto, Status, Terceiros
+
+Tabela: Cidades
+Colunas: Codigo, Cidade, Região
+
+Tabela: Clientes
+Colunas: CODCLIENTE, NOME, ENDERECO, BAIRRO, CIDADE, UF, CEP, FONE, FAX, CPF/CGC, DATACADASTRO, CONTATO, RG/IE, VENDEDOR, REGIAO, SITUACAO, DEBITO, CELULAR, EMAIL, LIMITE, CONTATOTECNICO, CONTATOCOBRANCA, REFBANCARIAS, OBSERVACOES, REFCOMERCIAIS
+
+Tabela: ContadorClientes
+Colunas: Codigo
+
+Tabela: ContadorContratos
+Colunas: Codigo
+
+Tabela: ContadorFornecedores
+Colunas: Codigo
+
+Tabela: ContadorProdutos
+Colunas: Codigo
+
+Tabela: ContasBanco
+Colunas: Codigo, Banco, NomeBanco, Numero, Agencia, Contato
+
+Tabela: Contratos
+Colunas: Contrato, Cliente, TipoContrato, Renovado, TotalMaquinas, ValorContrato, NumeroParcelas, ValorPacela, Referencia, Data, Incio, Fim, UltimoAtendimento, NMaquinas, ClienteReal, TipoContratoReal, Obs
+
+Tabela: Despesas
+Colunas: Codigo, Descricao
+
+Tabela: Folha de Pagamento
+Colunas: CodFolha, Funcionario, Mes, Ano, Valor Total, Data, Especificacao, Resta, Salario
+
+Tabela: Fornecedores
+Colunas: codigo, nome, endereco, bairro, cidade, uf, cep, fone, fax, cgc, cgf, contato, datacadastro, celular, email, especificacao, tipo
+
+Tabela: Funcionarios
+Colunas: Codigo, nome, endereco, bairro, cidade, cep, fone, celular, cpf, rg, funcao, salario, dataadmissao, Setor, Comissao
+
+Tabela: Funcionarios_Morais
+Colunas: Codigo, nome, Endereço, bairro, cidade, cep, fone, celular, cpf, Identidade, Função, Salário, DataAdmissão, Setor, Comissão, Razão
+
+Tabela: Grupos
+Colunas: Codigo, Descricao
+
+Tabela: Grupos-Morais
+Colunas: Codigo, Descricao_Grupos
+
+Tabela: ÍNDICES
+Colunas: NÚMERO_DO_ÍNDICE, TAXA_MENSAL, MARKUP_NOR_1, MARKUP_MIN_1, MARKUP_NOR_2, MARKUP_MIN_2, MARKUP_NOR_3, MARKUP_MIN_3
+
+Tabela: Itens da Folha de Pagto
+Colunas: Codigo, Funcionario, Mes, Ano, Data, Hora, Valor, Autorizacao, Historico, Especificacao, Salario
+
+Tabela: Itens dos Contratos
+Colunas: Codigo, Contrato, ClienteReal, Cliente, Serie, Categoria, Modelo, Tecnico, PercentualComissao, Inicio, Fim
+
+Tabela: KITS
+Colunas: NUMERO, REFERENCIA, Codigo, DESCRICAO
+
+Tabela: KITS_DE_PRODUTOS
+Colunas: SEQUENCIAL, PRESTAÇÕES, DESCRIÇÃO, REFERENCIA, CÓDIGO, ESTOQUE, GRUPO, PREÇO, MÍNIMO
+
+Tabela: Linha
+Colunas: Codigo, Linha, Historico
+
+Tabela: Maquinas
+Colunas: Codigo, Maquina, Serie, Categoria, Marca, Modelo, Tecnico, Notafiscal, Fornecedor, Cliente, SituacaoContrato, InicioContrato, FimContrato, Comentarios, PercentualComissao, Contrato, ClienteReal, Comissao, DataFaturamento, Qtde, Atendimento, OEndereco
+
+Tabela: Marcas
+Colunas: Codigo, Marcas
+
+Tabela: Produtos
+Colunas: Codigo, Descricao, Unidade, grupo, Fornecedor, Referencia, Custo, Revenda, Varejo, Estoque, Reservado, Datacadastro, Ultimaalteracao, Percentual, Status, UltimoCusto, Destaque, Campo1, Markup, ValorDestaque, CondicoesDestaque, Minimo, Redução, Localizacao, Linha, EstoqueMinimo, CustoUS, Nivel, Total, MarkupMin, Mov
+
+Tabela: Transportadoras
+Colunas: codigo, nome, endereco, bairro, cidade, cep, fone, celular, Contato, Região
+
+
+
+Banco de Dados 3:
+Tabela: Bancos
+Colunas: Codigo, Nome, Endereco, Bairro, Agencia, Contato, Fone, Fax
+
+Tabela: Categorias
+Colunas: Codigo, Categoria
+
+Tabela: Cheques
+Colunas: Codigo, Cheque, Banco, Cliente, Valor, Vencimento, Destino, ValorPago, Historico, Responsavel, Cgc, Cpf, Compensado, Devolvido, DataDev, Repassado, DataPagto, Confirmado, Status, Terceiros, Data
+
+Tabela: ChequesEmitidos
+Colunas: Cheque, Banco, Destinatario, Valor, Vencimento, Destino, ValorPago, Historico, Responsavel, Cgc, Cpf, Compensado, Devolvido, DataDev, Repassado, DataPagto, Status, Terceiros
+
+Tabela: Cidades
+Colunas: Codigo, Cidade, Região
+
+Tabela: Clientes
+Colunas: CODCLIENTE, NOME, ENDERECO, BAIRRO, CIDADE, UF, CEP, FONE, FAX, CPF/CGC, DATACADASTRO, CONTATO, RG/IE, VENDEDOR, REGIAO, SITUACAO, DEBITO, CELULAR, EMAIL, LIMITE, CONTATOTECNICO, CONTATOCOBRANCA, REFBANCARIAS, OBSERVACOES, REFCOMERCIAIS, CPBS, IBGE
+
+Tabela: Consumo
+Colunas: Codigo, Descricao, Unidade, Fornecedor, Referencia, Custo, Datacadastro, Ultimaalteracao, Percentual, Status, CSTA, CSTB, Tipo
+
+Tabela: ContadorClientes
+Colunas: Codigo
+
+Tabela: ContadorContratos
+Colunas: Codigo
+
+Tabela: ContadorFornecedores
+Colunas: Codigo
+
+Tabela: ContadorFuncionario
+Colunas: Codigo
+
+Tabela: ContadorProdutos
+Colunas: Codigo
+
+Tabela: ContasBanco
+Colunas: Codigo, Banco, NomeBanco, Numero, Agencia, Contato
+
+Tabela: Contratos
+Colunas: Contrato, Cliente, TipoContrato, Renovado, TotalMaquinas, ValorContrato, NumeroParcelas, ValorPacela, Referencia, Data, Incio, Fim, UltimoAtendimento, NMaquinas, ClienteReal, TipoContratoReal, Obs
+
+Tabela: Cópia de Funcionarios
+Colunas: Codigo, nome, endereco, bairro, cidade, cep, fone, celular, cpf, rg, funcao, salario, dataadmissao, Setor, Comissao
+
+Tabela: Despesas
+Colunas: Codigo, Descricao
+
+Tabela: Folha de Pagamento
+Colunas: CodFolha, Funcionario, Mes, Ano, Valor Total, Data, Especificacao, Resta, Salario
+
+Tabela: Fornecedores
+Colunas: codigo, nome, endereco, bairro, cidade, uf, cep, fone, fax, cgc, cgf, contato, datacadastro, celular, email, especificacao, tipo, IBGE
+
+Tabela: Funcionarios
+Colunas: Codigo, nome, endereco, bairro, cidade, cep, fone, celular, cpf, rg, funcao, salario, dataadmissao, Setor, Comissao
+
+Tabela: Funcionarios_Morais
+Colunas: Codigo, nome, Endereço, bairro, cidade, cep, fone, celular, cpf, Identidade, Função, Salário, DataAdmissão, Setor, Comissão, Razão
+
+Tabela: Grupos
+Colunas: Codigo, Descricao
+
+Tabela: Grupos-Morais
+Colunas: Codigo, Descricao_Grupos
+
+Tabela: ÍNDICES
+Colunas: NÚMERO_DO_ÍNDICE, TAXA_MENSAL, MARKUP_NOR_1, MARKUP_MIN_1, MARKUP_NOR_2, MARKUP_MIN_2, MARKUP_NOR_3, MARKUP_MIN_3
+
+Tabela: Itens da Folha de Pagto
+Colunas: Codigo, Funcionario, Mes, Ano, Data, Hora, Valor, Autorizacao, Historico, Especificacao, Salario
+
+Tabela: Itens dos Contratos
+Colunas: Codigo, Contrato, ClienteReal, Cliente, Serie, Categoria, Modelo, Tecnico, PercentualComissao, Inicio, Fim
+
+Tabela: KITS
+Colunas: NUMERO, REFERENCIA, Codigo, DESCRICAO
+
+Tabela: KITS_DE_PRODUTOS
+Colunas: SEQUENCIAL, PRESTAÇÕES, DESCRIÇÃO, REFERENCIA, CÓDIGO, ESTOQUE, GRUPO, PREÇO, MÍNIMO
+
+Tabela: Linha
+Colunas: Codigo, Linha, Historico
+
+Tabela: Maquinas
+Colunas: Codigo, Maquina, Serie, Categoria, Marca, Modelo, Tecnico, Notafiscal, Fornecedor, Cliente, SituacaoContrato, InicioContrato, FimContrato, Comentarios, PercentualComissao, Contrato, ClienteReal, Comissao, DataFaturamento, Qtde, Atendimento, OEndereco
+
+Tabela: Marcas
+Colunas: Codigo, Marcas
+
+Tabela: Produtos
+Colunas: Codigo, Descricao, Unidade, grupo, Fornecedor, Referencia, Custo, Revenda, Varejo, Estoque, Reservado, Datacadastro, Ultimaalteracao, Percentual, Status, UltimoCusto, Destaque, Campo1, Markup, ValorDestaque, CondicoesDestaque, Minimo, Redução, Localizacao, Linha, EstoqueMinimo, CustoUS, Nivel, Total, MarkupMin, Mov, NCM, CSTA, CSTB
+
+Tabela: Transportadoras
+Colunas: codigo, nome, endereco, bairro, cidade, cep, fone, celular, Contato, Região, CNPJ, UF, IE
+
+
+
+Banco de Dados 4:
+Tabela: Bancos
+Colunas: Codigo, Nome, Endereco, Bairro, Agencia, Contato, Fone, Fax
+
+Tabela: Categorias
+Colunas: Codigo, Categoria
+
+Tabela: Cheques
+Colunas: Codigo, Cheque, Banco, Cliente, Valor, Vencimento, Destino, ValorPago, Historico, Responsavel, Cgc, Cpf, Compensado, Devolvido, DataDev, Repassado, DataPagto, Confirmado, Status, Terceiros, Data
+
+Tabela: ChequesEmitidos
+Colunas: Cheque, Banco, Destinatario, Valor, Vencimento, Destino, ValorPago, Historico, Responsavel, Cgc, Cpf, Compensado, Devolvido, DataDev, Repassado, DataPagto, Status, Terceiros
+
+Tabela: Cidades
+Colunas: Codigo, Cidade, Região
+
+Tabela: Clientes
+Colunas: CODCLIENTE, NOME, ENDERECO, BAIRRO, CIDADE, UF, CEP, FONE, FAX, CPF/CGC, DATACADASTRO, CONTATO, RG/IE, VENDEDOR, REGIAO, SITUACAO, DEBITO, CELULAR, EMAIL, LIMITE, CONTATOTECNICO, CONTATOCOBRANCA, REFBANCARIAS, OBSERVACOES, REFCOMERCIAIS, CPBS, IBGE
+
+Tabela: ContadorClientes
+Colunas: Codigo
+
+Tabela: ContadorContratos
+Colunas: Codigo
+
+Tabela: ContadorFornecedores
+Colunas: Codigo
+
+Tabela: ContadorFuncionario
+Colunas: Codigo
+
+Tabela: ContadorProdutos
+Colunas: Codigo
+
+Tabela: ContasBanco
+Colunas: Codigo, Banco, NomeBanco, Numero, Agencia, Contato
+
+Tabela: Contratos
+Colunas: Contrato, Cliente, TipoContrato, Renovado, TotalMaquinas, ValorContrato, NumeroParcelas, ValorPacela, Referencia, Data, Incio, Fim, UltimoAtendimento, NMaquinas, ClienteReal, TipoContratoReal, Obs
+
+Tabela: Cópia de Funcionarios
+Colunas: Codigo, nome, endereco, bairro, cidade, cep, fone, celular, cpf, rg, funcao, salario, dataadmissao, Setor, Comissao
+
+Tabela: Despesas
+Colunas: Codigo, Descricao
+
+Tabela: Folha de Pagamento
+Colunas: CodFolha, Funcionario, Mes, Ano, Valor Total, Data, Especificacao, Resta, Salario
+
+Tabela: Fornecedores
+Colunas: codigo, nome, endereco, bairro, cidade, uf, cep, fone, fax, cgc, cgf, contato, datacadastro, celular, email, especificacao, tipo, IBGE
+
+Tabela: Funcionarios
+Colunas: Codigo, nome, endereco, bairro, cidade, cep, fone, celular, cpf, rg, funcao, salario, dataadmissao, Setor, Comissao
+
+Tabela: Funcionarios_Morais
+Colunas: Codigo, nome, Endereço, bairro, cidade, cep, fone, celular, cpf, Identidade, Função, Salário, DataAdmissão, Setor, Comissão, Razão
+
+Tabela: Grupos
+Colunas: Codigo, Descricao
+
+Tabela: Grupos-Morais
+Colunas: Codigo, Descricao_Grupos
+
+Tabela: ÍNDICES
+Colunas: NÚMERO_DO_ÍNDICE, TAXA_MENSAL, MARKUP_NOR_1, MARKUP_MIN_1, MARKUP_NOR_2, MARKUP_MIN_2, MARKUP_NOR_3, MARKUP_MIN_3
+
+Tabela: Itens da Folha de Pagto
+Colunas: Codigo, Funcionario, Mes, Ano, Data, Hora, Valor, Autorizacao, Historico, Especificacao, Salario
+
+Tabela: Itens dos Contratos
+Colunas: Codigo, Contrato, ClienteReal, Cliente, Serie, Categoria, Modelo, Tecnico, PercentualComissao, Inicio, Fim
+
+Tabela: KITS
+Colunas: NUMERO, REFERENCIA, Codigo, DESCRICAO
+
+Tabela: KITS_DE_PRODUTOS
+Colunas: SEQUENCIAL, PRESTAÇÕES, DESCRIÇÃO, REFERENCIA, CÓDIGO, ESTOQUE, GRUPO, PREÇO, MÍNIMO
+
+Tabela: Linha
+Colunas: Codigo, Linha, Historico
+
+Tabela: Maquinas
+Colunas: Codigo, Maquina, Serie, Categoria, Marca, Modelo, Tecnico, Notafiscal, Fornecedor, Cliente, SituacaoContrato, InicioContrato, FimContrato, Comentarios, PercentualComissao, Contrato, ClienteReal, Comissao, DataFaturamento, Qtde, Atendimento, OEndereco
+
+Tabela: Marcas
+Colunas: Codigo, Marcas
+
+Tabela: Produtos
+Colunas: Codigo, Descricao, Unidade, grupo, Fornecedor, Referencia, Custo, Revenda, Varejo, Estoque, Reservado, Datacadastro, Ultimaalteracao, Percentual, Status, UltimoCusto, Destaque, Campo1, Markup, ValorDestaque, CondicoesDestaque, Minimo, Redução, Localizacao, Linha, EstoqueMinimo, CustoUS, Nivel, Total, MarkupMin, Mov, NCM, CSTA, CSTB
+
+Tabela: Transportadoras
+Colunas: codigo, nome, endereco, bairro, cidade, cep, fone, celular, Contato, Região, CNPJ, UF, IE
+
+
+
+Banco de Dados 5:
+Tabela: CFOP
+Colunas: AUTO, CFOP, DISCRICAO
+
+Tabela: Cidades
+Colunas: Codigo, Cidade, CodigoIBGE, UF
+
+Tabela: CSTA
+Colunas: CODIGO, VALOR, DISCRIÇÃO
+
+Tabela: CSTB
+Colunas: CODIGO, VALOR, DISCRIÇÃO
+
+Tabela: ICMS
+Colunas: CODIGO, VALOR, DISCRIÇÃO
+
+Tabela: PAIS
+Colunas: CODIGO, CODIBGE, PAIS
+
+Tabela: TIPO DO ITEM
+Colunas: AUTO, CODIGO, DESCRIÇÃO
+
+Tabela: UF
+Colunas: CODIGO, UF, CODIBGE, AliquotaICMS, URLGNRE
+
+Tabela: UNIDADES
+Colunas: AUTO, CODIGO, DISCRIÇÃO
+
+
+
+Banco de Dados 6:
+Tabela: Fluxo
+Colunas: Sequencia, RDoc, RVen, RVal, RRec, RCli, RJur, PDoc, PVen, PVal, PPag, PFor, PJur
+
+Tabela: Movimento
+Colunas: Sequencia, Data, Horario, Local, Conta, Credito, Debito, Historico, Operador
+
+
+
+Banco de Dados 7:
+Tabela: Fluxo
+Colunas: Sequencia, RDoc, RVen, RVal, RRec, RCli, RJur, PDoc, PVen, PVal, PPag, PFor, PJur
+
+Tabela: Movimento
+Colunas: Sequencia, Data, Horario, Local, Conta, Credito, Debito, Historico, Operador
+
+
+
+Banco de Dados 8:
+Tabela: Fluxo
+Colunas: Sequencia, RDoc, RVen, RVal, RRec, RCli, RJur, PDoc, PVen, PVal, PPag, PFor, PJur
+
+Tabela: Movimento
+Colunas: Sequencia, Data, Horario, Local, Conta, Credito, Debito, Historico, Operador
+
+
+
+Banco de Dados 9:
+Tabela: Fluxo
+Colunas: Sequencia, Data, Status, Saldo Inicial, Dinheiro, Cheques Pré-Datado, Boleto, Duplicatas a Receber, Outros Recebimentos, Total das Entradas, Impostos sobre Vendas, Pagamentos a Fornecedores, Pro-Labore, Salarios, Encargos, Beneficios, Agua, Luz, Telefone, Propaganda, Despesas Bancarias, Despesas Financeiras, Comissoes a Vendedores, Honorários Contábeis, Emprestimo, Pagto de Serviços, Combustíveis, Despesas com Veículos, Materiais de Escritório, Compra de Equipamentos, Pagto de Financiamentos, Acordo, Depesas Viagem, Frete, MatAssistTec, MatdeEscritorio, MatCopa, Multas, Refeicao, Recisao, Vale Transporte, Outras Despesas, Total das Saidas, Saldo Operacional, Saldo Final
+
+Tabela: Resumo
+Colunas: Sequencia, Data, Status, Saldo Inicial, Dinheiro, Cheques Pré-Datado, Duplicatas a Receber, Boleto, Outros Recebimentos, Total das Entradas, Impostos sobre Vendas, Pagamentos a Fornecedores, Pro-Labore, Salarios, Encargos, Beneficios, Agua, Luz, Emprestimo, Telefone, Propaganda, Despesas Bancarias, Despesas Financeiras, Comissoes a Vendedores, Honorários Contábeis, Pagto de Serviços, Combustíveis, Despesas com Veículos, Materiais de Escritório, Compra de Equipamentos, Pagto de Financiamentos, Acordo, Depesas Viagem, Frete, MatAssistTec, MatdeEscritorio, MatCopa, Multas, Refeicao, Recisao, Vale Transporte, Outras Despesas, Total das Saidas, Saldo Operacional, Saldo Final
+
+
+
+Banco de Dados 10:
+Tabela: Factoring
+Colunas: Codigo, Nome, Fone, Fax, Contato
+
+Tabela: Pagar
+Colunas: CodConta a Pagar, Data, Valor, Fornecedor, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NDuplicata, DataPagto, ValorPago, Local, Status, Conta
+
+Tabela: PreConta
+Colunas: CodConta a Receber, Documento, Data, Valor, Cliente, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NN, Recebido, DataPagto, Local, Conta, Impresso, Status, Comanda, RepassadoFactory, Factory, ValorFactory, StatusFactory, ValorPagoFactory, Cartorio, Protesto, Desconto, DataPagtoFactory
+
+Tabela: Receber
+Colunas: CodConta a Receber, Documento, Data, Valor, Cliente, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NN, Recebido, DataPagto, Local, Conta, Impresso, Status, Comanda, RepassadoFactory, Factory, ValorFactory, StatusFactory, ValorPagoFactory, Cartorio, Protesto, Desconto, DataPagtoFactory
+
+
+
+Banco de Dados 11:
+Tabela: Factoring
+Colunas: Codigo, Nome, Fone, Fax, Contato
+
+Tabela: HistCob
+Colunas: Documento, Data, DataNegociacao, Horario, Detalhes, Agendar, Cliente, Contato
+
+Tabela: HistMov
+Colunas: Documento, Data, DataMov, Movimento, Valor
+
+Tabela: HistoricoRecebimentos
+Colunas: Documento, Data, DataPagto, Valor, FormaPagto, Condicoes, Tarifas, Desconto, Juros, Local, Conta, Comentarios, Recebido
+
+Tabela: Pagar
+Colunas: CodConta a Pagar, Data, Valor, Fornecedor, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NDuplicata, DataPagto, ValorPago, Local, Status, Conta
+
+Tabela: PreConta
+Colunas: CodConta a Receber, Documento, Data, Valor, Cliente, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NN, Recebido, DataPagto, Local, Conta, Impresso, Status, Comanda, RepassadoFactory, Factory, ValorFactory, StatusFactory, ValorPagoFactory, Cartorio, Protesto, Desconto, DataPagtoFactory
+
+Tabela: Receber
+Colunas: CodConta a Receber, Documento, Data, Valor, Cliente, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NN, Recebido, DataPagto, Local, Conta, Impresso, Status, Comanda, RepassadoFactory, Factory, ValorFactory, StatusFactory, ValorPagoFactory, Cartorio, Protesto, Desconto, DataPagtoFactory
+
+
+
+Banco de Dados 12:
+Tabela: Factoring
+Colunas: Codigo, Nome, Fone, Fax, Contato
+
+Tabela: HistCob
+Colunas: Documento, Data, DataNegociacao, Horario, Detalhes, Agendar, Cliente, Contato
+
+Tabela: HistMov
+Colunas: Documento, Data, DataMov, Movimento, Valor
+
+Tabela: HistoricoRecebimentos
+Colunas: Documento, Data, DataPagto, Valor, FormaPagto, Condicoes, Tarifas, Desconto, Juros, Local, Conta, Comentarios, Recebido
+
+Tabela: Pagar
+Colunas: CodConta a Pagar, Data, Valor, Fornecedor, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NDuplicata, DataPagto, ValorPago, Local, Status, Conta
+
+Tabela: PreConta
+Colunas: CodConta a Receber, Documento, Data, Valor, Cliente, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NN, Recebido, DataPagto, Local, Conta, Impresso, Status, Comanda, RepassadoFactory, Factory, ValorFactory, StatusFactory, ValorPagoFactory, Cartorio, Protesto, Desconto, DataPagtoFactory
+
+Tabela: Receber
+Colunas: CodConta a Receber, Documento, Data, Valor, Cliente, Vencimento, ValorTotalPago, Historico, FormaPagto, Condicoes, Confirmacao, Juros, Tarifas, NN, Recebido, DataPagto, Local, Conta, Impresso, Status, Comanda, RepassadoFactory, Factory, ValorFactory, StatusFactory, ValorPagoFactory, Cartorio, Protesto, Desconto, DataPagtoFactory
+
+
+
+Banco de Dados 13:
+Tabela: MalaDireta
+Colunas: AUTONUM, CODIGO, NOME, ENDERECO, BAIRRO, CIDADE, UF, CEP, FONE
+
+
+
+Banco de Dados 14:
+Tabela: Diario
+Colunas: Chave, Produto, Data, Estoque, Nivel
+
+Tabela: Movimentacao
+Colunas: Chave, Produto, Documento, Data, Horario, Unitario, Quantidade, Movimentacao, Historico, OPERADOR
+
+Tabela: NotasFiscais
+Colunas: Chave, Produto, Documento, Data, Horario, Unitario, Quantidade, Movimentacao, Historico, OPERADOR
+
+
+
+Banco de Dados 15:
+Tabela: Diario
+Colunas: Chave, Produto, Data, Estoque, Nivel
+
+Tabela: Movimentacao
+Colunas: Chave, Produto, Documento, Data, Horario, Unitario, Quantidade, Movimentacao, Historico, OPERADOR
+
+Tabela: NotasFiscais
+Colunas: Chave, Produto, Documento, Data, Horario, Unitario, Quantidade, Movimentacao, Historico, OPERADOR
+
+
+
+Banco de Dados 16:
+Tabela: Anterior
+Colunas: DATA, MERCADORIA, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: ContadorProdutos
+Colunas: Contador
+
+Tabela: Entradas
+Colunas: DATA, NF, SERIE, PRODUTO, QUANTIDADE, PRECO, USUARIO, DATALAN, HORARIO
+
+Tabela: INVENTAR
+Colunas: DATA, MERCADORIA, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: Inventario
+Colunas: DATA, PRODUTO, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: Produtos
+Colunas: Codigo, Descricao, Unidade, Grupo, Fornecedor, Referencia, Custo, Estoque, Saldo, Entradas, Saidas
+
+Tabela: Saidas
+Colunas: DATA, SERIE, NF, PRODUTO, QUANTIDADE, PRECO, USUARIO, DATLAN, HORARIO, DESC, CODPROD
+
+Tabela: Saldos
+Colunas: Produto, Ano, Estoque, Valor
+
+
+
+Banco de Dados 17:
+Tabela: Anterior
+Colunas: DATA, MERCADORIA, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: ContadorProdutos
+Colunas: Contador
+
+Tabela: Entradas
+Colunas: DATA, NF, SERIE, PRODUTO, QUANTIDADE, PRECO, USUARIO, DATALAN, HORARIO
+
+Tabela: INVENTAR
+Colunas: DATA, MERCADORIA, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: Inventario
+Colunas: DATA, PRODUTO, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: Produtos
+Colunas: Codigo, Descricao, Unidade, Grupo, Fornecedor, Referencia, Custo, Estoque, Saldo, Entradas, Saidas
+
+Tabela: Saidas
+Colunas: DATA, SERIE, NF, PRODUTO, QUANTIDADE, PRECO, USUARIO, DATLAN, HORARIO, DESC, CODPROD
+
+Tabela: Saldos
+Colunas: Produto, Ano, Estoque, Valor
+
+
+
+Banco de Dados 18:
+Tabela: Anterior
+Colunas: DATA, MERCADORIA, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: ContadorProdutos
+Colunas: Contador
+
+Tabela: Entradas
+Colunas: DATA, NF, SERIE, PRODUTO, QUANTIDADE, PRECO, USUARIO, DATALAN, HORARIO
+
+Tabela: INVENTAR
+Colunas: DATA, MERCADORIA, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: Inventario
+Colunas: DATA, PRODUTO, DESCRICAO, QUANTIDADE, UNITARIO
+
+Tabela: Produtos
+Colunas: Codigo, Descricao, Unidade, Grupo, Fornecedor, Referencia, Custo, Estoque, Saldo, Entradas, Saidas
+
+Tabela: Saidas
+Colunas: DATA, SERIE, NF, PRODUTO, QUANTIDADE, PRECO, USUARIO, DATLAN, HORARIO, DESC, CODPROD
+
+Tabela: Saldos
+Colunas: Produto, Ano, Estoque, Valor
+
+
+
+Banco de Dados 19:
+Tabela: Compras
+Colunas: CodComanda, Comanda, Data, Fornecedor, Comprador, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador
+
+Tabela: Itens da Compra
+Colunas: CodItemComanda, Comanda, Data, Produto, Qtde, Valor, Total
+
+Tabela: Itens do Pedido de Venda
+Colunas: CodItemPV, Pedido, Data, Produto, Qtde, Valor, Total, Comissao
+
+Tabela: Itens dos Orcamentos
+Colunas: CodItemOrc, Orcamento, Data, Produto, Qtde, Valor, Total
+
+Tabela: Orcamentos
+Colunas: AutoNum, Orcamento, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, Validade, Obs, Entrega, Frete, Contato, Cidade
+
+Tabela: Pedidos de Venda
+Colunas: Autonum, Pedido, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, ComissaoTotal, Confirmado, Transportadora, Parcelas, Detalhes, Obs
+
+Tabela: Planejamento
+Colunas: Auto, Codigo, Cliente, Endereco, Bairro, Cidade, Fone, Serie, Modelo, Categoria, TipoContrato, NContrato, Inicio, Fim, UAtendimento, Renovado, OEndereco
+
+Tabela: RelClassificacaoPagar
+Colunas: Tipo, Cod, Va, Vp
+
+Tabela: RelItensPagar
+Colunas: Codigo, Fornecedor, Vencimento, Valor, Documento, Data, ValorPago
+
+Tabela: RelItensVendas
+Colunas: Codigo, Produto, Qtde, Estoque, Valor, Cliente, Comanda, Data
+
+Tabela: RelPagar
+Colunas: Codigo, Fornecedor, TitulosAbertos, TitulosPagos, Tipo, Cod, NomeFor
+
+Tabela: RelVendas
+Colunas: Codigo, Cliente, Valor, UltimaVenda, Nome, Cidade
+
+
+
+Banco de Dados 20:
+Tabela: Compras
+Colunas: CodComanda, Comanda, Data, Fornecedor, Comprador, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador
+
+Tabela: Itens da Compra
+Colunas: CodItemComanda, Comanda, Data, Produto, Qtde, Valor, Total
+
+Tabela: Itens do Pedido de Venda
+Colunas: CodItemPV, Pedido, Data, Produto, Qtde, Valor, Total, Comissao
+
+Tabela: Itens dos Orcamentos
+Colunas: CodItemOrc, Orcamento, Data, Produto, Qtde, Valor, Total
+
+Tabela: Orcamentos
+Colunas: AutoNum, Orcamento, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, Validade, Obs, Entrega, Frete, Contato, Cidade
+
+Tabela: Pedidos de Venda
+Colunas: Autonum, Pedido, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, ComissaoTotal, Confirmado, Transportadora, Parcelas, Detalhes, Obs
+
+Tabela: Planejamento
+Colunas: Auto, Codigo, Cliente, Endereco, Bairro, Cidade, Fone, Serie, Modelo, Categoria, TipoContrato, NContrato, Inicio, Fim, UAtendimento, Renovado, OEndereco
+
+Tabela: RelClassificacaoPagar
+Colunas: Tipo, Cod, Va, Vp
+
+Tabela: RelItensPagar
+Colunas: Codigo, Fornecedor, Vencimento, Valor, Documento, Data, ValorPago, Factoring
+
+Tabela: RelItensVendas
+Colunas: Codigo, Produto, Qtde, Estoque, Valor, Cliente, Comanda, Data
+
+Tabela: RelPagar
+Colunas: Codigo, Fornecedor, TitulosAbertos, TitulosPagos, Tipo, Cod, NomeFor, Factoring
+
+Tabela: RelVendas
+Colunas: Codigo, Cliente, Valor, UltimaVenda, Nome, Cidade
+
+
+
+Banco de Dados 21:
+Tabela: Compras
+Colunas: CodComanda, Comanda, Data, Fornecedor, Comprador, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador
+
+Tabela: Itens da Compra
+Colunas: CodItemComanda, Comanda, Data, Produto, Qtde, Valor, Total
+
+Tabela: Itens do Pedido de Venda
+Colunas: CodItemPV, Pedido, Data, Produto, Qtde, Valor, Total, Comissao
+
+Tabela: Itens dos Orcamentos
+Colunas: CodItemOrc, Orcamento, Data, Produto, Qtde, Valor, Total
+
+Tabela: Orcamentos
+Colunas: AutoNum, Orcamento, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, Validade, Obs, Entrega, Frete, Contato, Cidade
+
+Tabela: Pedidos de Venda
+Colunas: Autonum, Pedido, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, ComissaoTotal, Confirmado, Transportadora, Parcelas, Detalhes, Obs
+
+Tabela: Planejamento
+Colunas: Auto, Codigo, Cliente, Endereco, Bairro, Cidade, Fone, Serie, Modelo, Categoria, TipoContrato, NContrato, Inicio, Fim, UAtendimento, Renovado, OEndereco
+
+Tabela: RelClassificacaoPagar
+Colunas: Tipo, Cod, Va, Vp
+
+Tabela: RelItensPagar
+Colunas: Codigo, Fornecedor, Vencimento, Valor, Documento, Data, ValorPago, Factoring
+
+Tabela: RelItensVendas
+Colunas: Codigo, Produto, Qtde, Estoque, Valor, Cliente, Comanda, Data
+
+Tabela: RelPagar
+Colunas: Codigo, Fornecedor, TitulosAbertos, TitulosPagos, Tipo, Cod, NomeFor, Factoring
+
+Tabela: RelVendas
+Colunas: Codigo, Cliente, Valor, UltimaVenda, Nome, Cidade
+
+
+
+Banco de Dados 22:
+Tabela: FechamentoCupons
+Colunas: AUTO, ESTABELECIMENTO, DATA, NUMERO, COOREDUCAO, COOINICIAL, COOFINAL, CONTADORREDUCAO, NUMEROCRO, VENDABRUTA, TOTALGERAL, CANCELAMENTOS, DESCONTOS, SUBSTITUICAO, ISENTAS, NAOINCIDENCIA, SERVICOSISS, MAPARESUMOECF, AIDFMRE, SERIEMRE, SUBSERIEMRE, NUMEROMRE, SERVICO, RECEITATRIBCOFINS, RECEITATRIBPIS, RECEITATRIBCSL1, RECEITATRIBCSL2, RECEITATRIBIRPJ1, RECEITATRIBIRPJ2, RECEITATRIBIRPJ3, RECEITATRIBIRPJ4, OBS, FATURA
+
+
+
+Banco de Dados 23:
+Tabela: Compras
+Colunas: CodComanda, Comanda, Data, Fornecedor, Comprador, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador
+
+Tabela: ContadorCompra
+Colunas: Comanda
+
+Tabela: ContadorCupomFiscal
+Colunas: Cupom
+
+Tabela: ContadorFormulario
+Colunas: Formulario
+
+Tabela: ContadorNotaFiscalServicos
+Colunas: NFSERV
+
+Tabela: ContadorOrcamento
+Colunas: Orcamento
+
+Tabela: ContadorOrdem
+Colunas: OS
+
+Tabela: ContadorPedido
+Colunas: Pedido
+
+Tabela: ContadorReq
+Colunas: Req
+
+Tabela: ContadorSerieNotaFiscal
+Colunas: Serie, Inicial
+
+Tabela: Cupom
+Colunas: CodCupom, NumCupom, Data, Cliente, ValorProdutos, Desconto, ValorTotal, FormaPagto, Condicoes, Vendedor, Operador, Recebido, Troco, BaseCalculo, Impostos
+
+Tabela: Itens Cupom
+Colunas: CodItemCupom, NumCupom, Data, Produtos, Qtde, Valor, Total, Aliquota, PercIpi, Status, Desconto
+
+Tabela: Itens da Compra
+Colunas: CodItemComanda, Comanda, Data, Produto, Qtde, Valor, Total, Devolvido
+
+Tabela: Itens da NFE
+Colunas: CodItemNFE, NumNFE, Data, Produtos, Qtde, Valor, Total, PercIpi, Status, Aliquota
+
+Tabela: Itens da NFS
+Colunas: CodItemNFS, NumNFS, Data, Produtos, Qtde, Valor, Total, PercIpi, Status, Aliquota, Reducao
+
+Tabela: Itens da NFSERV
+Colunas: CodItemNFS, NumNFSERV, Data, Serviços, Qtde, Valor, Total
+
+Tabela: Itens da Ordem
+Colunas: CodItemOrdem, Ordem, DataEntrada, Descricao, Valor, Qtde, ValorTotal
+
+Tabela: Itens da Venda
+Colunas: CodItemComanda, Comanda, Data, Produto, Qtde, Valor, Total, Comissao, Devolvido, Custo
+
+Tabela: Itens do Pedido de Venda
+Colunas: CodItemPV, Pedido, Data, Produto, Qtde, Valor, Total, Comissao
+
+Tabela: Itens dos Orcamentos
+Colunas: CodItemOrc, Orcamento, Data, Produto, Qtde, Valor, Total
+
+Tabela: NFE
+Colunas: CodNFE, NumNFE, Data, Fornecedor, ValorProdutos, BaseCalculo, Desconto, ValorFrete, TipoFrete, Valoricms, Valoripi, Valoricmsfonte, Valortotalnota, FormaPagto, Condicoes, Comprador, Operador, Formulario, Observação, OutrosEncargos, Parcelas
+
+Tabela: NFS
+Colunas: NumNFS, Data, Cliente, ValorProdutos, BaseCalculo, Desconto, ValorFrete, TipoFrete, Valoricms, Valoripi, Valoricmsfonte, Valortotalnota, FormaPagto, Condicoes, vendedor, Operador, Transportadora, Formulario, Peso, Volume, Obs, Operacao, CFOP, ImpostoFederalTotal, NSerie, Comissao, Parcelas, ValRef, PercentualICMS, Detalhes
+
+Tabela: NFSERV
+Colunas: NumNFSERV, Data, Cliente, ValorProdutos, ISS, BaseCalculo, Desconto, Valortotalnota, FormaPagto, Condicoes, vendedor, Operador, Transportadora, Formulario, Obs, Operacao, CFOP, NSerie, Parcelas, Comissao, Tipo
+
+Tabela: Orcamentos
+Colunas: AutoNum, Orcamento, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, Validade, Obs, Entrega, Frete
+
+Tabela: Ordem de Servico
+Colunas: CodOrdem, Ordem, Cliente, ValorServicos, Operador, Observacoes, DataEntrada, DataSaida, DataChamado, Atendimento, Chamado, Contrato, DataInicioContrato, DataFimContrato, TipoContrato, Maquina, Tecnico, Marca, Modelo, Serie, ChamadoPor, HoraChegada, Permanencia, Retornar, Gravacoes, Copias, Impressoes, Fullcolor, Toner, Revelador, Cilindro, Tinta, Master, ComentarioTecnico, ValorPecas, ValorTotal, Defeito, Pedido
+
+Tabela: Pecas da Ordem
+Colunas: CodItemOrdem, Ordem, DataEntrada, Produto, Valor, Qtde, ValorTotal, Markup, ValorCustoUS
+
+Tabela: Pedidos de Venda
+Colunas: Autonum, Pedido, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, ComissaoTotal, Trasportadora, Parcelas, Detalhes, Status, Obs
+
+Tabela: Vendas
+Colunas: CodComanda, Comanda, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, ComissaoTotal, Transportadora
+
+
+
+Banco de Dados 24:
+Tabela: Compras
+Colunas: CodComanda, Comanda, Data, Fornecedor, Comprador, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador
+
+Tabela: ContadorCompra
+Colunas: Comanda
+
+Tabela: ContadorCupomFiscal
+Colunas: Cupom
+
+Tabela: ContadorFormulario
+Colunas: Formulario
+
+Tabela: ContadorNotaFiscalServicos
+Colunas: NFSERV
+
+Tabela: ContadorNumNFServ
+Colunas: Pedido
+
+Tabela: ContadorOrcamento
+Colunas: Orcamento
+
+Tabela: ContadorOrdem
+Colunas: OS
+
+Tabela: ContadorPedido
+Colunas: Pedido
+
+Tabela: ContadorReq
+Colunas: Req
+
+Tabela: ContadorSerieNotaFiscal
+Colunas: Serie, Inicial
+
+Tabela: Cupom
+Colunas: CodCupom, NumCupom, Data, Cliente, ValorProdutos, Desconto, ValorTotal, FormaPagto, Condicoes, Vendedor, Operador, Recebido, Troco, BaseCalculo, Impostos
+
+Tabela: Itens Cupom
+Colunas: CodItemCupom, NumCupom, Data, Produtos, Qtde, Valor, Total, Aliquota, PercIpi, Status, Desconto
+
+Tabela: Itens da Compra
+Colunas: CodItemComanda, Comanda, Data, Produto, Qtde, Valor, Total, Devolvido
+
+Tabela: Itens da NFE
+Colunas: CodItemNFE, NumNFE, Data, Produtos, Qtde, Valor, Total, PercIpi, Status, Aliquota, Desconto, CFOP, BaseSubstituicao, ICMSSubstituicao, OutrasDespesas, frete, AliquotaSubstituicao, ContNCM, Controle
+
+Tabela: Itens da NFS
+Colunas: CodItemNFS, NumNFS, Data, Produtos, Qtde, Valor, Total, PercIpi, Status, Aliquota, Reducao, Desconto, CSTA, CSTB, Controle, Frete, OutrasDespesas, Seguro
+
+Tabela: Itens da NFSERV
+Colunas: CodItemNFS, NumNFSERV, Data, Serviços, Qtde, Valor, Total
+
+Tabela: Itens da Ordem
+Colunas: CodItemOrdem, Ordem, DataEntrada, Descricao, Valor, Qtde, ValorTotal
+
+Tabela: Itens da Venda
+Colunas: CodItemComanda, Comanda, Data, Produto, Qtde, Valor, Total, Comissao, Devolvido, Custo
+
+Tabela: Itens do Pedido de Venda
+Colunas: CodItemPV, Pedido, Data, Produto, Qtde, Valor, Total, Comissao
+
+Tabela: Itens dos Orcamentos
+Colunas: CodItemOrc, Orcamento, Data, Produto, Qtde, Valor, Total
+
+Tabela: NFE
+Colunas: CodNFE, NumNFE, Data, Fornecedor, ValorProdutos, BaseCalculo, Desconto, ValorFrete, TipoFrete, Valoricms, Valoripi, Valoricmsfonte, Valortotalnota, FormaPagto, Condicoes, Comprador, Operador, Formulario, Observação, OutrosEncargos, Parcelas, Operacao, CFOP, DataEntrada, Tipo, Chave, Serie, Protocolo, Natureza, BaseSubstituicao, ICMSSubstituicao, OutrasDespesas
+
+Tabela: NFS
+Colunas: NumNFS, Data, Cliente, ValorProdutos, BaseCalculo, Desconto, ValorFrete, TipoFrete, Valoricms, Valoripi, Valoricmsfonte, Valortotalnota, FormaPagto, Condicoes, vendedor, Operador, Transportadora, Formulario, Peso, Volume, Obs, Operacao, CFOP, ImpostoFederalTotal, NSerie, Comissao, Parcelas, ValRef, PercentualICMS, Detalhes, NFReferencia, Finalidade, OutrasDespesas, Seguro
+
+Tabela: NFSERV
+Colunas: NumNFSERV, MesAno, Data, Cliente, ValorProdutos, ISS, BaseCalculo, Desconto, Valortotalnota, FormaPagto, Condicoes, vendedor, Operador, Transportadora, Formulario, Obs, Operacao, CFOP, NSerie, Parcelas, Comissao, Tipo
+
+Tabela: Orcamentos
+Colunas: AutoNum, Orcamento, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, Validade, Obs, Entrega, Frete
+
+Tabela: Ordem de Servico
+Colunas: CodOrdem, Ordem, Cliente, ValorServicos, Operador, Observacoes, DataEntrada, DataSaida, DataChamado, Atendimento, Chamado, Contrato, DataInicioContrato, DataFimContrato, TipoContrato, Maquina, Tecnico, Marca, Modelo, Serie, ChamadoPor, HoraChegada, Permanencia, Retornar, Gravacoes, Copias, Impressoes, Fullcolor, Toner, Revelador, Cilindro, Tinta, Master, ComentarioTecnico, ValorPecas, ValorTotal, Defeito, Pedido
+
+Tabela: Pecas da Ordem
+Colunas: CodItemOrdem, Ordem, DataEntrada, Produto, Valor, Qtde, ValorTotal, Markup, ValorCustoUS
+
+Tabela: Pedidos de Venda
+Colunas: Autonum, Pedido, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, ComissaoTotal, Trasportadora, Parcelas, Detalhes, Status, Obs
+
+Tabela: Vendas
+Colunas: CodComanda, Comanda, Data, Cliente, Vendedor, Valor, ValorProdutos, Desconto, Condicoes, FormaPagto, Operador, ComissaoTotal, Transportadora
+
+
+
+Banco de Dados 25:
+Tabela: ContadorConsumo
+Colunas: Numero
+
+Tabela: ContadorFretes
+Colunas: Numero
+
+Tabela: Cópia de Fretes
+Colunas: Codigo, CodFretes, SERIE, Numero, DataEmissão, DataEntrada, Frete, Transportadora, CFOP, ValorTotal, BaseCalculo, Aliquota, ICMS, Isentas, Outras, UFColeta, MunicipioColeta, CodIbge, Tipo, Chave, CSTB, Fatura, Formulario
+
+Tabela: Fretes
+Colunas: Codigo, CodFretes, SERIE, Numero, DataEmissão, DataEntrada, Frete, Transportadora, CFOP, ValorTotal, BaseCalculo, Aliquota, ICMS, Isentas, Outras, UFColeta, MunicipioColeta, CodIbge, Tipo, Chave, CSTB, Fatura, Formulario, CSON
+
+Tabela: ImpItensdaNFE
+Colunas: CodItemNFE, Produtos, Qtde, Valor, Total, PercIpi, Aliquota, CFOP, Desconto, frete, BaseSubstituicao, ICMSSubstituicao, OutrasDespesas, AliquotaSubstituicao, Seguro, BaseCalculoICMS, ValorIcms, BaseCalculoIPI, ValorIPI, CSTA, CSTB, ProdForn, Descricao, NCM, Und, Conferencia, CodBarra, CSON
+
+Tabela: Itens da NFConsumo
+Colunas: CodItemNFConsumo, NumNFConsumo, Data, Produtos, Qtde, Valor, Total, PercIpi, Status, Aliquota, Desconto
+
+Tabela: Itens do Fretes
+Colunas: AUTO, TIPOREGISTRO, SERVICO, QUANTIDADE, VALORTOTAL, CSTB, TRIBUTACAOICMS, BASECALCULO
+
+Tabela: NFConsumo
+Colunas: CodNFConsumo, NumNFConsumo, Data, Fornecedor, ValorProdutos, BaseCalculo, Desconto, ValorFrete, TipoFrete, Valoricms, Valoripi, Valoricmsfonte, Valortotalnota, FormaPagto, Condicoes, Comprador, Operador, Formulario, Observação, Transportadora, Conhecimento, DataConhec, NSelo, DataSelo, CFOP, DataEntrada, Tipo, Chave, Serie
+
+
+
+Banco de Dados 26:
+Tabela: Acessos
+Colunas: Código, Data, Usuario, Horario
+
+Tabela: Agenda
+Colunas: AutoNum, Usuario, Data, Tarefa, Verificado, Obs, Horario
+
+Tabela: Alterações
+Colunas: Autonum, Usuario, Alteração, Data, Verificado, Data Verificação, Alterado
+
+Tabela: Atualização
+Colunas: Autonum, Modulo, Origem, Destino, VAtual, VUltima, At
+
+Tabela: Avisos
+Colunas: AutoNum, De, Ate, Usuario, Aviso, Obs
+
+Tabela: Convenios
+Colunas: Codigo, Data, Descrição, Redução, Operador
+
+Tabela: Dolar
+Colunas: Codigo, Cotacao, Data
+
+Tabela: Empresa
+Colunas: Código, HD, Ate, Empresa, Endereco, Bairro, Cidade, Fone, CGC, CGF, Logo
+
+Tabela: HistoricoMaquina
+Colunas: Auto, Maquina, Cadastro, Data, Historico
+
+Tabela: Impostos
+Colunas: PIS, COFINS, RENDA1, RENDA2, CONTRIBUICAOSOCIAL1, CONTRIBUICAOSOCIAL2
+
+Tabela: PedidosAbertos
+Colunas: Código, Comanda, Data, Cliente, Vendedor, Valor
+
+Tabela: ProdutosOnLine
+Colunas: AutoNum, Produto, Vendedor, Data
+
+Tabela: Senhas
+Colunas: Código, Senha, Usuario, Nivel, CodFun, Avisar
+
+Tabela: Tipos de Contratos
+Colunas: Codigo, Contrato
+
+Tabela: VendasAbertas
+Colunas: Código, Comanda, Data, Cliente, Vendedor, Valor
+
+
+
+Banco de Dados 27:
+Tabela: Mensagens
+Colunas: Código, De, Para, Mensagem, Data, Horario
+
+
+
+Banco de Dados 28:
+Tabela: Acessos
+Colunas: Código, Data, Usuario, Horario
+
+Tabela: Agenda
+Colunas: AutoNum, Usuario, Data, Tarefa, Verificado, Obs, Horario
+
+Tabela: AgendaClientes
+Colunas: Auto, Cliente, Cadastro, Data, Ocorrencia, usuario, Contato, Vendedor, DataAgenda
+
+Tabela: Alterações
+Colunas: Autonum, Usuario, Alteração, Data, Verificado, Data Verificação, Alterado
+
+Tabela: Atualização
+Colunas: Autonum, Modulo, Origem, Destino, VAtual, VUltima, At
+
+Tabela: Avisos
+Colunas: AutoNum, De, Ate, Usuario, Aviso, Obs
+
+Tabela: Convenios
+Colunas: Codigo, Data, Descrição, Redução, Operador
+
+Tabela: Dolar
+Colunas: Codigo, Cotacao, Data
+
+Tabela: Empresa
+Colunas: Código, HD, Ate, Empresa, Endereco, Bairro, Cidade, Fone, CGC, CGF, Logo
+
+Tabela: HistoricoClientes
+Colunas: Auto, Cliente, Cadastro, Data, Ocorrencia, usuario, Contato, DataAgenda
+
+Tabela: HistoricoMaquina
+Colunas: Auto, Maquina, Cadastro, Data, Historico
+
+Tabela: Impostos
+Colunas: PIS, COFINS, RENDA1, RENDA2, CONTRIBUICAOSOCIAL1, CONTRIBUICAOSOCIAL2
+
+Tabela: PedidosAbertos
+Colunas: Código, Comanda, Data, Cliente, Vendedor, Valor
+
+Tabela: ProdutosOnLine
+Colunas: AutoNum, Produto, Vendedor, Data
+
+Tabela: Senhas
+Colunas: Código, Senha, Usuario, Nivel, CodFun, Avisar
+
+Tabela: Tipos de Contratos
+Colunas: Codigo, Contrato
+
+Tabela: VendasAbertas
+Colunas: Código, Comanda, Data, Cliente, Vendedor, Valor
+
+

@@ -1,0 +1,1622 @@
+Registros que precisam de verificação manual:
+
+ID: 344
+Data: 2006-07-13
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 726
+Data: 2006-08-04
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 887
+Data: 2006-08-31
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 895
+Data: 2006-09-01
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 920
+Data: 2006-09-06
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 933
+Data: 2006-09-08
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 942
+Data: 2006-09-11
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 950
+Data: 2006-09-12
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 958
+Data: 2006-09-13
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 964
+Data: 2006-09-14
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 970
+Data: 2006-09-15
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 982
+Data: 2006-09-18
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 986
+Data: 2006-09-19
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1100
+Data: 2006-10-17
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1105
+Data: 2006-10-18
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1116
+Data: 2006-10-19
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1117
+Data: 2006-10-20
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1121
+Data: 2006-10-24
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1127
+Data: 2006-10-25
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1131
+Data: 2006-10-26
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1137
+Data: 2006-10-27
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 1140
+Data: 2006-10-31
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2559
+Data: 2006-07-04
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2718
+Data: 2006-11-14
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2724
+Data: 2006-11-16
+Hora: 18:13:59
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF.NF.674U
+Problema: Sem valor
+--------------------------------------------------
+ID: 2757
+Data: 2006-11-16
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2784
+Data: 2006-11-17
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2818
+Data: 2006-11-20
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2834
+Data: 2006-11-21
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2869
+Data: 2006-11-22
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2886
+Data: 2006-11-23
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 2929
+Data: 2006-11-24
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 3000
+Data: 2006-11-27
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 3001
+Data: 2006-11-28
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 3024
+Data: 2006-11-29
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 3048
+Data: 2006-11-30
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 3065
+Data: 2006-12-01
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 3093
+Data: 2006-12-04
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 6207
+Data: None
+Hora: None
+Tipo: None
+Crédito: 2.40
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 8020
+Data: 2007-06-15
+Hora: 16:11:18
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: cx p/bb
+Problema: Sem valor
+--------------------------------------------------
+ID: 9424
+Data: None
+Hora: None
+Tipo: None
+Crédito: 40.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 9672
+Data: None
+Hora: None
+Tipo: None
+Crédito: 62.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 11845
+Data: None
+Hora: None
+Tipo: None
+Crédito: 33.70
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 17286
+Data: None
+Hora: None
+Tipo: None
+Crédito: 142.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 19244
+Data: None
+Hora: None
+Tipo: None
+Crédito: 23.35
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 19584
+Data: 2008-06-20
+Hora: 14:45:10
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: BB P/ CX
+Problema: Sem valor
+--------------------------------------------------
+ID: 19623
+Data: 2005-06-23
+Hora: 15:26:19
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 4.00
+Histórico: REFEICAO JAQ
+Problema: Data antiga suspeita
+--------------------------------------------------
+ID: 21261
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 21797
+Data: None
+Hora: None
+Tipo: None
+Crédito: 1000.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 22932
+Data: 2008-10-16
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 22963
+Data: 2008-10-17
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 23241
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 25722
+Data: None
+Hora: None
+Tipo: None
+Crédito: 9.20
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 25785
+Data: 2009-02-05
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 25911
+Data: 2009-02-06
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 25937
+Data: 2009-02-09
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 25987
+Data: 2009-02-10
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 26000
+Data: 2009-02-11
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 26018
+Data: 2009-02-12
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 26763
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 27724
+Data: None
+Hora: None
+Tipo: None
+Crédito: 31.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 32370
+Data: None
+Hora: None
+Tipo: None
+Crédito: 106.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 33013
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 33652
+Data: None
+Hora: None
+Tipo: None
+Crédito: 100.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 35388
+Data: 2010-01-29
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 38876
+Data: None
+Hora: None
+Tipo: None
+Crédito: 1075.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 39280
+Data: None
+Hora: None
+Tipo: None
+Crédito: 73.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 39784
+Data: None
+Hora: None
+Tipo: None
+Crédito: 11200.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 40936
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 43732
+Data: None
+Hora: None
+Tipo: None
+Crédito: 300.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 45071
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 45588
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 46566
+Data: 2011-03-03
+Hora: 10:27:14
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. VENDA 002450
+Problema: Sem valor
+--------------------------------------------------
+ID: 46616
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 48226
+Data: 2011-05-03
+Hora: 09:45:08
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: -PARTE FRETE (ACORDO C REGINA C3M PAGA METADE).
+Problema: Sem valor
+--------------------------------------------------
+ID: 49340
+Data: None
+Hora: None
+Tipo: None
+Crédito: 8.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 59063
+Data: 2001-05-17
+Hora: 10:38:30
+Tipo: BANCO
+Crédito: 600.00
+Débito: 0.00
+Histórico: REF. DOC. 005548U
+Problema: Data antiga suspeita
+--------------------------------------------------
+ID: 59486
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 2753.40
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 59487
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 117.18
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 60684
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 1420.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 61363
+Data: 2012-08-10
+Hora: 15:13:43
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: SEDEX
+Problema: Sem valor
+--------------------------------------------------
+ID: 63235
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 4723.06
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 63236
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 4723.06
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 65377
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 108.64
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 65482
+Data: 2012-12-14
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 66399
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 74344
+Data: 2013-09-11
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 78309
+Data: None
+Hora: None
+Tipo: None
+Crédito: 1200.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 80370
+Data: None
+Hora: None
+Tipo: None
+Crédito: 1000.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 80690
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 88191
+Data: 2014-10-22
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 88269
+Data: 2014-10-22
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 88276
+Data: 2014-10-23
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 88733
+Data: 2014-11-05
+Hora: 15:02:17
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: 
+Problema: Sem valor
+--------------------------------------------------
+ID: 92936
+Data: None
+Hora: None
+Tipo: None
+Crédito: 1200.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 94288
+Data: None
+Hora: None
+Tipo: None
+Crédito: 257.80
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 94315
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 40.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 96251
+Data: 2015-06-25
+Hora: 15:04:25
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF VENDA 0014285A4
+Problema: Sem valor
+--------------------------------------------------
+ID: 96597
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 293.41
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 96600
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 137.30
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 97124
+Data: 2015-07-21
+Hora: 16:02:08
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: DEV EMPRESTIMO LUINA
+Problema: Sem valor
+--------------------------------------------------
+ID: 104613
+Data: 2016-04-19
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 104655
+Data: 2016-04-20
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 108250
+Data: 2016-09-01
+Hora: 14:17:33
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. 6314.C3
+Problema: Sem valor
+--------------------------------------------------
+ID: 108811
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 109222
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 109511
+Data: 2001-10-21
+Hora: 16:27:47
+Tipo: BANCO
+Crédito: 650.00
+Débito: 0.00
+Histórico: REF. DOC. C1138.4/24
+Problema: Data antiga suspeita
+--------------------------------------------------
+ID: 110033
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 110296
+Data: 2016-11-24
+Hora: 11:10:20
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. E1109.9/12
+Problema: Sem valor
+--------------------------------------------------
+ID: 113183
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 114476
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 114877
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 116138
+Data: 2017-08-18
+Hora: 11:20:07
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: -DEV DESP DE VIAGEM TAUA/CRATO
+Problema: Sem valor
+--------------------------------------------------
+ID: 116710
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 117625
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 119079
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 121413
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 121414
+Data: 2018-04-23
+Hora: 11:26:59
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: -REFERENTE AO SEDEX DA NF 0019398
+Problema: Sem valor
+--------------------------------------------------
+ID: 121712
+Data: None
+Hora: None
+Tipo: None
+Crédito: 27.24
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 121953
+Data: 2018-05-14
+Hora: 17:29:29
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. 70529.A6
+Problema: Sem valor
+--------------------------------------------------
+ID: 123043
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 123284
+Data: 2018-07-12
+Hora: 11:06:08
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. 71128.B6
+Problema: Sem valor
+--------------------------------------------------
+ID: 123379
+Data: 2018-07-18
+Hora: 09:09:58
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. JUN/18(3261-0278)
+Problema: Sem valor
+--------------------------------------------------
+ID: 124001
+Data: 2018-08-20
+Hora: 16:55:56
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. 71128.C6
+Problema: Sem valor
+--------------------------------------------------
+ID: 124996
+Data: 2018-10-08
+Hora: 09:24:06
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. 088384D5
+Problema: Sem valor
+--------------------------------------------------
+ID: 125030
+Data: 2018-09-25
+Hora: 11:34:30
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. AGO/18
+Problema: Sem valor
+--------------------------------------------------
+ID: 125262
+Data: 2018-10-25
+Hora: 08:51:20
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. SET/18
+Problema: Sem valor
+--------------------------------------------------
+ID: 125489
+Data: 2018-11-06
+Hora: 08:49:01
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. CAR LUINA (FELIPE)
+Problema: Sem valor
+--------------------------------------------------
+ID: 125911
+Data: 2018-11-25
+Hora: 16:36:40
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. OUT/18
+Problema: Sem valor
+--------------------------------------------------
+ID: 126104
+Data: 2018-12-07
+Hora: 08:42:41
+Tipo: BANCO
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. 088384E5
+Problema: Sem valor
+--------------------------------------------------
+ID: 126504
+Data: 2019-01-07
+Hora: 13:34:08
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. COMPRA 70364.
+Problema: Sem valor
+--------------------------------------------------
+ID: 126505
+Data: 2019-01-07
+Hora: 13:34:22
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. COMPRA 70364.
+Problema: Sem valor
+--------------------------------------------------
+ID: 126506
+Data: 2019-01-07
+Hora: 13:34:47
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. COMPRA 70364.
+Problema: Sem valor
+--------------------------------------------------
+ID: 126507
+Data: 2019-01-07
+Hora: 13:35:15
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. COMPRA 70364.
+Problema: Sem valor
+--------------------------------------------------
+ID: 126508
+Data: 2019-01-07
+Hora: 13:35:29
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. COMPRA 70364.
+Problema: Sem valor
+--------------------------------------------------
+ID: 126509
+Data: 2019-01-07
+Hora: 13:36:12
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. COMPRA 70364.
+Problema: Sem valor
+--------------------------------------------------
+ID: 127081
+Data: 2019-01-25
+Hora: 17:11:02
+Tipo: CARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. JAN/19
+Problema: Sem valor
+--------------------------------------------------
+ID: 127082
+Data: 2018-12-25
+Hora: 17:11:24
+Tipo: cARTEIRA
+Crédito: 0.00
+Débito: 0.00
+Histórico: REF. DOC. NOV/18
+Problema: Sem valor
+--------------------------------------------------
+ID: 127091
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 127674
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 129705
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 129917
+Data: None
+Hora: None
+Tipo: None
+Crédito: 10.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 130325
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 130847
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 131468
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 131607
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 132706
+Data: 2020-01-16
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132783
+Data: 2020-01-17
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132784
+Data: 2020-01-20
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132800
+Data: 2020-01-21
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132801
+Data: 2020-01-22
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132810
+Data: 2020-01-23
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132826
+Data: 2020-01-24
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132834
+Data: 2020-01-27
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132891
+Data: 2020-01-28
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132892
+Data: 2020-01-29
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 132928
+Data: 2020-01-30
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 133188
+Data: 2020-02-18
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 133213
+Data: 2020-02-19
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 133221
+Data: 2020-02-20
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 133566
+Data: 2020-03-16
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 135814
+Data: 2020-12-21
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 135837
+Data: 2020-12-22
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 137959
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 141102
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 141245
+Data: None
+Hora: None
+Tipo: None
+Crédito: 30.12
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 141536
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 142077
+Data: 2022-06-20
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 142082
+Data: 2022-06-17
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 142093
+Data: 2022-06-21
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 142146
+Data: 2022-06-22
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 142607
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 145666
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 147875
+Data: None
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 147898
+Data: 2023-11-03
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 147900
+Data: 2023-11-06
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 147922
+Data: None
+Hora: None
+Tipo: None
+Crédito: 0.00
+Débito: 0.00
+Histórico: None
+Problema: Sem data
+--------------------------------------------------
+ID: 147964
+Data: 2023-11-07
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 149407
+Data: 2024-02-16
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------
+ID: 149420
+Data: 2024-02-20
+Hora: 00:00:00
+Tipo: CAIXA
+Crédito: 0.00
+Débito: 0.00
+Histórico: SALDO DO CAIXA
+Problema: Sem valor
+--------------------------------------------------

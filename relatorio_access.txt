@@ -1,0 +1,578 @@
+RELATÓRIO DE ESTRUTURA DO BANCO DE DADOS ACCESS
+Data de geração: 12/11/2024 05:45:44
+Arquivo: C:\Users\Cirilo\Documents\empresa\Bancos\Cadastros\Cadastros.mdb
+Total de tabelas encontradas: 32
+----------------------------------------------------------------------------------------------------
+
+
+1. Tabela: Bancos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Nome                           VARCHAR         50         1
+Endereco                       VARCHAR         50         1
+Bairro                         VARCHAR         40         1
+Agencia                        VARCHAR         12         1
+Contato                        VARCHAR         30         1
+Fone                           VARCHAR         20         1
+Fax                            VARCHAR         20         1
+
+Total de registros: 20
+----------------------------------------------------------------------------------------------------
+
+2. Tabela: Categorias
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Categoria                      VARCHAR         50         1
+
+Total de registros: 6
+----------------------------------------------------------------------------------------------------
+
+3. Tabela: Cheques
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Cheque                         INTEGER         10         1
+Banco                          SMALLINT        5          1
+Cliente                        SMALLINT        5          1
+Valor                          CURRENCY        19         1
+Vencimento                     DATETIME        19         1
+Destino                        VARCHAR         50         1
+ValorPago                      CURRENCY        19         1
+Historico                      VARCHAR         50         1
+Responsavel                    VARCHAR         50         1
+Cgc                            VARCHAR         18         1
+Cpf                            VARCHAR         15         1
+Compensado                     VARCHAR         50         1
+Devolvido                      VARCHAR         50         1
+DataDev                        DATETIME        19         1
+Repassado                      VARCHAR         50         1
+DataPagto                      DATETIME        19         1
+Confirmado                     DATETIME        19         1
+Status                         VARCHAR         50         1
+Terceiros                      VARCHAR         100        1
+Data                           DATETIME        19         1
+
+Total de registros: 2526
+----------------------------------------------------------------------------------------------------
+
+4. Tabela: ChequesEmitidos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Cheque                         INTEGER         10         1
+Banco                          SMALLINT        5          1
+Destinatario                   VARCHAR         50         1
+Valor                          CURRENCY        19         1
+Vencimento                     DATETIME        19         1
+Destino                        VARCHAR         50         1
+ValorPago                      CURRENCY        19         1
+Historico                      VARCHAR         50         1
+Responsavel                    VARCHAR         50         1
+Cgc                            VARCHAR         18         1
+Cpf                            VARCHAR         15         1
+Compensado                     VARCHAR         50         1
+Devolvido                      VARCHAR         50         1
+DataDev                        DATETIME        19         1
+Repassado                      VARCHAR         50         1
+DataPagto                      DATETIME        19         1
+Status                         VARCHAR         50         1
+Terceiros                      VARCHAR         100        1
+
+Total de registros: 0
+----------------------------------------------------------------------------------------------------
+
+5. Tabela: Cidades
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Cidade                         VARCHAR         50         1
+Região                         INTEGER         10         1
+
+Total de registros: 292
+----------------------------------------------------------------------------------------------------
+
+6. Tabela: Clientes
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+CODCLIENTE                     INTEGER         10         1
+NOME                           VARCHAR         80         1
+ENDERECO                       VARCHAR         60         1
+BAIRRO                         VARCHAR         30         1
+CIDADE                         VARCHAR         50         1
+UF                             VARCHAR         5          1
+CEP                            VARCHAR         20         1
+FONE                           VARCHAR         15         1
+FAX                            VARCHAR         15         1
+CPF/CGC                        VARCHAR         40         1
+DATACADASTRO                   DATETIME        19         1
+CONTATO                        VARCHAR         70         1
+RG/IE                          VARCHAR         30         1
+VENDEDOR                       INTEGER         10         1
+REGIAO                         INTEGER         10         1
+SITUACAO                       VARCHAR         50         1
+DEBITO                         CURRENCY        19         1
+CELULAR                        VARCHAR         50         1
+EMAIL                          VARCHAR         50         1
+LIMITE                         CURRENCY        19         1
+CONTATOTECNICO                 VARCHAR         50         1
+CONTATOCOBRANCA                VARCHAR         50         1
+REFBANCARIAS                   VARCHAR         100        1
+OBSERVACOES                    VARCHAR         250        1
+REFCOMERCIAIS                  VARCHAR         100        1
+CPBS                           VARCHAR         255        1
+IBGE                           VARCHAR         5          1
+
+Total de registros: 4479
+----------------------------------------------------------------------------------------------------
+
+7. Tabela: Consumo
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+Descricao                      VARCHAR         50         1
+Unidade                        VARCHAR         10         1
+Fornecedor                     VARCHAR         50         1
+Referencia                     VARCHAR         20         1
+Custo                          CURRENCY        19         1
+Datacadastro                   DATETIME        19         1
+Ultimaalteracao                DATETIME        19         1
+Percentual                     CURRENCY        19         1
+Status                         VARCHAR         50         1
+CSTA                           INTEGER         10         1
+CSTB                           INTEGER         10         1
+Tipo                           VARCHAR         50         1
+
+Total de registros: 0
+----------------------------------------------------------------------------------------------------
+
+8. Tabela: ContadorClientes
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+
+Total de registros: 1
+----------------------------------------------------------------------------------------------------
+
+9. Tabela: ContadorContratos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+
+Total de registros: 1
+----------------------------------------------------------------------------------------------------
+
+10. Tabela: ContadorFornecedores
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+
+Total de registros: 1
+----------------------------------------------------------------------------------------------------
+
+11. Tabela: ContadorFuncionario
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+
+Total de registros: 1
+----------------------------------------------------------------------------------------------------
+
+12. Tabela: ContadorProdutos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+
+Total de registros: 1
+----------------------------------------------------------------------------------------------------
+
+13. Tabela: ContasBanco
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Banco                          INTEGER         10         1
+NomeBanco                      VARCHAR         50         1
+Numero                         VARCHAR         50         1
+Agencia                        VARCHAR         40         1
+Contato                        VARCHAR         20         1
+
+Total de registros: 6
+----------------------------------------------------------------------------------------------------
+
+14. Tabela: Contratos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Contrato                       VARCHAR         50         1
+Cliente                        VARCHAR         50         1
+TipoContrato                   VARCHAR         250        1
+Renovado                       VARCHAR         50         1
+TotalMaquinas                  INTEGER         10         1
+ValorContrato                  CURRENCY        19         1
+NumeroParcelas                 INTEGER         10         1
+ValorPacela                    CURRENCY        19         1
+Referencia                     VARCHAR         50         1
+Data                           DATETIME        19         1
+Incio                          DATETIME        19         1
+Fim                            DATETIME        19         1
+UltimoAtendimento              DATETIME        19         1
+NMaquinas                      INTEGER         10         1
+ClienteReal                    VARCHAR         50         1
+TipoContratoReal               VARCHAR         50         1
+Obs                            VARCHAR         250        1
+
+Total de registros: 1149
+----------------------------------------------------------------------------------------------------
+
+15. Tabela: Cópia de Funcionarios
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+nome                           VARCHAR         50         1
+endereco                       VARCHAR         50         1
+bairro                         VARCHAR         30         1
+cidade                         VARCHAR         30         1
+cep                            VARCHAR         15         1
+fone                           VARCHAR         15         1
+celular                        VARCHAR         15         1
+cpf                            VARCHAR         15         1
+rg                             VARCHAR         18         1
+funcao                         VARCHAR         30         1
+salario                        CURRENCY        19         1
+dataadmissao                   DATETIME        19         1
+Setor                          VARCHAR         40         1
+Comissao                       CURRENCY        19         1
+
+Total de registros: 16
+----------------------------------------------------------------------------------------------------
+
+16. Tabela: Despesas
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Descricao                      VARCHAR         50         1
+
+Total de registros: 93
+----------------------------------------------------------------------------------------------------
+
+17. Tabela: Folha de Pagamento
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+CodFolha                       COUNTER         10         0
+Funcionario                    INTEGER         10         1
+Mes                            VARCHAR         50         1
+Ano                            INTEGER         10         1
+Valor Total                    CURRENCY        19         1
+Data                           DATETIME        19         1
+Especificacao                  VARCHAR         50         1
+Resta                          CURRENCY        19         1
+Salario                        CURRENCY        19         1
+
+Total de registros: 3
+----------------------------------------------------------------------------------------------------
+
+18. Tabela: Fornecedores
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+codigo                         INTEGER         10         1
+nome                           VARCHAR         50         1
+endereco                       VARCHAR         50         1
+bairro                         VARCHAR         30         1
+cidade                         VARCHAR         25         1
+uf                             VARCHAR         4          1
+cep                            VARCHAR         14         1
+fone                           VARCHAR         14         1
+fax                            VARCHAR         14         1
+cgc                            VARCHAR         20         1
+cgf                            VARCHAR         18         1
+contato                        VARCHAR         30         1
+datacadastro                   DATETIME        19         1
+celular                        VARCHAR         50         1
+email                          VARCHAR         50         1
+especificacao                  VARCHAR         60         1
+tipo                           VARCHAR         50         1
+IBGE                           VARCHAR         255        1
+
+Total de registros: 780
+----------------------------------------------------------------------------------------------------
+
+19. Tabela: Funcionarios
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+nome                           VARCHAR         50         1
+endereco                       VARCHAR         50         1
+bairro                         VARCHAR         30         1
+cidade                         VARCHAR         30         1
+cep                            VARCHAR         15         1
+fone                           VARCHAR         15         1
+celular                        VARCHAR         15         1
+cpf                            VARCHAR         15         1
+rg                             VARCHAR         18         1
+funcao                         VARCHAR         30         1
+salario                        CURRENCY        19         1
+dataadmissao                   DATETIME        19         1
+Setor                          VARCHAR         40         1
+Comissao                       CURRENCY        19         1
+
+Total de registros: 21
+----------------------------------------------------------------------------------------------------
+
+20. Tabela: Funcionarios_Morais
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         VARCHAR         50         1
+nome                           VARCHAR         50         1
+Endereço                       VARCHAR         50         1
+bairro                         VARCHAR         30         1
+cidade                         VARCHAR         30         1
+cep                            VARCHAR         15         1
+fone                           VARCHAR         15         1
+celular                        VARCHAR         15         1
+cpf                            VARCHAR         15         1
+Identidade                     VARCHAR         18         1
+Função                         VARCHAR         30         1
+Salário                        VARCHAR         50         1
+DataAdmissão                   VARCHAR         50         1
+Setor                          VARCHAR         40         1
+Comissão                       CURRENCY        19         1
+Razão                          VARCHAR         10         1
+
+Total de registros: 10
+----------------------------------------------------------------------------------------------------
+
+21. Tabela: Grupos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Descricao                      VARCHAR         40         1
+
+Total de registros: 18
+----------------------------------------------------------------------------------------------------
+
+22. Tabela: Grupos-Morais
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         VARCHAR         10         1
+Descricao_Grupos               VARCHAR         40         1
+
+Total de registros: 13
+----------------------------------------------------------------------------------------------------
+
+23. Tabela: Itens da Folha de Pagto
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Funcionario                    INTEGER         10         1
+Mes                            VARCHAR         50         1
+Ano                            INTEGER         10         1
+Data                           DATETIME        19         1
+Hora                           VARCHAR         50         1
+Valor                          CURRENCY        19         1
+Autorizacao                    VARCHAR         50         1
+Historico                      VARCHAR         100        1
+Especificacao                  VARCHAR         50         1
+Salario                        CURRENCY        19         1
+
+Total de registros: 3
+----------------------------------------------------------------------------------------------------
+
+24. Tabela: Itens dos Contratos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Contrato                       VARCHAR         50         1
+ClienteReal                    VARCHAR         50         1
+Cliente                        VARCHAR         250        1
+Serie                          VARCHAR         50         1
+Categoria                      VARCHAR         50         1
+Modelo                         VARCHAR         50         1
+Tecnico                        VARCHAR         50         1
+PercentualComissao             VARCHAR         50         1
+Inicio                         DATETIME        19         1
+Fim                            DATETIME        19         1
+
+Total de registros: 2292
+----------------------------------------------------------------------------------------------------
+
+25. Tabela: KITS
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+NUMERO                         INTEGER         10         1
+REFERENCIA                     VARCHAR         50         1
+Codigo                         INTEGER         10         1
+DESCRICAO                      VARCHAR         50         1
+
+Total de registros: 39
+----------------------------------------------------------------------------------------------------
+
+26. Tabela: KITS_DE_PRODUTOS
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+SEQUENCIAL                     INTEGER         10         1
+PRESTAÇÕES                     VARCHAR         50         1
+DESCRIÇÃO                      VARCHAR         50         1
+REFERENCIA                     VARCHAR         50         1
+CÓDIGO                         VARCHAR         50         1
+ESTOQUE                        VARCHAR         50         1
+GRUPO                          VARCHAR         50         1
+PREÇO                          VARCHAR         50         1
+MÍNIMO                         VARCHAR         50         1
+
+Total de registros: 256
+----------------------------------------------------------------------------------------------------
+
+27. Tabela: Linha
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Linha                          VARCHAR         50         1
+Historico                      VARCHAR         250        1
+
+Total de registros: 17
+----------------------------------------------------------------------------------------------------
+
+28. Tabela: Maquinas
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Maquina                        VARCHAR         50         1
+Serie                          VARCHAR         50         1
+Categoria                      VARCHAR         250        1
+Marca                          VARCHAR         50         1
+Modelo                         VARCHAR         50         1
+Tecnico                        INTEGER         10         1
+Notafiscal                     VARCHAR         50         1
+Fornecedor                     INTEGER         10         1
+Cliente                        INTEGER         10         1
+SituacaoContrato               VARCHAR         3          1
+InicioContrato                 DATETIME        19         1
+FimContrato                    DATETIME        19         1
+Comentarios                    VARCHAR         200        1
+PercentualComissao             CURRENCY        19         1
+Contrato                       VARCHAR         50         1
+ClienteReal                    VARCHAR         50         1
+Comissao                       CURRENCY        19         1
+DataFaturamento                DATETIME        19         1
+Qtde                           INTEGER         10         1
+Atendimento                    DATETIME        19         1
+OEndereco                      VARCHAR         200        1
+
+Total de registros: 1612
+----------------------------------------------------------------------------------------------------
+
+29. Tabela: Marcas
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         COUNTER         10         0
+Marcas                         VARCHAR         50         1
+
+Total de registros: 11
+----------------------------------------------------------------------------------------------------
+
+30. Tabela: Produtos
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+Codigo                         INTEGER         10         1
+Descricao                      VARCHAR         50         1
+Unidade                        VARCHAR         10         1
+grupo                          VARCHAR         50         1
+Fornecedor                     VARCHAR         50         1
+Referencia                     VARCHAR         20         1
+Custo                          CURRENCY        19         1
+Revenda                        CURRENCY        19         1
+Varejo                         CURRENCY        19         1
+Estoque                        CURRENCY        19         1
+Reservado                      CURRENCY        19         1
+Datacadastro                   DATETIME        19         1
+Ultimaalteracao                DATETIME        19         1
+Percentual                     CURRENCY        19         1
+Status                         VARCHAR         50         1
+UltimoCusto                    CURRENCY        19         1
+Destaque                       VARCHAR         50         1
+Campo1                         VARCHAR         255        1
+Markup                         CURRENCY        19         1
+ValorDestaque                  CURRENCY        19         1
+CondicoesDestaque              VARCHAR         50         1
+Minimo                         CURRENCY        19         1
+Redução                        CURRENCY        19         1
+Localizacao                    VARCHAR         50         1
+Linha                          VARCHAR         50         1
+EstoqueMinimo                  CURRENCY        19         1
+CustoUS                        CURRENCY        19         1
+Nivel                          CURRENCY        19         1
+Total                          CURRENCY        19         1
+MarkupMin                      CURRENCY        19         1
+Mov                            VARCHAR         1          1
+NCM                            VARCHAR         50         1
+CSTA                           INTEGER         10         1
+CSTB                           INTEGER         10         1
+
+Total de registros: 5421
+----------------------------------------------------------------------------------------------------
+
+31. Tabela: Transportadoras
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+codigo                         COUNTER         10         0
+nome                           VARCHAR         50         1
+endereco                       VARCHAR         50         1
+bairro                         VARCHAR         30         1
+cidade                         VARCHAR         30         1
+cep                            VARCHAR         15         1
+fone                           VARCHAR         15         1
+celular                        VARCHAR         15         1
+Contato                        VARCHAR         40         1
+Região                         VARCHAR         50         1
+CNPJ                           VARCHAR         255        1
+UF                             VARCHAR         255        1
+IE                             VARCHAR         255        1
+
+Total de registros: 33
+----------------------------------------------------------------------------------------------------
+
+32. Tabela: ÍNDICES
+--------------------------------------------------
+Coluna                         Tipo            Tamanho    Nullable
+----------------------------------------------------------------------
+NÚMERO_DO_ÍNDICE               INTEGER         10         1
+TAXA_MENSAL                    DOUBLE          53         1
+MARKUP_NOR_1                   DOUBLE          53         1
+MARKUP_MIN_1                   DOUBLE          53         1
+MARKUP_NOR_2                   DOUBLE          53         1
+MARKUP_MIN_2                   DOUBLE          53         1
+MARKUP_NOR_3                   DOUBLE          53         1
+MARKUP_MIN_3                   DOUBLE          53         1
+
+Total de registros: 1
+----------------------------------------------------------------------------------------------------
