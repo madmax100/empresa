@@ -2,13 +2,35 @@
 import { Cliente, ContasPagarResponse, ContasReceberResponse, Contrato, ContratoExpandido, DashboardContrato, DashboardFiltros, DashboardResponse, FilterParams, ItemContrato, Produto } from '@/types/models';
 import { NotaFiscalAgrupamento, NotaFiscalFiltros, NotaFiscalResponse, NotaFiscalSaida } from '@/types/notas_fiscais/models';
 import axios from 'axios';
+import config from '@/config';
 
-const api = axios.create({
-  baseURL: 'http://localhost:8000/contas',
-  headers: {
-    'Content-Type': 'application/json',
-  }
+// Use unified baseURL from config (env-driven). In dev, Vite proxy handles CORS.
+export const api = axios.create({
+    baseURL: config.api.baseURL,
+    headers: {
+        'Content-Type': 'application/json',
+    }
 });
+
+// Helper genérico: tenta via baseURL (p.ex. /contas) e, se 404/400, tenta na raiz do host
+async function getWithFallback<T>(relativePath: string, params?: URLSearchParams | Record<string, any>): Promise<T> {
+    try {
+        const response = await api.get<T>(relativePath, { params: params as any });
+        return response.data as T;
+    } catch (err: any) {
+        const status = err?.response?.status;
+        if (status !== 404 && status !== 400) throw err;
+        let origin = '';
+        try {
+            const u = new URL(config.api.baseURL);
+            origin = u.origin;
+        } catch {
+            origin = 'http://127.0.0.1:8000';
+        }
+        const response2 = await axios.get<T>(`${origin}${relativePath}`, { params: params as any });
+        return response2.data as T;
+    }
+}
 
 export const produtosService = {
   listar: () => api.get<Produto[]>('/produtos/'),
@@ -30,6 +52,23 @@ export const contratosService = {
     listar: async (): Promise<ContratoExpandido[]> => {
         const response = await api.get<Contrato[]>('/contratos_locacao/');
         return response.data as ContratoExpandido[];
+    },
+
+    // Novo endpoint otimizado para suprimentos
+    buscarSuprimentos: async (filtros: {
+        data_inicial: string;
+        data_final: string;
+        contrato_id?: string;
+        cliente_id?: string;
+    }) => {
+        const params = new URLSearchParams();
+        Object.entries(filtros).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                params.append(key, value.toString());
+            }
+        });
+        const response = await api.get(`/contratos_locacao/suprimentos/?${params}`);
+        return response.data;
     },
 
     buscarItens: async (numeroContrato: string): Promise<ItemContrato[]> => {
@@ -124,6 +163,15 @@ export const contratosService = {
 
 
 export const contasReceberService = {
+    excluir: async (tituloId: number) => {
+        try {
+            const response = await api.delete(`/contas_receber/${tituloId}/`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao excluir título a receber:', error);
+            throw error;
+        }
+    },
     atualizarStatus: async (tituloId: number, novoStatus: string) => {
         try {
             console.log('Enviando requisição PATCH:', { tituloId, novoStatus });
@@ -155,10 +203,24 @@ export const contasReceberService = {
         );
         return response.data;
     },
+
+    listarTodas: async (dataInicial: string = '2024-01-01', dataFinal: string = '2024-12-31') => {
+        const response = await api.get<ContasReceberResponse>(`/contas_receber/dashboard/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
+        return response.data;
+    },  
 };
 
 
 export const contasPagarService = {
+    excluir: async (tituloId: number) => {
+        try {
+            const response = await api.delete(`/contas_pagar/${tituloId}/`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao excluir título a pagar:', error);
+            throw error;
+        }
+    },
     atualizarStatus: async (tituloId: number, novoStatus: string) => {
         try {
             console.log('Enviando requisição PATCH:', { tituloId, novoStatus });
@@ -178,8 +240,8 @@ export const contasPagarService = {
     buscarPorFornecedor: (fornecedorId: number) => 
         api.get<ContasPagarResponse>(`/contas_pagar/por-fornecedor/${fornecedorId}/`),
     
-    listarTodas: (dataInicial: string = '2024-01-01') => 
-        api.get<ContasPagarResponse>(`/contas_pagar/dashboard/?data_inicial=${dataInicial}`),
+    listarTodas: (dataInicial: string = '2024-01-01', dataFinal: string = '2024-12-31') => 
+        api.get<ContasPagarResponse>(`/contas_pagar/dashboard/?data_inicio=${dataInicial}&data_fim=${dataFinal}`),
 
     buscarVencidas: () => 
         api.get<ContasPagarResponse>('/contas_pagar/vencidos/')
@@ -190,11 +252,13 @@ export const financeiroDashboard = {
     resumoGeral: async (filters: FilterParams): Promise<DashboardResponse> => {
         try {
             const params = new URLSearchParams({
-                data_inicial: filters.dataInicial,
-                data_final: filters.dataFinal,
-                status: filters.status,
+                data_inicio: filters.dataInicial,
+                data_fim: filters.dataFinal,
+                ...(filters.status && filters.status !== 'all' ? { status: filters.status } : {}),
                 ...(filters.searchTerm ? { searchTerm: filters.searchTerm } : {})
             });
+
+            console.log('🏦 Parâmetros enviados para API:', Object.fromEntries(params));
 
             const [contasReceber, contasPagar] = await Promise.all([
                 api.get<ContasReceberResponse>(`/contas_receber/dashboard/?${params}`),
@@ -287,25 +351,61 @@ export const getStatusColor = (status: string): string => {
 
 // Interface para o serviço
 export const notasFiscaisService = {
+    // Helper: normaliza respostas (paginação DRF ou lista crua)
+    _normalizeLista(resp: any): NotaFiscalResponse {
+        const toNum = (v: any): number => {
+            if (v === null || v === undefined) return 0;
+            const n = typeof v === 'number' ? v : Number(String(v).replace(/[^0-9.-]/g, ''));
+            return isNaN(n) ? 0 : n;
+        };
+        if (Array.isArray(resp)) {
+            const results = resp as unknown as NotaFiscalSaida[];
+            const count = results.length;
+            const valor_total = results.reduce((acc, n) => acc + toNum((n as any).valor_total_nota), 0);
+            const valor_produtos = results.reduce((acc, n) => acc + toNum((n as any).valor_produtos), 0);
+            const valor_frete = results.reduce((acc, n) => acc + toNum((n as any).valor_frete), 0);
+            // muitos backends não fornecem esses totais; preenchemos o básico
+            return {
+                count,
+                next: null,
+                previous: null,
+                results,
+                totais: {
+                    quantidade_notas: count,
+                    valor_total,
+                    valor_produtos,
+                    valor_impostos: 0,
+                    valor_frete,
+                },
+            } as NotaFiscalResponse;
+        }
+        // Já está no formato esperado
+        return resp as NotaFiscalResponse;
+    },
     listar: async (filtros?: NotaFiscalFiltros): Promise<NotaFiscalResponse> => {
         const params = new URLSearchParams();
         if (filtros) {
             Object.entries(filtros).forEach(([key, value]) => {
-                if (value) params.append(key, value.toString());
+                if (value !== undefined && value !== null) params.append(key, value.toString());
             });
         }
-        const response = await api.get<NotaFiscalResponse>('/notas_fiscais_saida/', { params });
-        return response.data;
+    const resp = await getWithFallback<NotaFiscalResponse | NotaFiscalSaida[]>('/notas_fiscais_venda/', params);
+    return notasFiscaisService._normalizeLista(resp);
     },
 
     buscarPorId: async (id: number): Promise<NotaFiscalSaida> => {
-        const response = await api.get<NotaFiscalSaida>(`/notas_fiscais_saida/${id}/`);
-        return response.data;
+    return await getWithFallback<NotaFiscalSaida>(`/notas_fiscais_venda/${id}/`);
     },
 
     buscarPorNumero: async (numeroNota: string): Promise<NotaFiscalSaida> => {
-        const response = await api.get<NotaFiscalSaida>(`/notas_fiscais_saida/numero/${numeroNota}/`);
-        return response.data;
+    // Algumas APIs não expõem detalhe por número; filtra via listagem e retorna o primeiro registro
+    const params = new URLSearchParams();
+    params.append('numero_nota', numeroNota);
+    const resp = await getWithFallback<NotaFiscalResponse | NotaFiscalSaida[]>(`/notas_fiscais_venda/`, params);
+    const normalized = notasFiscaisService._normalizeLista(resp);
+    const first = (normalized.results || []).find(n => String((n as any).numero_nota) === String(numeroNota));
+    if (!first) throw new Error('Nota fiscal não encontrada');
+    return first as NotaFiscalSaida;
     },
 
     buscarPorContrato: async (
@@ -315,14 +415,13 @@ export const notasFiscaisService = {
         const params = new URLSearchParams();
         if (filtros) {
             Object.entries(filtros).forEach(([key, value]) => {
-                if (value) params.append(key, value.toString());
+                if (value !== undefined && value !== null) params.append(key, value.toString());
             });
         }
-        const response = await api.get<NotaFiscalResponse>(
-            `/notas_fiscais_saida/contrato/${numeroContrato}/`,
-            { params }
-        );
-        return response.data;
+        // A API não tem endpoint dedicado; usar query param
+        params.append('contrato', numeroContrato);
+        const resp = await getWithFallback<NotaFiscalResponse | NotaFiscalSaida[]>(`/notas_fiscais_venda/`, params);
+        return notasFiscaisService._normalizeLista(resp);
     },
 
     buscarAgrupamentos: async (
@@ -331,14 +430,13 @@ export const notasFiscaisService = {
         const params = new URLSearchParams();
         if (filtros) {
             Object.entries(filtros).forEach(([key, value]) => {
-                if (value) params.append(key, value.toString());
+                if (value !== undefined && value !== null) params.append(key, value.toString());
             });
         }
-        const response = await api.get<NotaFiscalAgrupamento>(
-            '/notas_fiscais_saida/agrupamentos/',
-            { params }
+    return await getWithFallback<NotaFiscalAgrupamento>(
+            '/notas_fiscais_venda/agrupamentos/',
+            params
         );
-        return response.data;
     },
 
     // Funções auxiliares
@@ -353,3 +451,4 @@ export const notasFiscaisService = {
         return new Date(data).toLocaleDateString('pt-BR');
     }
 };
+

@@ -200,6 +200,49 @@ export interface DashboardResponse {
     };
 }
 
+export interface Bill {
+    id: number;
+    vencimento: string;
+    valor: number;
+    status: 'A' | 'P' | 'C';
+    cliente?: {
+        id: number;
+        nome: string;
+    };
+    fornecedor?: {
+        id: number;
+        nome: string;
+    };
+}
+
+export interface FilterParams2 {
+    dataInicial?: string;
+    dataFinal?: string;
+    status?: string;
+    searchTerm?: string;
+};
+
+export interface PaymentData {
+    status: string;
+    data_pagamento: string;
+    forma_pagamento: string;
+    valor_pago: number;
+}
+
+export interface DashboardResponse2 {
+    resumo: {
+        total_atrasado: number;
+        total_pago_periodo: number;
+        total_cancelado_periodo: number;
+        total_aberto_periodo: number;
+        quantidade_titulos: number;
+        quantidade_atrasados_periodo: number;
+    };
+    titulos_atrasados: Bill[];
+    titulos_pagos_periodo: Bill[];
+    titulos_abertos_periodo: Bill[];
+}
+
 export interface Titulo {
     id: number;
     historico: string;

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',  # Django REST Framework
     'corsheaders',
     'contas',          # Seu app
+    # 'django_extensions',  # Temporariamente comentado
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://localhost:5174",
 ]
 
 ROOT_URLCONF = 'empresa.urls'

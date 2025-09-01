@@ -1,0 +1,10 @@
+2025-01-10 15:49:13,837 - INFO - === INICIANDO PROCESSO DE MIGRAÇÃO ÀS 2025-01-10 15:49:13.836597 ===
+2025-01-10 15:49:13,837 - INFO - Verificando ambiente...
+2025-01-10 15:49:13,838 - ERROR - Arquivo de configuração não encontrado: C:\Users\Cirilo\Documents\c3mcopias\backend\empresa\scripts\migrations\conf.py
+2025-01-10 15:49:13,839 - ERROR - Ambiente não está configurado corretamente.
+2025-01-10 15:49:13,839 - ERROR - Migração finalizada com erros!
+2025-01-10 15:50:05,443 - INFO - === INICIANDO PROCESSO DE MIGRAÇÃO ÀS 2025-01-10 15:50:05.443242 ===
+2025-01-10 15:50:05,443 - INFO - Verificando ambiente...
+2025-01-10 15:50:05,444 - ERROR - Script não encontrado: C:\Users\Cirilo\Documents\c3mcopias\backend\empresa\scripts\migrations\migrate_itens_contrato.py
+2025-01-10 15:50:05,445 - ERROR - Ambiente não está configurado corretamente.
+2025-01-10 15:50:05,445 - ERROR - Migração finalizada com erros!

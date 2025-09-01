@@ -1,0 +1,52 @@
+2025-08-31 08:24:14,223 - INFO - Iniciando script de limpeza completa de tabelas...
+2025-08-31 08:24:14,223 - INFO - === INICIANDO LIMPEZA COMPLETA DO BANCO DE DADOS ===
+2025-08-31 08:24:14,224 - INFO - Conectando ao PostgreSQL...
+2025-08-31 08:24:14,304 - INFO - Desabilitando verificações de chave estrangeira...
+2025-08-31 08:24:14,327 - INFO - Limpando tabela: fluxo_caixa_lancamentos
+2025-08-31 08:24:14,412 - INFO - Limpando tabela: saldos_diarios
+2025-08-31 08:24:14,425 - INFO - Limpando tabela: configuracoes_fluxo_caixa
+2025-08-31 08:24:14,439 - INFO - Limpando tabela: itens_contrato_locacao
+2025-08-31 08:24:14,454 - INFO - Limpando tabela: itens_nf_entrada
+2025-08-31 08:24:14,471 - INFO - Limpando tabela: itens_nf_saida
+2025-08-31 08:24:14,486 - INFO - Limpando tabela: itens_nf_servico
+2025-08-31 08:24:14,498 - INFO - Limpando tabela: contas_receber
+2025-08-31 08:24:14,521 - INFO - Limpando tabela: contas_pagar
+2025-08-31 08:24:14,540 - INFO - Limpando tabela: contratos_locacao
+2025-08-31 08:24:14,565 - INFO - Limpando tabela: notas_fiscais_entrada
+2025-08-31 08:24:14,641 - INFO - Limpando tabela: notas_fiscais_saida
+2025-08-31 08:24:14,696 - INFO - Limpando tabela: notas_fiscais_servico
+2025-08-31 08:24:14,726 - INFO - Limpando tabela: movimentacoes_estoque
+2025-08-31 08:24:14,748 - INFO - Limpando tabela: contagens_inventario
+2025-08-31 08:24:14,759 - INFO - Limpando tabela: posicoes_estoque
+2025-08-31 08:24:14,768 - INFO - Limpando tabela: saldos_estoque
+2025-08-31 08:24:14,781 - INFO - Limpando tabela: pagamentos_funcionarios
+2025-08-31 08:24:14,791 - INFO - Limpando tabela: custos_adicionais_frete
+2025-08-31 08:24:14,806 - INFO - Limpando tabela: ocorrencias_frete
+2025-08-31 08:24:14,818 - INFO - Limpando tabela: despesas
+2025-08-31 08:24:14,825 - INFO - Limpando tabela: produtos
+2025-08-31 08:24:14,932 - INFO - Limpando tabela: clientes
+2025-08-31 08:24:15,158 - INFO - Limpando tabela: fornecedores
+2025-08-31 08:24:15,269 - INFO - Limpando tabela: funcionarios
+2025-08-31 08:24:15,361 - INFO - Limpando tabela: transportadoras
+2025-08-31 08:24:15,484 - INFO - Limpando tabela: empresas
+2025-08-31 08:24:15,496 - INFO - Limpando tabela: categorias_produtos
+2025-08-31 08:24:15,514 - INFO - Limpando tabela: categorias
+2025-08-31 08:24:15,521 - INFO - Limpando tabela: grupos
+2025-08-31 08:24:15,531 - INFO - Limpando tabela: marcas
+2025-08-31 08:24:15,539 - INFO - Limpando tabela: inventarios
+2025-08-31 08:24:15,568 - INFO - Limpando tabela: lotes
+2025-08-31 08:24:15,625 - INFO - Limpando tabela: locais_estoque
+2025-08-31 08:24:15,686 - INFO - Limpando tabela: regioes_entrega
+2025-08-31 08:24:15,702 - INFO - Limpando tabela: tabelas_frete
+2025-08-31 08:24:15,714 - INFO - Limpando tabela: tipos_movimentacao_estoque
+2025-08-31 08:24:15,740 - INFO - Limpando tabela: historico_rastreamento
+2025-08-31 08:24:15,753 - INFO - Limpando tabela: fretes
+2025-08-31 08:24:15,786 - INFO - Limpando tabela: contas_bancarias
+2025-08-31 08:24:15,943 - INFO - Reabilitando verificações de chave estrangeira...
+2025-08-31 08:24:15,946 - INFO - Resetando sequências de ID...
+2025-08-31 08:24:16,387 - INFO - === LIMPEZA COMPLETA FINALIZADA ===
+2025-08-31 08:24:16,393 - INFO - Tabelas limpas: 40
+2025-08-31 08:24:16,393 - INFO - Tabelas não encontradas: 0
+2025-08-31 08:24:16,394 - INFO - Total de tabelas processadas: 40
+2025-08-31 08:24:16,395 - INFO - Conexão com PostgreSQL encerrada
+2025-08-31 08:24:16,396 - INFO - Limpeza completa executada com sucesso!

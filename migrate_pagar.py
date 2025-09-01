@@ -1,6 +1,6 @@
 import pyodbc
 import psycopg2
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 import re
 
@@ -19,14 +19,25 @@ def clean_decimal(value):
     except:
         return Decimal('0.00')
 
-def determinar_status(row):
-    """Determina o status com base nos valores"""
-    if not row[13]:  # Sem data de pagamento
-        return 'A'
-    valor_pago = clean_decimal(row[14])
-    if valor_pago >= clean_decimal(row[2]):
-        return 'P'
-    return 'A'
+def clean_date(value):
+    if not value:
+        return None
+    if isinstance(value, (datetime, date)):
+        return value
+    try:
+        # Remove espaços e caracteres inválidos
+        clean_value = str(value).strip()
+        if not clean_value:
+            return None
+            
+        # Tenta converter para datetime
+        return datetime.strptime(clean_value, '%Y-%m-%d %H:%M:%S').date()
+    except:
+        try:
+            # Tenta outros formatos comuns
+            return datetime.strptime(clean_value, '%d/%m/%Y').date()
+        except:
+            return None
 
 def limpar_tabelas(pg_conn):
     try:
@@ -81,6 +92,18 @@ def carregar_contas(pg_cursor):
     ids = {row[0] for row in pg_cursor.fetchall()}
     print(f"Contas bancárias encontradas: {len(ids)}")
     return ids
+
+def determinar_status(row):
+    """Determina o status com base nos valores"""
+    if row[16] and str(row[16]).strip().upper() in ['A', 'P', 'C']:
+        return str(row[16]).strip().upper()
+    if row[13]:  # Sem data de pagamento
+        return 'P'
+    valor_pago = clean_decimal(row[14])
+    if valor_pago >= clean_decimal(row[2]):
+        return 'P'
+    return 'A'
+
 
 def migrar_contas_pagar():
     pg_config = {
@@ -214,25 +237,24 @@ def migrar_contas_pagar():
                         pass
 
                 dados = (
-                    row[1],                     # data
-                    clean_decimal(row[2]),      # valor
-                    fornecedor_id,              # fornecedor_id
-                    row[4],                     # vencimento
-                    clean_decimal(row[5]),      # valor_total_pago
-                    clean_string(row[6]),       # historico
-                    clean_string(row[7]),       # forma_pagamento
-                    clean_string(row[8]),       # condicoes
-                    clean_string(row[9]),       # confirmacao
-                    clean_decimal(row[10]),     # juros
-                    clean_decimal(row[11]),     # tarifas
-                    clean_string(row[12]),      # numero_duplicata
-                    row[13],                    # data_pagamento
-                    clean_decimal(row[14]),     # valor_pago
-                    clean_string(row[15]),      # local
-                    #determinar_status(row),     # status
-                    row[16],
-                    conta_id                    # conta_id
-                )
+                        clean_date(row[1]),           # data
+                        clean_decimal(row[2]),        # valor
+                        fornecedor_id,                # fornecedor_id 
+                        clean_date(row[4]),           # vencimento
+                        clean_decimal(row[5]),        # valor_total_pago
+                        clean_string(row[6]),         # historico
+                        clean_string(row[7]),         # forma_pagamento
+                        clean_string(row[8]),         # condicoes
+                        clean_string(row[9]),         # confirmacao
+                        clean_decimal(row[10]),       # juros
+                        clean_decimal(row[11]),       # tarifas
+                        clean_string(row[12]),        # numero_duplicata
+                        clean_date(row[13]),          # data_pagamento
+                        clean_decimal(row[14]),       # valor_pago
+                        clean_string(row[15]),        # local
+                        determinar_status(row),       # status
+                        conta_id                      # conta_id
+                    )
                 
                 pg_cursor.execute(insert_sql, dados)
                 pg_conn.commit()

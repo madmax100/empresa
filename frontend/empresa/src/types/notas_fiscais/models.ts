@@ -137,3 +137,10 @@ export interface ItemNotaFiscal {
 export interface NotaFiscalSaidaDetalhada extends NotaFiscalSaida {
     itens: ItemNotaFiscal[];
 }
+
+export interface PaymentData {
+    status: string;
+    data_pagamento: string;
+    forma_pagamento: string;
+    valor_pago: number;
+}

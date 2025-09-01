@@ -1,6 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import *
+
+from .views.fluxo_caixa.views import FluxoCaixaViewSet
+from .views.access import *
+from .views.access import suprimentos_por_contrato
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
@@ -37,8 +40,11 @@ router.register(r'saldos_estoque', SaldosEstoqueViewSet)
 router.register(r'tabelas_frete', TabelasFreteViewSet)
 router.register(r'tipos_movimentacao_estoque', TiposMovimentacaoEstoqueViewSet)
 router.register(r'transportadoras', TransportadorasViewSet)
+router.register(r'fluxo-caixa', FluxoCaixaViewSet, basename='fluxo-caixa')
+
 
 
 urlpatterns = [
+    path('contratos_locacao/suprimentos/', suprimentos_por_contrato, name='suprimentos-por-contrato'),
     path('', include(router.urls)),
 ]

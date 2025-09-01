@@ -1,0 +1,1125 @@
+2025-01-10 15:59:51,131 - INFO - Iniciando migração de contratos às 2025-01-10 15:59:51.131530
+2025-01-10 15:59:51,132 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-01-10 15:59:51,653 - INFO - Iniciando limpeza das tabelas...
+2025-01-10 15:59:51,661 - INFO - Limpando tabela itens_contrato_locacao...
+2025-01-10 15:59:51,667 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-01-10 15:59:51,668 - INFO - Limpando tabela contratos_locacao...
+2025-01-10 15:59:51,684 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-01-10 15:59:51,693 - INFO - Limpeza de tabelas concluída com sucesso
+2025-01-10 15:59:51,704 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-01-10 15:59:51,709 - INFO - Consultando dados do Access...
+2025-01-10 15:59:51,718 - INFO - Iniciando migração dos registros...
+2025-01-10 15:59:51,723 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,729 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,730 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,731 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,732 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,733 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,734 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,734 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,734 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,734 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,734 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,734 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-01-10 15:59:51,738 - INFO - 
+        Migração concluída em 0:00:00.606917:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-01-13 20:38:42,169 - INFO - Iniciando migração de contratos às 2025-01-13 20:38:42.169387
+2025-01-13 20:38:42,169 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-01-13 20:38:42,642 - INFO - Iniciando limpeza das tabelas...
+2025-01-13 20:38:42,653 - INFO - Limpando tabela itens_contrato_locacao...
+2025-01-13 20:38:42,662 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-01-13 20:38:42,664 - INFO - Limpando tabela contratos_locacao...
+2025-01-13 20:38:42,679 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-01-13 20:38:42,690 - INFO - Limpeza de tabelas concluída com sucesso
+2025-01-13 20:38:42,703 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-01-13 20:38:42,712 - INFO - Consultando dados do Access...
+2025-01-13 20:38:42,724 - INFO - Iniciando migração dos registros...
+2025-01-13 20:38:42,728 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,734 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,735 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,736 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,737 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,738 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,739 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-01-13 20:38:42,744 - INFO - 
+        Migração concluída em 0:00:00.573822:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-01-13 20:51:55,888 - INFO - Iniciando migração de contratos às 2025-01-13 20:51:55.888699
+2025-01-13 20:51:55,889 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-01-13 20:51:56,344 - INFO - Iniciando limpeza das tabelas...
+2025-01-13 20:51:56,354 - INFO - Limpando tabela itens_contrato_locacao...
+2025-01-13 20:51:56,361 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-01-13 20:51:56,362 - INFO - Limpando tabela contratos_locacao...
+2025-01-13 20:51:56,377 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-01-13 20:51:56,386 - INFO - Limpeza de tabelas concluída com sucesso
+2025-01-13 20:51:56,399 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-01-13 20:51:56,404 - INFO - Consultando dados do Access...
+2025-01-13 20:51:56,418 - INFO - Iniciando migração dos registros...
+2025-01-13 20:51:56,421 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,428 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,428 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,428 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,428 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,428 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,428 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,429 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,430 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,431 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,432 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-01-13 20:51:56,436 - INFO - 
+        Migração concluída em 0:00:00.547455:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-01-13 20:55:28,686 - INFO - Iniciando migração de contratos às 2025-01-13 20:55:28.686813
+2025-01-13 20:55:28,686 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-01-13 20:55:29,140 - INFO - Iniciando limpeza das tabelas...
+2025-01-13 20:55:29,150 - INFO - Limpando tabela itens_contrato_locacao...
+2025-01-13 20:55:29,157 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-01-13 20:55:29,159 - INFO - Limpando tabela contratos_locacao...
+2025-01-13 20:55:29,175 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-01-13 20:55:29,185 - INFO - Limpeza de tabelas concluída com sucesso
+2025-01-13 20:55:29,199 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-01-13 20:55:29,205 - INFO - Consultando dados do Access...
+2025-01-13 20:55:29,215 - INFO - Iniciando migração dos registros...
+2025-01-13 20:55:29,217 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,224 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,225 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,226 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,227 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,228 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,229 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,230 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,230 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,230 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,230 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-01-13 20:55:29,233 - INFO - 
+        Migração concluída em 0:00:00.546953:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-01-13 20:59:16,689 - INFO - Iniciando migração de contratos às 2025-01-13 20:59:16.689433
+2025-01-13 20:59:16,689 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-01-13 20:59:17,190 - INFO - Iniciando limpeza das tabelas...
+2025-01-13 20:59:17,200 - INFO - Limpando tabela itens_contrato_locacao...
+2025-01-13 20:59:17,206 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-01-13 20:59:17,207 - INFO - Limpando tabela contratos_locacao...
+2025-01-13 20:59:17,222 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-01-13 20:59:17,232 - INFO - Limpeza de tabelas concluída com sucesso
+2025-01-13 20:59:17,243 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-01-13 20:59:17,249 - INFO - Consultando dados do Access...
+2025-01-13 20:59:17,259 - INFO - Iniciando migração dos registros...
+2025-01-13 20:59:17,261 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,267 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,268 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,268 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,268 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,268 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,268 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,268 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,268 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,269 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,270 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,271 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,272 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-01-13 20:59:17,277 - INFO - 
+        Migração concluída em 0:00:00.587652:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-01-13 21:03:49,412 - INFO - Iniciando migração de contratos às 2025-01-13 21:03:49.412106
+2025-01-13 21:03:49,413 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-01-13 21:03:49,847 - INFO - Iniciando limpeza das tabelas...
+2025-01-13 21:03:49,858 - INFO - Limpando tabela itens_contrato_locacao...
+2025-01-13 21:03:49,864 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-01-13 21:03:49,865 - INFO - Limpando tabela contratos_locacao...
+2025-01-13 21:03:49,881 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-01-13 21:03:49,893 - INFO - Limpeza de tabelas concluída com sucesso
+2025-01-13 21:03:49,908 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-01-13 21:03:49,914 - INFO - Consultando dados do Access...
+2025-01-13 21:03:49,927 - INFO - Iniciando migração dos registros...
+2025-01-13 21:03:49,928 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,934 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,935 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,935 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,935 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,935 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,935 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,935 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,935 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,936 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,937 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,938 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,939 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-01-13 21:03:49,942 - INFO - 
+        Migração concluída em 0:00:00.529908:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-01-13 21:07:56,182 - INFO - Iniciando migração de contratos às 2025-01-13 21:07:56.181316
+2025-01-13 21:07:56,182 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-01-13 21:07:56,648 - INFO - Iniciando limpeza das tabelas...
+2025-01-13 21:07:56,658 - INFO - Limpando tabela itens_contrato_locacao...
+2025-01-13 21:07:56,665 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-01-13 21:07:56,666 - INFO - Limpando tabela contratos_locacao...
+2025-01-13 21:07:56,683 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-01-13 21:07:56,696 - INFO - Limpeza de tabelas concluída com sucesso
+2025-01-13 21:07:56,710 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-01-13 21:07:56,717 - INFO - Consultando dados do Access...
+2025-01-13 21:07:56,732 - INFO - Iniciando migração dos registros...
+2025-01-13 21:07:56,735 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,743 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,744 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,745 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,746 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,747 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,748 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,749 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-01-13 21:07:56,753 - INFO - 
+        Migração concluída em 0:00:00.572449:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-08-30 08:12:40,318 - INFO - Iniciando migração de contratos às 2025-08-30 08:12:40.317317
+2025-08-30 08:12:40,318 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-08-30 08:12:40,674 - INFO - Iniciando limpeza das tabelas...
+2025-08-30 08:12:40,676 - ERROR - Erro durante processo de limpeza: ERRO:  permissão negada ao definir parâmetro "session_replication_role"
+
+2025-08-30 08:12:40,676 - ERROR - Erro durante a migração: ERRO:  permissão negada ao definir parâmetro "session_replication_role"
+
+2025-08-30 08:36:06,492 - INFO - Iniciando migração de contratos às 2025-08-30 08:36:06.492496
+2025-08-30 08:36:06,493 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-08-30 08:36:06,983 - INFO - Iniciando limpeza das tabelas...
+2025-08-30 08:36:06,986 - ERROR - Erro durante processo de limpeza: ERRO:  permissão negada ao definir parâmetro "session_replication_role"
+
+2025-08-30 08:36:06,987 - ERROR - Erro durante a migração: ERRO:  permissão negada ao definir parâmetro "session_replication_role"
+
+2025-08-30 08:43:13,351 - INFO - Iniciando migração de contratos às 2025-08-30 08:43:13.351517
+2025-08-30 08:43:13,351 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-08-30 08:43:13,803 - INFO - Iniciando limpeza das tabelas...
+2025-08-30 08:43:13,813 - INFO - Limpando tabela itens_contrato_locacao...
+2025-08-30 08:43:13,819 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-08-30 08:43:13,821 - INFO - Limpando tabela contratos_locacao...
+2025-08-30 08:43:13,836 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-08-30 08:43:13,845 - INFO - Limpeza de tabelas concluída com sucesso
+2025-08-30 08:43:13,859 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-08-30 08:43:13,867 - INFO - Consultando dados do Access...
+2025-08-30 08:43:13,881 - INFO - Iniciando migração dos registros...
+2025-08-30 08:43:13,884 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,891 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,892 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,893 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,894 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,895 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,896 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,897 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,898 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,898 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,898 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-08-30 08:43:13,901 - INFO - 
+        Migração concluída em 0:00:00.550079:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-08-30 08:47:57,540 - INFO - Iniciando migração de contratos às 2025-08-30 08:47:57.540867
+2025-08-30 08:47:57,540 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-08-30 08:47:57,958 - INFO - Iniciando limpeza das tabelas...
+2025-08-30 08:47:57,967 - INFO - Limpando tabela itens_contrato_locacao...
+2025-08-30 08:47:57,974 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-08-30 08:47:57,976 - INFO - Limpando tabela contratos_locacao...
+2025-08-30 08:47:57,999 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-08-30 08:47:58,010 - INFO - Limpeza de tabelas concluída com sucesso
+2025-08-30 08:47:58,027 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-08-30 08:47:58,036 - INFO - Consultando dados do Access...
+2025-08-30 08:47:58,047 - INFO - Iniciando migração dos registros...
+2025-08-30 08:47:58,049 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,057 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,058 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,059 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,060 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,061 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,062 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-08-30 08:47:58,066 - INFO - 
+        Migração concluída em 0:00:00.525400:
+        - Total de contratos migrados: 0
+        - Total de erros: 71
+        
+2025-08-31 07:09:14,412 - INFO - Iniciando migração de contratos às 2025-08-31 07:09:14.412796
+2025-08-31 07:09:14,413 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-08-31 07:09:14,811 - INFO - Iniciando limpeza das tabelas...
+2025-08-31 07:09:14,820 - INFO - Limpando tabela itens_contrato_locacao...
+2025-08-31 07:09:14,825 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-08-31 07:09:14,826 - INFO - Limpando tabela contratos_locacao...
+2025-08-31 07:09:14,839 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-08-31 07:09:14,848 - INFO - Limpeza de tabelas concluída com sucesso
+2025-08-31 07:09:14,864 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-08-31 07:09:14,870 - INFO - Consultando dados do Access...
+2025-08-31 07:09:14,882 - INFO - Iniciando migração dos registros...
+2025-08-31 07:09:14,884 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,891 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,891 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,891 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,891 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,891 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,891 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,891 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,892 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,893 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,894 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,895 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1607: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1608: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1609: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1610: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1611: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1612: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1613: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1614: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1615: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1616: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,896 - ERROR - Erro ao migrar contrato C1617: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,897 - ERROR - Erro ao migrar contrato C1618: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,897 - ERROR - Erro ao migrar contrato C1619: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,897 - ERROR - Erro ao migrar contrato C1620: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,897 - ERROR - Erro ao migrar contrato C1621: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,897 - ERROR - Erro ao migrar contrato C1622: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,897 - ERROR - Erro ao migrar contrato C1623: can't compare datetime.datetime to datetime.date
+2025-08-31 07:09:14,901 - INFO - 
+        Migração concluída em 0:00:00.489186:
+        - Total de contratos migrados: 0
+        - Total de erros: 88
+        
+2025-08-31 08:25:14,318 - INFO - Iniciando migração de contratos às 2025-08-31 08:25:14.318632
+2025-08-31 08:25:14,318 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-08-31 08:25:14,748 - INFO - Iniciando limpeza das tabelas...
+2025-08-31 08:25:14,764 - INFO - Limpando tabela itens_contrato_locacao...
+2025-08-31 08:25:14,781 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-08-31 08:25:14,781 - INFO - Limpando tabela contratos_locacao...
+2025-08-31 08:25:14,796 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-08-31 08:25:14,798 - INFO - Limpeza de tabelas concluída com sucesso
+2025-08-31 08:25:14,814 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-08-31 08:25:14,814 - INFO - Consultando dados do Access...
+2025-08-31 08:25:14,831 - INFO - Iniciando migração dos registros...
+2025-08-31 08:25:14,831 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1607: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1608: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1609: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1610: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1611: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1612: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1613: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1614: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1615: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1616: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1617: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1618: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1619: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1620: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1621: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1622: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - ERROR - Erro ao migrar contrato C1623: can't compare datetime.datetime to datetime.date
+2025-08-31 08:25:14,848 - INFO - 
+        Migração concluída em 0:00:00.529381:
+        - Total de contratos migrados: 0
+        - Total de erros: 88
+        
+2025-08-31 08:34:44,853 - INFO - Iniciando migração de contratos às 2025-08-31 08:34:44.853525
+2025-08-31 08:34:44,853 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-08-31 08:34:45,406 - INFO - Iniciando limpeza das tabelas...
+2025-08-31 08:34:45,418 - INFO - Limpando tabela itens_contrato_locacao...
+2025-08-31 08:34:45,425 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-08-31 08:34:45,427 - INFO - Limpando tabela contratos_locacao...
+2025-08-31 08:34:45,445 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-08-31 08:34:45,455 - INFO - Limpeza de tabelas concluída com sucesso
+2025-08-31 08:34:45,468 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-08-31 08:34:45,475 - INFO - Consultando dados do Access...
+2025-08-31 08:34:45,484 - INFO - Iniciando migração dos registros...
+2025-08-31 08:34:45,487 - ERROR - Erro ao migrar contrato C1529: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,494 - ERROR - Erro ao migrar contrato C1530: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,494 - ERROR - Erro ao migrar contrato C1531: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,494 - ERROR - Erro ao migrar contrato C1532: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,494 - ERROR - Erro ao migrar contrato C1533: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,494 - ERROR - Erro ao migrar contrato C1535: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,494 - ERROR - Erro ao migrar contrato C1536: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1538: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1539: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1540: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1541: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1542: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1543: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1544: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1545: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1546: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1547: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1548: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1549: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,495 - ERROR - Erro ao migrar contrato C1550: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1551: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1552: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1553: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1554: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1555: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1556: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1558: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1559: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1560: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1561: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1562: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1563: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1564: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,496 - ERROR - Erro ao migrar contrato C1565: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1569: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1571: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1572: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1573: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1574: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1575: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1576: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1577: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1578: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1579: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,497 - ERROR - Erro ao migrar contrato C1580: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1581: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1582: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1583: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1584: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1585: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1586: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1587: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1588: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1589: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1590: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1591: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1592: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,498 - ERROR - Erro ao migrar contrato C1593: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1594: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1595: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1596: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1597: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1598: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1599: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1600: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1601: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,499 - ERROR - Erro ao migrar contrato C1602: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1603: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1604: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1605: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1606: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1607: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1608: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1609: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1610: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1611: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,500 - ERROR - Erro ao migrar contrato C1612: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1613: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1614: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1615: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1616: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1617: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1618: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1619: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1620: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1621: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1622: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,501 - ERROR - Erro ao migrar contrato C1623: can't compare datetime.datetime to datetime.date
+2025-08-31 08:34:45,505 - INFO - 
+        Migração concluída em 0:00:00.652119:
+        - Total de contratos migrados: 0
+        - Total de erros: 88
+        
+2025-09-01 00:51:27,416 - INFO - Iniciando migração de contratos às 2025-09-01 00:51:27.416702
+2025-09-01 00:51:27,416 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-09-01 00:51:27,867 - INFO - Iniciando limpeza das tabelas...
+2025-09-01 00:51:27,867 - INFO - Limpando tabela itens_contrato_locacao...
+2025-09-01 00:51:27,883 - INFO - Tabela itens_contrato_locacao limpa com sucesso
+2025-09-01 00:51:27,883 - INFO - Limpando tabela contratos_locacao...
+2025-09-01 00:51:27,900 - INFO - Tabela contratos_locacao limpa com sucesso
+2025-09-01 00:51:27,917 - INFO - Limpeza de tabelas concluída com sucesso
+2025-09-01 00:51:27,917 - INFO - Estrutura das tabelas verificada/criada com sucesso
+2025-09-01 00:51:27,933 - INFO - Consultando dados do Access...
+2025-09-01 00:51:27,950 - INFO - Iniciando migração dos registros...
+2025-09-01 00:51:28,100 - INFO - 
+        Migração concluída em 0:00:00.683915:
+        - Total de contratos migrados: 88
+        - Total de erros: 0
+        

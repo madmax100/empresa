@@ -26,16 +26,12 @@ def clean_boolean(value):
 
 def determinar_status(row):
     """Determina o status com base nos valores"""
-    if row[19]:  # Status do Access
-        status_atual = clean_string(row[19]).upper()
-        if status_atual == 'BAIXADO':
-            return 'P'
-        elif status_atual == 'CANCELADO':
-            return 'C'
-    if not row[15]:  # Sem data de pagamento
-        return 'A'
+    if row[19] and str(row[19]).strip().upper() in ['A', 'P', 'C']:
+        return str(row[19]).strip().upper()
+    if row[15]:  # Sem data de pagamento
+        return 'P'
     valor_recebido = clean_decimal(row[14])
-    if valor_recebido >= clean_decimal(row[3]):
+    if valor_recebido >= clean_decimal(row[2]):
         return 'P'
     return 'A'
 
