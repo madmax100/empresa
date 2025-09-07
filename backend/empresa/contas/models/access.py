@@ -602,7 +602,7 @@ class Empresas(models.Model):
         return self.razao_social
 
 class MovimentacoesEstoque(models.Model):
-    data_movimentacao = models.DateTimeField(auto_now_add=True)
+    data_movimentacao = models.DateTimeField()
     tipo_movimentacao = models.ForeignKey('TiposMovimentacaoEstoque', on_delete=models.PROTECT, null=True, blank=True)
     produto = models.ForeignKey('Produtos', on_delete=models.PROTECT, null=True, blank=True)
     lote_id = models.ForeignKey('Lotes', on_delete=models.PROTECT, null=True, blank=True)

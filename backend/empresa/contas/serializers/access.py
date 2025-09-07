@@ -43,22 +43,24 @@ class ContagensInventarioSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class ContasReceberSerializer(serializers.ModelSerializer):
+    cliente_nome = serializers.CharField(source='cliente.nome', read_only=True)
+
     class Meta:
         model = ContasReceber
         fields = [
-            'id', 'cliente', 'historico', 'valor', 
-            'vencimento', 'data_pagamento', 'status',
-            'valor_total_pago', 'forma_pagamento'
+            'id', 'data', 'vencimento', 'cliente_nome', 'historico',
+            'valor', 'status', 'data_pagamento', 'recebido'
         ]
         depth = 1  # Para incluir os dados do cliente/fornecedor
 
 class ContasPagarSerializer(serializers.ModelSerializer):
+    fornecedor_nome = serializers.CharField(source='fornecedor.nome', read_only=True)
+
     class Meta:
         model = ContasPagar
         fields = [
-            'id', 'fornecedor', 'historico', 'valor', 
-            'vencimento', 'data_pagamento', 'status',
-            'valor_pago', 'forma_pagamento'
+            'id', 'data', 'vencimento', 'fornecedor_nome', 'historico', 
+            'valor', 'status', 'data_pagamento', 'valor_pago'
         ]
         depth = 1
         
@@ -211,4 +213,4 @@ class TransportadorasSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transportadoras
         fields = '__all__'
-        
+

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { PaymentData } from '@/types/notas_fiscais/models';
 import { Bill, DashboardResponse2, FilterParams2 } from '@/types/models';
 import { financialService } from '@/services/financialService';
 import { contasPagarService, contasReceberService } from '@/services/api';
@@ -264,7 +263,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ data, onUpdateStatus, onDelete,
             }
             case 'nome':
             default:
-                return (bill.cliente?.nome || bill.fornecedor?.nome || '').toLowerCase();
+                return ((bill as any).cliente_nome || (bill as any).fornecedor_nome || bill.cliente?.nome || bill.fornecedor?.nome || '').toLowerCase();
         }
     };
 
@@ -393,7 +392,7 @@ const BillsTable: React.FC<BillsTableProps> = ({ data, onUpdateStatus, onDelete,
                                     }).format(bill.valor)}
                                 </td>
                                 <td className="px-4 py-3">
-                                    {bill.cliente?.nome || bill.fornecedor?.nome}
+                                    {(bill as any).cliente_nome || (bill as any).fornecedor_nome || bill.cliente?.nome || bill.fornecedor?.nome}
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(bill.status)}`}>
@@ -565,17 +564,11 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
     });
     const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [currentFilters, setCurrentFilters] = useState<FilterParams2>({
-        dataInicial: new Date().toISOString().split('T')[0],
-        dataFinal: new Date().toISOString().split('T')[0],
-        status: 'all',
-        searchTerm: ''
-    });
 
-    const fetchData = async (filters?: FilterParams2) => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const result = await financialService.getDashboard(type, filters);
+            const result = await financialService.getDashboard();
             setData(result);
             setError(null);
         } catch (err) {
@@ -586,16 +579,16 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
         }
     };
 
-    const handlePaymentSubmit = async (paymentData: PaymentData) => {
+    const handlePaymentSubmit = async () => {
         if (!selectedBill) return;
     
         try {
             setLoading(true);
-            await financialService.updateStatus(type, selectedBill.id, paymentData);
+            await financialService.updateStatus();
             setSelectedBill(null);
             
             // Use os filtros atuais ao recarregar os dados
-            await fetchData(currentFilters);
+            await fetchData();
             
             setError(null);
         } catch (err) {
@@ -617,7 +610,7 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
             } else {
                 await contasReceberService.excluir(billId);
             }
-            await fetchData(currentFilters);
+            await fetchData();
             setError(null);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao excluir o título');
@@ -638,7 +631,7 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
             } else {
                 await Promise.all(billIds.map(id => contasReceberService.excluir(id)));
             }
-            await fetchData(currentFilters);
+            await fetchData();
             setError(null);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao excluir os títulos selecionados');
@@ -658,7 +651,7 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
             setLoading(true);
             // Fazer atualização em paralelo
             await Promise.all(abertos.map(b => contasPagarService.atualizarStatus(b.id, 'P')));
-            await fetchData(currentFilters);
+            await fetchData();
         } catch (err) {
             console.error('Erro na baixa em lote por fornecedor:', err);
         } finally {
@@ -671,11 +664,11 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
     const handleBatchPayByCliente = async () => {
         try {
             if (type !== 'receber' || !batchCliente) return;
-            const abertos = data.titulos_abertos_periodo.filter(b => b.cliente?.nome === batchCliente);
+            const abertos = data.titulos_abertos_periodo.filter(b => ((b as any).cliente_nome || b.cliente?.nome) === batchCliente);
             if (abertos.length === 0) return;
             setLoading(true);
             await Promise.all(abertos.map(b => contasReceberService.atualizarStatus(b.id, 'P')));
-            await fetchData(currentFilters);
+            await fetchData();
         } catch (err) {
             console.error('Erro na baixa em lote por cliente:', err);
         } finally {
@@ -702,9 +695,8 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
  */
 
 
-    const handleFilterChange = (filters: FilterParams2) => {
-        setCurrentFilters(filters);
-        fetchData(filters);
+    const handleFilterChange = () => {
+        fetchData();
     };
 
     const handleUpdateStatus = (billId: number) => {
@@ -790,7 +782,7 @@ const BillsManagement: React.FC<BillsManagementProps> = ({ type = 'pagar' }) => 
                         >
                             <option value="">Selecionar cliente...</option>
                             {Array.from(new Set(data.titulos_abertos_periodo
-                                .map(b => b.cliente?.nome)
+                                .map(b => (b as any).cliente_nome || b.cliente?.nome)
                                 .filter(Boolean)))
                                 .map((nome) => (
                                     <option key={nome as string} value={nome as string}>{nome as string}</option>

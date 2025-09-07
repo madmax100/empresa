@@ -13,6 +13,7 @@ import { DashboardFilter } from '@/components/dashboard/dashboardFilter';
 import OperationalDashboard from './dashboard/OperationalDashboard';
 import { ManagementDashboard } from './dashboard/ManagementDashboard';
 import { StrategicDashboard } from './dashboard/StrategicDashboard';
+import TesteContasVencidas from '@/components/TesteContasVencidas';
 
 interface DashboardState {
   operacional: DashboardOperacional | null;
@@ -70,12 +71,17 @@ const Home: React.FC = () => {
 
       switch (activeTab) {
         case 'operacional': {
-          const dashboardData = await financialService.getDashboardOperacional(apiFilters);
+          const dashboardData = await financialService.getDashboardOperacional({
+            data_inicial: apiFilters.dataInicial,
+            data_final: apiFilters.dataFinal,
+            tipo: apiFilters.tipo,
+            fonte: apiFilters.fonte
+          });
           setData(prev => ({ ...prev, operacional: dashboardData }));
           break;
         }
         case 'estrategico': {
-          const dashboardData = await financialService.getDashboardEstrategico(apiFilters);
+          const dashboardData = await financialService.getDashboardEstrategico();
           setData(prev => ({ ...prev, estrategico: dashboardData }));
           break;
         }
@@ -120,31 +126,11 @@ const Home: React.FC = () => {
     setFilters(prev => ({ ...prev, ...updatedFilters }));
   };
 
-  // Handler para mudança de status de movimentação
-  const handleMovementStatusChange = async (id: number) => {
-    try {
-      setLoading(true);
-      await financialService.realizarLancamento(id);
-      await loadDashboardData();
-    } catch (error: any) {
-      setError(error?.response?.data?.detail || 'Erro ao atualizar status do movimento');
-      console.error('Erro ao atualizar status:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Handler para exportação
   const handleExport = async () => {
     try {
       setLoading(true);
-      const blob = await financialService.getRelatorioFluxoCaixa(
-        {
-          inicio: filters.dataInicial,
-          fim: filters.dataFinal
-        },
-        'excel'
-      );
+      const blob = await financialService.getRelatorioFluxoCaixa();
       financialService.exportarRelatorio(blob, 'fluxo-caixa.xlsx');
     } catch (error: any) {
       setError(error?.response?.data?.detail || 'Erro ao exportar relatório');
@@ -190,7 +176,12 @@ const Home: React.FC = () => {
           <TabsTrigger value="operacional">Operacional</TabsTrigger>
           <TabsTrigger value="estrategico">Estratégico</TabsTrigger>
           <TabsTrigger value="gerencial">Gerencial</TabsTrigger>
+          <TabsTrigger value="teste">🧪 Teste Vencidas</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="teste">
+          <TesteContasVencidas />
+        </TabsContent>
 
         <TabsContent value="operacional">
           {data.operacional && (
@@ -200,7 +191,6 @@ const Home: React.FC = () => {
               onFiltrosChange={handleFilterChange}
               onRefresh={handleRefresh}
               onExport={handleExport}
-              onMovimentoStatusChange={handleMovementStatusChange}
             />
           )}
         </TabsContent>

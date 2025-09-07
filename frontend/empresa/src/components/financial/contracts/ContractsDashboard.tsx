@@ -130,10 +130,7 @@ const ContractsDashboard: React.FC = () => {
       // Tenta buscar análise de performance; se falhar (400/500), seguimos com fallback
       let performance: any | null = null;
       try {
-        performance = await financialService.getAnalisePerformance({
-          data_inicial: toYmd(from),
-          data_final: toYmd(to),
-        } as any);
+        performance = await financialService.getAnalisePerformance();
       } catch (e) {
         console.warn('analise_performance indisponível, usando fallback de contratos:', e);
       }

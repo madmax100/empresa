@@ -32,6 +32,8 @@ export interface DateRange {
     status: MovimentoStatus;
     realizado: boolean;
     data_realizacao?: string;
+    data_pagamento?: string;
+    data_vencimento?: string;
     data_estorno?: string;
     observacoes?: string;
   }
@@ -143,4 +145,57 @@ export interface DateRange {
       resultado_operacional: number;
       resultado_liquido: number;
     };
+  }
+  
+  export interface Pessoa {
+    id: number;
+    nome: string;
+  }
+  
+  export interface Conta {
+    id: number;
+    descricao: string;
+    valor: number;
+    data_vencimento: string;
+    pessoa?: Pessoa;
+    // Outros campos relevantes
+  }
+  
+  export interface FluxoCaixaData {
+    contas_a_pagar: Conta[];
+    contas_a_receber: Conta[];
+    total_a_pagar: number;
+    total_a_receber: number;
+    saldo_periodo: number;
+    grafico_diario: {
+      name: string;
+      receitas: number;
+      despesas: number;
+    }[];
+  }
+
+  export interface ItemEstoque {
+    id: number;
+    nome: string;
+    categoria: string;
+    quantidade: number;
+    valor_unitario: number;
+    valor_total: number;
+    data_ultima_atualizacao: string;
+  }
+
+  export interface RelatorioEstoque {
+    resumo: {
+      total_itens: number;
+      valor_total: number;
+      total_categorias: number;
+    };
+    categorias: {
+      [key: string]: {
+        itens: number;
+        valor: number;
+        percentual: number;
+      }
+    };
+    itens: ItemEstoque[];
   }

@@ -1,0 +1,7 @@
+2025-09-02 04:21:42,803 - INFO - === INICIANDO CRIAÇÃO DE TIPOS DE MOVIMENTAÇÃO ===
+2025-09-02 04:21:42,872 - INFO - Tipos de movimentação existentes: 2
+2025-09-02 04:21:42,872 - INFO - Tipos de movimentação já existem, pulando criação
+2025-09-02 04:21:42,873 - INFO - --- TIPOS CADASTRADOS ---
+2025-09-02 04:21:42,874 - INFO - • ENT - Entrada de Estoque (Tipo: E)
+2025-09-02 04:21:42,874 - INFO - • SAI - Saída de Estoque (Tipo: S)
+2025-09-02 04:21:42,874 - INFO - === CRIAÇÃO DE TIPOS CONCLUÍDA COM SUCESSO ===

@@ -41,7 +41,10 @@ const ContasPage: React.FC = () => {
         try {
             setLoading(true);
             console.log('🏦 Carregando dados de contas a receber com filtros:', filters);
-            const data = await financeiroDashboard.resumoGeral(filters);
+            const data = await financeiroDashboard.resumoGeral({
+                ...filters,
+                searchTerm: filters.searchTerm || ''
+            });
             console.log('🏦 Dados recebidos:', data);
             console.log('🏦 Contas a receber:', {
                 resumo: data.contasReceber.resumo,

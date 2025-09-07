@@ -31,3 +31,20 @@ class FluxoCaixaViewSet(FluxoCaixaAnaliseMixin, FluxoCaixaBaseMixin, ClienteAnal
     queryset = FluxoCaixaLancamento.objects.all()
     serializer_class = FluxoCaixaLancamentoSerializer
     #permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Retorna queryset filtrado por parâmetros de data
+        """
+        queryset = super().get_queryset()
+        
+        # Filtros de data
+        data_inicio = self.request.query_params.get('data_inicio')
+        data_fim = self.request.query_params.get('data_fim')
+        
+        if data_inicio:
+            queryset = queryset.filter(data__gte=data_inicio)
+        if data_fim:
+            queryset = queryset.filter(data__lte=data_fim)
+            
+        return queryset.order_by('-data', '-id')

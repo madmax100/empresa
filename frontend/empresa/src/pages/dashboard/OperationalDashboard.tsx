@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,6 +15,15 @@ import {
 } from "lucide-react";
 import { Filtros } from '@/types/dashboardNovo';
 import IndicadorCard from '@/components/common/IndicadorCard';
+import { financialService } from '@/services/financialService';
+import ContasVencidasComponent from '@/components/ContasVencidasComponent';
+
+interface DadoMensal {
+  mes: string;
+  entradas: number;
+  saidas: number;
+  diferenca: number;
+}
 
 
 
@@ -29,7 +38,6 @@ interface OperationalDashboardCompleteProps {
   onFiltrosChange: (filtros: Partial<Filtros>) => void;
   onRefresh: () => void;
   onExport: () => void;
-  onMovimentoStatusChange?: (id: number) => Promise<void>;
   className?: string;
 }
 
@@ -38,10 +46,109 @@ export const OperationalDashboardComplete: React.FC<OperationalDashboardComplete
   loading = false,
   onRefresh,
   onExport,
-  onMovimentoStatusChange,
   className = ''
 }) => {
   const [selectedTab, setSelectedTab] = useState('visao-geral');
+  const [movimentosAnoCompleto, setMovimentosAnoCompleto] = useState<any[]>([]);
+
+  // Função para formatar data de forma segura
+  const formatarDataSegura = (data: any) => {
+    // Debug específico para conta #54669
+    if (typeof data === 'string' && data.includes('2025-09-01')) {
+      console.log('🔍 formatarDataSegura para conta #54669:', data, typeof data);
+    }
+    
+    console.log('🔍 formatarDataSegura chamada com:', data, typeof data);
+    
+    if (!data) {
+      console.log('❌ Data é null/undefined');
+      return 'Data não informada';
+    }
+    
+    try {
+      // Verificar se é uma string vazia ou só espaços
+      if (typeof data === 'string' && data.trim() === '') {
+        console.log('❌ Data é string vazia');
+        return 'Data não informada';
+      }
+      
+      // Tentar criar data
+      const dataObj = new Date(data);
+      console.log('📅 Objeto Date criado:', dataObj);
+      
+      // Verificar se a data é válida
+      if (isNaN(dataObj.getTime())) {
+        console.warn('❌ Data inválida recebida:', data);
+        return 'Data inválida';
+      }
+      
+      const formatted = dataObj.toLocaleDateString('pt-BR');
+      console.log('✅ Data formatada:', formatted);
+      return formatted;
+    } catch (error) {
+      console.error('❌ Erro ao formatar data:', data, error);
+      return 'Erro na data';
+    }
+  };
+
+  // Buscar movimentos do ano completo para análise mensal usando filtro de data de pagamento
+  useEffect(() => {
+    const buscarMovimentosAnoCompleto = async () => {
+      try {
+        const anoAtual = new Date().getFullYear();
+        const movimentosDoAno: any[] = [];
+        
+        // Buscar dados mês a mês usando o endpoint de data de pagamento
+        for (let mes = 0; mes < 12; mes++) {
+          const dataInicio = new Date(anoAtual, mes, 1);
+          const dataFim = new Date(anoAtual, mes + 1, 0); // Último dia do mês
+          
+          try {
+            const dadosMes = await financialService.getDashboardOperacional({
+              data_inicial: dataInicio.toISOString().split('T')[0],
+              data_final: dataFim.toISOString().split('T')[0],
+              tipo: 'todos',
+              fonte: 'todas'
+            });
+            
+            // Extrair movimentos reais das contas pagas
+            const totalizadores = dadosMes.totalizadores || {};
+            
+            // Converter totalizadores em movimentos para manter compatibilidade
+            if (totalizadores.entradas_realizadas?.valor > 0) {
+              movimentosDoAno.push({
+                data: dataFim.toISOString(),
+                tipo: 'entrada',
+                valor: totalizadores.entradas_realizadas.valor,
+                descricao: `Entradas realizadas - ${dataInicio.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`
+              });
+            }
+            
+            if (totalizadores.saidas_realizadas?.valor > 0) {
+              movimentosDoAno.push({
+                data: dataFim.toISOString(),
+                tipo: 'saida',
+                valor: totalizadores.saidas_realizadas.valor,
+                descricao: `Saídas realizadas - ${dataInicio.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`
+              });
+            }
+            
+          } catch (errorMes) {
+            console.warn(`Erro ao buscar dados do mês ${mes + 1}:`, errorMes);
+          }
+        }
+        
+        console.log('📊 Movimentos do ano (filtrados por data de pagamento):', movimentosDoAno.length);
+        setMovimentosAnoCompleto(movimentosDoAno);
+        
+      } catch (error) {
+        console.error('Erro ao buscar movimentos do ano:', error);
+        setMovimentosAnoCompleto([]);
+      }
+    };
+
+    buscarMovimentosAnoCompleto();
+  }, []);
 
   // Debug: verificar dados recebidos
   console.log('📊 OperationalDashboard recebeu dados:', {
@@ -50,6 +157,20 @@ export const OperationalDashboardComplete: React.FC<OperationalDashboardComplete
     resumo: data?.resumo,
     movimentos: data?.movimentos?.slice(0, 3) // Primeiros 3 para debug
   });
+
+  // Debug: verificar movimentos específicos
+  if (data?.movimentos && data.movimentos.length > 0) {
+    const entradasComPagamento = data.movimentos.filter(m => m.tipo === 'entrada' && m.realizado && m.data);
+    const saidasComPagamento = data.movimentos.filter(m => m.tipo === 'saida' && m.realizado && m.data);
+    
+    console.log('💰 Debug - Movimentos com data de pagamento:', {
+      totalMovimentos: data.movimentos.length,
+      entradasComPagamento: entradasComPagamento.length,
+      saidasComPagamento: saidasComPagamento.length,
+      exemploEntrada: entradasComPagamento[0],
+      exemploSaida: saidasComPagamento[0]
+    });
+  }
 
   if (loading) {
     return (
@@ -128,6 +249,49 @@ export const OperationalDashboardComplete: React.FC<OperationalDashboardComplete
 
   const CORES_CATEGORIAS = ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#6366F1'];
 
+  // Função para preparar dados mensais do ano (usando dados filtrados por data de pagamento)
+  const prepararDadosMensais = (): DadoMensal[] => {
+    const dadosMensais: DadoMensal[] = [];
+    const anoAtual = new Date().getFullYear();
+    const mesesNomes = [
+      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    for (let mes = 0; mes < 12; mes++) {
+      // Os dados já vêm separados por mês dos totalizadores
+      const entradasMes = (movimentosAnoCompleto || [])
+        .filter(m => {
+          const dataMovimento = new Date(m.data);
+          return dataMovimento.getFullYear() === anoAtual && 
+                 dataMovimento.getMonth() === mes && 
+                 m.tipo === 'entrada';
+        })
+        .reduce((sum, m) => sum + m.valor, 0);
+
+      const saidasMes = (movimentosAnoCompleto || [])
+        .filter(m => {
+          const dataMovimento = new Date(m.data);
+          return dataMovimento.getFullYear() === anoAtual && 
+                 dataMovimento.getMonth() === mes && 
+                 m.tipo === 'saida';
+        })
+        .reduce((sum, m) => sum + m.valor, 0);
+
+      dadosMensais.push({
+        mes: mesesNomes[mes],
+        entradas: entradasMes,
+        saidas: saidasMes,
+        diferenca: entradasMes - saidasMes
+      });
+    }
+
+    console.log('📊 Dados mensais preparados (com filtro de data de pagamento):', dadosMensais);
+    return dadosMensais;
+  };
+
+  const dadosMensais = prepararDadosMensais();
+
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header com filtros */}
@@ -180,6 +344,9 @@ export const OperationalDashboardComplete: React.FC<OperationalDashboardComplete
           cor="purple"
         />
       </div>
+
+      {/* Cards de Contas Vencidas - Componente Independente */}
+      <ContasVencidasComponent />
 
       {/* Relação Entradas x Saídas */}
       {(() => {
@@ -329,6 +496,7 @@ export const OperationalDashboardComplete: React.FC<OperationalDashboardComplete
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList>
           <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
+          <TabsTrigger value="analise-mensal">Análise Mensal</TabsTrigger>
           <TabsTrigger value="movimentacoes">Movimentações</TabsTrigger>
           <TabsTrigger value="categorias">Categorias</TabsTrigger>
           <TabsTrigger value="previsoes">Previsões</TabsTrigger>
@@ -427,6 +595,178 @@ export const OperationalDashboardComplete: React.FC<OperationalDashboardComplete
           </div>
         </TabsContent>
 
+        <TabsContent value="analise-mensal">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Entradas e Saídas por Mês - {new Date().getFullYear()}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[500px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={dadosMensais} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="mes" />
+                      <YAxis tickFormatter={(value) => 
+                        new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                          notation: 'compact'
+                        }).format(Number(value))
+                      } />
+                      <Tooltip 
+                        formatter={(value, name) => [
+                          new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL'
+                          }).format(Number(value)),
+                          name === 'entradas' ? 'Entradas' : 'Saídas'
+                        ]}
+                        labelFormatter={(label) => `Mês: ${label}`}
+                      />
+                      <Legend />
+                      <Bar dataKey="entradas" name="Entradas" fill="#10B981" />
+                      <Bar dataKey="saidas" name="Saídas" fill="#EF4444" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Resumo Mensal em Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Total de Entradas no Ano</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    }).format(dadosMensais.reduce((sum, item) => sum + item.entradas, 0))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Total de Saídas no Ano</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    }).format(dadosMensais.reduce((sum, item) => sum + item.saidas, 0))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Diferença Total do Ano</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${
+                    dadosMensais.reduce((sum, item) => sum + item.diferenca, 0) >= 0 
+                      ? 'text-green-600' 
+                      : 'text-red-600'
+                  }`}>
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    }).format(dadosMensais.reduce((sum, item) => sum + item.diferenca, 0))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Melhor Mês</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-bold text-blue-600">
+                    {dadosMensais.reduce((melhor, item) => 
+                      item.diferenca > melhor.diferenca ? item : melhor, 
+                      { mes: '-', diferenca: -Infinity }
+                    ).mes}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    }).format(
+                      dadosMensais.reduce((melhor, item) => 
+                        item.diferenca > melhor.diferenca ? item : melhor, 
+                        { mes: '-', diferenca: -Infinity }
+                      ).diferenca
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tabela Detalhada por Mês */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Detalhamento Mensal</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="px-4 py-2 text-left">Mês</th>
+                        <th className="px-4 py-2 text-right">Entradas</th>
+                        <th className="px-4 py-2 text-right">Saídas</th>
+                        <th className="px-4 py-2 text-right">Diferença</th>
+                        <th className="px-4 py-2 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dadosMensais.map((item, index) => (
+                        <tr key={index} className="border-b hover:bg-gray-50">
+                          <td className="px-4 py-2 font-medium">{item.mes}</td>
+                          <td className="px-4 py-2 text-right text-green-600">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            }).format(item.entradas)}
+                          </td>
+                          <td className="px-4 py-2 text-right text-red-600">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            }).format(item.saidas)}
+                          </td>
+                          <td className={`px-4 py-2 text-right font-medium ${
+                            item.diferenca >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            }).format(item.diferenca)}
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              item.diferenca >= 0 
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {item.diferenca >= 0 ? 'Positivo' : 'Negativo'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
         <TabsContent value="movimentacoes">
           <Card>
             <CardHeader>
@@ -460,67 +800,153 @@ export const OperationalDashboardComplete: React.FC<OperationalDashboardComplete
                   </ResponsiveContainer>
                 </div>
 
-                {/* Tabela de Movimentações */}
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="px-4 py-2 text-left">Data</th>
-                        <th className="px-4 py-2 text-left">Descrição</th>
-                        <th className="px-4 py-2 text-left">Tipo</th>
-                        <th className="px-4 py-2 text-right">Valor</th>
-                        <th className="px-4 py-2 text-center">Status</th>
-                        <th className="px-4 py-2 text-center">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(movimentos || []).map((movimento) => (
-                        <tr key={movimento.id} className="border-b">
-                          <td className="px-4 py-2">
-                            {new Date(movimento.data).toLocaleDateString('pt-BR')}
-                          </td>
-                          <td className="px-4 py-2">{movimento.descricao}</td>
-                          <td className="px-4 py-2">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              movimento.tipo === 'entrada' 
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {movimento.tipo === 'entrada' ? 'Entrada' : 'Saída'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 text-right">
-                            {new Intl.NumberFormat('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL'
-                            }).format(movimento.valor)}
-                          </td>
-                          <td className="px-4 py-2 text-center">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              movimento.realizado
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {movimento.realizado ? 'Realizado' : 'Pendente'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-2 text-center">
-                            {!movimento.realizado && onMovimentoStatusChange && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => onMovimentoStatusChange(movimento.id)}
-                                className="text-blue-600 hover:text-blue-800"
-                              >
-                                Realizar
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                {/* Tabela de Entradas */}
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-green-600">📈 Entradas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="px-4 py-2 text-left">ID</th>
+                            <th className="px-4 py-2 text-left">Data Vencimento</th>
+                            <th className="px-4 py-2 text-left">Data Pagamento</th>
+                            <th className="px-4 py-2 text-left">Descrição</th>
+                            <th className="px-4 py-2 text-right">Valor</th>
+                            <th className="px-4 py-2 text-center">Status</th>
+                            <th className="px-4 py-2 text-center">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(movimentos || [])
+                            .filter(movimento => movimento.tipo === 'entrada')
+                            .map((movimento) => (
+                            <tr key={movimento.id} className="border-b hover:bg-gray-50">
+                              <td className="px-4 py-2 font-mono text-sm text-gray-600">
+                                #{movimento.id}
+                              </td>
+                              <td className="px-4 py-2">
+                                {movimento.data_vencimento ? 
+                                  formatarDataSegura(movimento.data_vencimento) :
+                                  formatarDataSegura(movimento.data)
+                                }
+                              </td>
+                              <td className="px-4 py-2">
+                                <span className="text-green-600 font-medium">
+                                  {movimento.realizado ? formatarDataSegura(movimento.data) : 'Data não informada'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-2">{movimento.descricao}</td>
+                              <td className="px-4 py-2 text-right font-medium text-green-600">
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL'
+                                }).format(movimento.valor)}
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Pago
+                                </span>
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                {/* Ações removidas pois só mostramos contas pagas */}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      {(movimentos || []).filter(m => m.tipo === 'entrada').length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          Nenhuma entrada encontrada no período
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Tabela de Saídas */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-red-600">📉 Saídas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="px-4 py-2 text-left">ID</th>
+                            <th className="px-4 py-2 text-left">Data Vencimento</th>
+                            <th className="px-4 py-2 text-left">Data Pagamento</th>
+                            <th className="px-4 py-2 text-left">Descrição</th>
+                            <th className="px-4 py-2 text-right">Valor</th>
+                            <th className="px-4 py-2 text-center">Status</th>
+                            <th className="px-4 py-2 text-center">Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(movimentos || [])
+                            .filter(movimento => movimento.tipo === 'saida')
+                            .map((movimento) => {
+                              // Debug específico para conta #54669
+                              if (movimento.id === 54669) {
+                                console.log('🔍 Renderizando conta #54669:', {
+                                  id: movimento.id,
+                                  realizado: movimento.realizado,
+                                  data: movimento.data,
+                                  data_pagamento: movimento.data_pagamento,
+                                  data_vencimento: movimento.data_vencimento,
+                                  descricao: movimento.descricao,
+                                  valor: movimento.valor,
+                                  objeto_completo: movimento
+                                });
+                              }
+                              
+                              return (
+                                <tr key={movimento.id} className="border-b hover:bg-gray-50">
+                                  <td className="px-4 py-2 font-mono text-sm text-gray-600">
+                                    #{movimento.id}
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    {movimento.data_vencimento ? 
+                                      formatarDataSegura(movimento.data_vencimento) :
+                                      formatarDataSegura(movimento.data)
+                                    }
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    <span className="text-green-600 font-medium">
+                                      {movimento.realizado ? formatarDataSegura(movimento.data) : 'Data não informada'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-2">{movimento.descricao}</td>
+                                  <td className="px-4 py-2 text-right font-medium text-red-600">
+                                    {new Intl.NumberFormat('pt-BR', {
+                                      style: 'currency',
+                                      currency: 'BRL'
+                                    }).format(movimento.valor)}
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                      Pago
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-2 text-center">
+                                    {/* Ações removidas pois só mostramos contas pagas */}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                        </tbody>
+                      </table>
+                      {(movimentos || []).filter(m => m.tipo === 'saida').length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          Nenhuma saída encontrada no período
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>

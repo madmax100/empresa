@@ -4,14 +4,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {
     AlertCircle,
     ArrowUpCircle,
     ArrowDownCircle,
@@ -20,10 +12,9 @@ import {
 } from "lucide-react";
 import { financialService } from '@/services/financialService';
 import {
-    DashboardOperacional,
-    Movimento,
     FluxoCaixaFiltros
 } from '@/types/financeiro';
+import { DashboardOperacional } from '@/types/dashboardNovo';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { DateRangePicker } from '../common/DataRangerPicker';
@@ -59,121 +50,47 @@ const MetricCard: React.FC<{
     </Card>
 );
 
-const MovementTable: React.FC<{
-    movements: Movimento[];
-    onStatusChange: (id: number, status: string) => Promise<void>;
-}> = ({ movements, onStatusChange }) => (
-    <Table>
-        <TableHeader>
-            <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead></TableHead>
-            </TableRow>
-        </TableHeader>
-        <TableBody>
-            {movements.map((movement) => (
-                <TableRow key={movement.id}>
-                    <TableCell>{new Date(movement.data).toLocaleDateString()}</TableCell>
-                    <TableCell>{movement.descricao}</TableCell>
-                    <TableCell>{movement.categoria}</TableCell>
-                    <TableCell className={`text-right font-medium ${movement.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                        {movement.tipo === 'saida' ? '- ' : ''}
-                        {new Intl.NumberFormat('pt-BR', {
-                            style: 'currency',
-                            currency: 'BRL'
-                        }).format(movement.valor)}
-                    </TableCell>
-                    <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${movement.status === 'realizado'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                            }`}>
-                            {movement.status}
-                        </span>
-                    </TableCell>
-                    <TableCell>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onStatusChange(movement.id,
-                                movement.status === 'realizado' ? 'previsto' : 'realizado'
-                            )}
-                        >
-                            {movement.status === 'realizado' ? 'Estornar' : 'Realizar'}
-                        </Button>
-                    </TableCell>
-                </TableRow>
-            ))}
-        </TableBody>
-    </Table>
-);
-
 const FinancialDashboard: React.FC = () => {
     // Estados
     const [data, setData] = useState<DashboardOperacional | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [filters, setFilters] = useState<FluxoCaixaFiltros>({
-        dataInicial: new Date().toISOString().split('T')[0],
-        dataFinal: new Date().toISOString().split('T')[0],
+        data_inicial: new Date().toISOString().split('T')[0],
+        data_final: new Date().toISOString().split('T')[0],
         tipo: 'todos',
         status: 'todos',
         fonte: 'todos'
     });
 
-    // Carregar dados
-    const loadData = async () => {
-        try {
-            setLoading(true);
-            const dashboardData = await financialService.getDashboardOperacional(filters);
-            setData(dashboardData);
-            setError(null);
-        } catch (err) {
-            console.error('Erro ao carregar dashboard:', err);
-            setError('Falha ao carregar dados financeiros');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     // Carregar dados quando os filtros mudarem
     useEffect(() => {
-        loadData();
-    }, [filters]);
-
-    // Handler para mudança de status
-    const handleStatusChange = async (id: number, newStatus: string) => {
-        try {
-            setLoading(true);
-            if (newStatus === 'realizado') {
-                await financialService.realizarLancamento(id);
-            } else {
-                await financialService.estornarLancamento(id, 'Estorno operacional');
+        const loadDataAsync = async () => {
+            try {
+                setLoading(true);
+                const dashboardData = await financialService.getDashboardOperacional({
+                    data_inicial: filters.data_inicial,
+                    data_final: filters.data_final,
+                    tipo: 'todos',
+                    fonte: 'todas'
+                });
+                setData(dashboardData);
+                setError(null);
+            } catch (err) {
+                console.error('Erro ao carregar dashboard:', err);
+                setError('Falha ao carregar dados financeiros');
+            } finally {
+                setLoading(false);
             }
-            await loadData();
-        } catch (err) {
-            console.error('Erro ao atualizar status:', err);
-            setError('Falha ao atualizar status do lançamento');
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
+        
+        loadDataAsync();
+    }, [filters]);
 
     // Handler para exportação
     const handleExport = async () => {
         try {
-            const blob = await financialService.getRelatorioFluxoCaixa(
-                {
-                    inicio: filters.dataInicial,
-                    fim: filters.dataFinal
-                },
-                'excel'
-            );
+            const blob = await financialService.getRelatorioFluxoCaixa();
             financialService.exportarRelatorio(blob, 'fluxo-caixa.xlsx');
         } catch (err) {
             console.error('Erro ao exportar:', err);
@@ -204,15 +121,15 @@ const FinancialDashboard: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <DateRangePicker
                             date={{
-                                from: new Date(filters.dataInicial),
-                                to: new Date(filters.dataFinal)
+                                from: new Date(filters.data_inicial),
+                                to: new Date(filters.data_final)
                             }}
                             onDateChange={(date) => {
                                 if (date && date.from && date.to) {
                                     setFilters(prev => ({
                                         ...prev,
-                                        dataInicial: date.from ? date.from.toISOString().split('T')[0] : filters.dataInicial,
-                                        dataFinal: date.to ? date.to.toISOString().split('T')[0] : filters.dataFinal
+                                        data_inicial: date.from ? date.from.toISOString().split('T')[0] : filters.data_inicial,
+                                        data_final: date.to ? date.to.toISOString().split('T')[0] : filters.data_final
                                     }));
                                 }
                             }}
@@ -261,14 +178,14 @@ const FinancialDashboard: React.FC = () => {
                             title="Entradas Realizadas"
                             value={data.totalizadores.entradas_realizadas.valor}
                             icon={<ArrowUpCircle className="h-4 w-4 text-green-500" />}
-                            change={data.totalizadores.entradas_realizadas.percentual}
+                            change={data.totalizadores.entradas_realizadas.percentual || undefined}
                             color="text-green-600"
                         />
                         <MetricCard
                             title="Saídas Realizadas"
                             value={data.totalizadores.saidas_realizadas.valor}
                             icon={<ArrowDownCircle className="h-4 w-4 text-red-500" />}
-                            change={data.totalizadores.saidas_realizadas.percentual}
+                            change={data.totalizadores.saidas_realizadas.percentual || undefined}
                             color="text-red-600"
                         />
                         <MetricCard
@@ -292,10 +209,10 @@ const FinancialDashboard: React.FC = () => {
                             <CardTitle>Movimentações</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <MovementTable
+                            {/* <MovementTable
                                 movements={data.movimentos}
                                 onStatusChange={handleStatusChange}
-                            />
+                            /> */}
                         </CardContent>
                     </Card>
                 </>

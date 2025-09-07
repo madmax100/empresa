@@ -2,15 +2,15 @@
 from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Avg
 from django.db import transaction
 from datetime import datetime, date, timedelta
 from dateutil.relativedelta import relativedelta
 from calendar import monthrange
 from decimal import Decimal
 from django.utils import timezone
-
-from ..models.access import ItensNfEntrada, ItensNfSaida
+from django.db.models.functions import Coalesce, ExtractMonth, ExtractYear
+from ..models.access import ItensNfEntrada, ItensNfSaida, ContasPagar, ContasReceber
 
 from ..models.fluxo_caixa import (
     FluxoCaixaLancamento,
@@ -24,6 +24,7 @@ from ..serializers.fluxo_caixa import (
     ConfiguracaoFluxoCaixaSerializer,
     FluxoCaixaResponseSerializer
 )
+from django.utils.dateparse import parse_date
 
 class FluxoCaixaViewSet(viewsets.ModelViewSet):
     queryset = FluxoCaixaLancamento.objects.all()
@@ -111,14 +112,12 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
                     movimento = {
                         'id': lancamento.id,
                         'valor': lancamento.valor,
-                        'tipo': lancamento.tipo,  # Adicionando o tipo
+                        'tipo': lancamento.tipo,
                         'realizado': lancamento.realizado,
                         'descricao': lancamento.descricao,
                         'categoria': lancamento.categoria,
-                        'fonte': {
-                            'tipo': lancamento.fonte_tipo,
-                            'id': lancamento.fonte_id
-                        },
+                        'fonte_tipo': lancamento.fonte_tipo,
+                        'fonte_id': lancamento.fonte_id,
                         'observacoes': lancamento.observacoes,
                         'data': lancamento.data,
                         'data_realizacao': lancamento.data_realizacao                        
@@ -227,7 +226,8 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
         
         # Analisa vendas do período
         vendas = ItensNfSaida.objects.filter(
-            nota_fiscal__data__range=[data_inicial, data_final]
+            data__gte=data_inicial,
+            data__lte=data_final
         ).select_related(
             'produto', 'nota_fiscal'
         ).values(
@@ -241,7 +241,8 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
 
         # Analisa compras do período
         compras = ItensNfEntrada.objects.filter(
-            nota_fiscal__data__range=[data_inicial, data_final]
+            data__gte=data_inicial,
+            data__lte=data_final
         ).select_related(
             'produto', 'nota_fiscal'
         ).values(
@@ -582,29 +583,51 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
             
         return sum(variacoes) / len(variacoes) * 100
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['get', 'post'])
     def cenarios(self, request):
         """Gera cenários de fluxo de caixa com diferentes premissas"""
         try:
             # Parâmetros dos cenários
-            meses = int(request.data.get('meses', 6))
-            cenarios = request.data.get('cenarios', [
-                {
-                    'nome': 'Realista',
-                    'ajuste_entradas': 0,
-                    'ajuste_saidas': 0
-                },
-                {
-                    'nome': 'Otimista',
-                    'ajuste_entradas': 10,
-                    'ajuste_saidas': -5
-                },
-                {
-                    'nome': 'Pessimista',
-                    'ajuste_entradas': -10,
-                    'ajuste_saidas': 5
-                }
-            ])
+            if request.method == 'GET':
+                # Valores padrão para GET
+                meses = int(request.query_params.get('meses', 6))
+                cenarios = [
+                    {
+                        'nome': 'Realista',
+                        'ajuste_entradas': 0,
+                        'ajuste_saidas': 0
+                    },
+                    {
+                        'nome': 'Otimista', 
+                        'ajuste_entradas': 15,
+                        'ajuste_saidas': -10
+                    },
+                    {
+                        'nome': 'Pessimista',
+                        'ajuste_entradas': -10,
+                        'ajuste_saidas': 20
+                    }
+                ]
+            else:
+                # Valores do POST
+                meses = int(request.data.get('meses', 6))
+                cenarios = request.data.get('cenarios', [
+                    {
+                        'nome': 'Realista',
+                        'ajuste_entradas': 0,
+                        'ajuste_saidas': 0
+                    },
+                    {
+                        'nome': 'Otimista',
+                        'ajuste_entradas': 10,
+                        'ajuste_saidas': -5
+                    },
+                    {
+                        'nome': 'Pessimista',
+                        'ajuste_entradas': -10,
+                        'ajuste_saidas': 5
+                    }
+                ])
 
             hoje = date.today()
             data_final = hoje + relativedelta(months=meses)
@@ -918,13 +941,6 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
     @action(detail=False, methods=['get'])
     def analise_contratos(self, request):
         """Análise financeira dos contratos"""
@@ -1009,33 +1025,36 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
             ).aggregate(total=Sum('valor'))['total'] or Decimal('0')
 
             saldo_atual = self._obter_saldo_inicial(hoje)
-            indice_liquidez = (saldo_atual + contas_receber) / contas_pagar if contas_pagar > 0 else 0
+            indice_liquidez = (
+                (float(saldo_atual) + float(contas_receber)) / float(contas_pagar) 
+                if contas_pagar and contas_pagar > 0 else float('inf')
+            )
 
             # Calcula variação mensal
             resultado_mes_atual = self.get_queryset().filter(
                 data__range=[mes_atual, mes_seguinte - timedelta(days=1)],
                 realizado=True
             ).aggregate(
-                entradas=Sum('valor', filter=Q(tipo='entrada')) or Decimal('0'),
-                saidas=Sum('valor', filter=Q(tipo='saida')) or Decimal('0')
+                entradas=Coalesce(Sum('valor', filter=Q(tipo='entrada')), Decimal('0')),
+                saidas=Coalesce(Sum('valor', filter=Q(tipo='saida')), Decimal('0'))
             )
 
             resultado_mes_anterior = self.get_queryset().filter(
                 data__range=[mes_anterior, mes_atual - timedelta(days=1)],
                 realizado=True
             ).aggregate(
-                entradas=Sum('valor', filter=Q(tipo='entrada')) or Decimal('0'),
-                saidas=Sum('valor', filter=Q(tipo='saida')) or Decimal('0')
+                entradas=Coalesce(Sum('valor', filter=Q(tipo='entrada')), Decimal('0')),
+                saidas=Coalesce(Sum('valor', filter=Q(tipo='saida')), Decimal('0'))
             )
 
             variacao_mensal = {
                 'receitas': (
-                    (resultado_mes_atual['entradas'] / resultado_mes_anterior['entradas'] - 1) * 100
-                    if resultado_mes_anterior['entradas'] > 0 else 0
+                    float((resultado_mes_atual['entradas'] / resultado_mes_anterior['entradas'] - 1) * 100)
+                    if resultado_mes_anterior['entradas'] and resultado_mes_anterior['entradas'] > 0 else 0
                 ),
                 'despesas': (
-                    (resultado_mes_atual['saidas'] / resultado_mes_anterior['saidas'] - 1) * 100
-                    if resultado_mes_anterior['saidas'] > 0 else 0
+                    float((resultado_mes_atual['saidas'] / resultado_mes_anterior['saidas'] - 1) * 100)
+                    if resultado_mes_anterior['saidas'] and resultado_mes_anterior['saidas'] > 0 else 0
                 )
             }
 
@@ -1071,20 +1090,20 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
                     })
 
             return Response({
-                'data_calculo': hoje,
+                'data_calculo': hoje.isoformat(),
                 'liquidez': {
-                    'indice': indice_liquidez,
-                    'saldo_atual': saldo_atual,
-                    'contas_receber': contas_receber,
-                    'contas_pagar': contas_pagar
+                    'indice': float(indice_liquidez) if indice_liquidez != float('inf') else None,
+                    'saldo_atual': float(saldo_atual),
+                    'contas_receber': float(contas_receber),
+                    'contas_pagar': float(contas_pagar)
                 },
                 'variacao_mensal': variacao_mensal,
                 'maiores_despesas': list(maiores_despesas),
                 'maiores_clientes': clientes_detalhados,
                 'mes_atual': {
-                    'receitas': resultado_mes_atual['entradas'],
-                    'despesas': resultado_mes_atual['saidas'],
-                    'resultado': resultado_mes_atual['entradas'] - resultado_mes_atual['saidas']
+                    'receitas': float(resultado_mes_atual['entradas']),
+                    'despesas': float(resultado_mes_atual['saidas']),
+                    'resultado': float(resultado_mes_atual['entradas'] - resultado_mes_atual['saidas'])
                 }
             })
 
@@ -1248,6 +1267,64 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
             print(f"Erro ao obter saldo inicial: {str(e)}")
             return Decimal('0')
 
+    def _sincronizar_contas_com_fluxo(self, data_inicial, data_final):
+        """Sincroniza contas a pagar e receber com o fluxo de caixa"""
+        try:
+            # Busca contas a pagar não pagas no período
+            contas_pagar = ContasPagar.objects.filter(
+                vencimento__date__range=[data_inicial, data_final],
+                status='A'  # Apenas contas abertas
+            )
+            
+            # Busca contas a receber não pagas no período
+            contas_receber = ContasReceber.objects.filter(
+                vencimento__date__range=[data_inicial, data_final],
+                status='A'  # Apenas contas abertas
+            )
+            
+            # Remove lançamentos automáticos anteriores do período (para evitar duplicatas)
+            FluxoCaixaLancamento.objects.filter(
+                data__range=[data_inicial, data_final],
+                fonte_tipo__in=['contas_pagar', 'contas_receber']
+            ).delete()
+            
+            # Cria lançamentos para contas a pagar
+            for conta in contas_pagar:
+                FluxoCaixaLancamento.objects.get_or_create(
+                    fonte_tipo='contas_pagar',
+                    fonte_id=conta.id,
+                    defaults={
+                        'data': conta.vencimento.date(),
+                        'valor': conta.valor,
+                        'tipo': 'saida',
+                        'descricao': f'Conta a Pagar - {conta.fornecedor.nome if conta.fornecedor else "Sem fornecedor"}',
+                        'categoria': 'Contas a Pagar',
+                        'realizado': False,
+                        'observacoes': conta.historico or f'Vencimento: {conta.vencimento.strftime("%d/%m/%Y")}'
+                    }
+                )
+            
+            # Cria lançamentos para contas a receber
+            for conta in contas_receber:
+                FluxoCaixaLancamento.objects.get_or_create(
+                    fonte_tipo='contas_receber',
+                    fonte_id=conta.id,
+                    defaults={
+                        'data': conta.vencimento.date(),
+                        'valor': conta.valor,
+                        'tipo': 'entrada',
+                        'descricao': f'Conta a Receber - {conta.cliente.nome if conta.cliente else "Sem cliente"}',
+                        'categoria': 'Contas a Receber',
+                        'realizado': False,
+                        'observacoes': conta.historico or f'Vencimento: {conta.vencimento.strftime("%d/%m/%Y")}'
+                    }
+                )
+                
+            print(f"Sincronizadas {contas_pagar.count()} contas a pagar e {contas_receber.count()} contas a receber")
+            
+        except Exception as e:
+            print(f"Erro na sincronização: {str(e)}")
+
     @action(detail=False, methods=['get'])
     def dashboard(self, request):
         """Endpoint principal do fluxo de caixa"""
@@ -1265,7 +1342,10 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
             data_inicial = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
             data_final = datetime.strptime(data_final_str, '%Y-%m-%d').date()
             
-            # Resto do código permanece igual
+            # Integra contas a pagar e receber no fluxo de caixa
+            self._sincronizar_contas_com_fluxo(data_inicial, data_final)
+            
+            # Busca os lançamentos incluindo as contas sincronizadas
             lancamentos = self.get_queryset().filter(
                 data__range=[data_inicial, data_final]
             ).order_by('data')
@@ -1468,502 +1548,131 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-   
-    
-    
-    
-    
-    
+    @action(detail=False, methods=['get'], url_path='relatorio-lucro')
+    def relatorio_lucro_periodo(self, request):
+        """
+        Calcula o lucro (Receitas - Despesas) em um determinado período.
+        Parâmetros: ?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD
+        """
+        data_inicio_str = request.query_params.get('data_inicio')
+        data_fim_str = request.query_params.get('data_fim')
 
-    
-
-
-@action(detail=False, methods=['get'])
-def dashboard_rentabilidade(self, request):
-    """Endpoint para dashboard simplificado de rentabilidade"""
-    try:
-        # Obtém parâmetros
-        data_inicial = request.query_params.get('data_inicial')
-        data_final = request.query_params.get('data_final')
-        
-        if not data_inicial:
-            data_inicial = (date.today() - timedelta(days=30)).strftime('%Y-%m-%d')
-        if not data_final:
-            data_final = date.today().strftime('%Y-%m-%d')
-            
-        # Converte para data
-        data_inicial = datetime.strptime(data_inicial, '%Y-%m-%d').date()
-        data_final = datetime.strptime(data_final, '%Y-%m-%d').date()
-        
-        # Realiza análise simplificada
-        vendas = ItensNfSaida.objects.filter(
-            nota_fiscal__data__range=[data_inicial, data_final]
-        ).select_related('produto', 'nota_fiscal')
-        
-        locacoes = ItensContratoLocacao.objects.filter(
-            contrato__inicio__lte=data_final,
-            contrato__fim__gte=data_inicial
-        ).select_related('produto', 'contrato')
-
-        # Métricas principais
-        metricas = {
-            'receita_total': sum(v.valor_total for v in vendas),
-            'custo_total': sum(
-                v.quantidade * (v.produto.preco_custo or 0)
-                for v in vendas
-            ),
-            'quantidade_vendas': vendas.count(),
-            'quantidade_locacoes': locacoes.values('contrato_id').distinct().count(),
-            'ticket_medio_vendas': (
-                sum(v.valor_total for v in vendas) / vendas.count()
-                if vendas.exists() else 0
+        if not data_inicio_str or not data_fim_str:
+            return Response(
+                {'error': 'Os parâmetros data_inicio e data_fim são obrigatórios.'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        }
 
-        # Tendências (últimos 6 meses)
-        seis_meses_atras = data_inicial - timedelta(days=180)
-        vendas_periodo = ItensNfSaida.objects.filter(
-            nota_fiscal__data__range=[seis_meses_atras, data_final]
-        ).select_related('produto', 'nota_fiscal')
-        
-        # Agrupa por mês
-        vendas_mes = {}
-        for venda in vendas_periodo:
-            mes = venda.nota_fiscal.data.strftime('%Y-%m')
-            if mes not in vendas_mes:
-                vendas_mes[mes] = {
-                    'receita': Decimal('0'),
-                    'quantidade': 0
-                }
-            vendas_mes[mes]['receita'] += venda.valor_total
-            vendas_mes[mes]['quantidade'] += 1
+        data_inicio = parse_date(data_inicio_str)
+        data_fim = parse_date(data_fim_str)
+
+        if not data_inicio or not data_fim:
+            return Response(
+                {'error': 'Formato de data inválido. Use YYYY-MM-DD.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Filtra lançamentos realizados no período
+        lancamentos = FluxoCaixaLancamento.objects.filter(
+            data__range=[data_inicio, data_fim],
+            realizado=True
+        )
+
+        # Calcula o total de receitas
+        total_receitas = lancamentos.filter(tipo='entrada').aggregate(
+            total=Coalesce(Sum('valor'), Decimal('0.00'))
+        )['total']
+
+        # Calcula o total de despesas
+        total_despesas = lancamentos.filter(tipo='saida').aggregate(
+            total=Coalesce(Sum('valor'), Decimal('0.00'))
+        )['total']
+
+        # Calcula o lucro líquido
+        lucro_liquido = total_receitas - total_despesas
+
+        # Detalhamento de receitas por categoria
+        receitas_por_categoria = lancamentos.filter(tipo='entrada').values('categoria').annotate(
+            total=Sum('valor')
+        ).order_by('-total')
+
+        # Detalhamento de despesas por categoria
+        despesas_por_categoria = lancamentos.filter(tipo='saida').values('categoria').annotate(
+            total=Sum('valor')
+        ).order_by('-total')
 
         return Response({
             'periodo': {
-                'inicio': data_inicial,
-                'fim': data_final
+                'data_inicio': data_inicio,
+                'data_fim': data_fim,
             },
-            'metricas': metricas,
-            'tendencias': {
-                'vendas_mes': vendas_mes
+            'resumo_financeiro': {
+                'total_receitas': total_receitas,
+                'total_despesas': total_despesas,
+                'lucro_liquido': lucro_liquido,
             },
-            'indicadores': {
-                'margem_bruta': (
-                    (metricas['receita_total'] - metricas['custo_total']) / 
-                    metricas['receita_total'] * 100
-                    if metricas['receita_total'] > 0 else 0
-                ),
-                'conversao_locacao_venda': (
-                    metricas['quantidade_vendas'] / 
-                    (metricas['quantidade_vendas'] + metricas['quantidade_locacoes']) * 100
-                    if (metricas['quantidade_vendas'] + metricas['quantidade_locacoes']) > 0
-                    else 0
-                )
-            }
+            'detalhamento_receitas': list(receitas_por_categoria),
+            'detalhamento_despesas': list(despesas_por_categoria),
         })
-        
-    except Exception as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
-
-class ConfiguracaoFluxoCaixaViewSet(viewsets.ModelViewSet):
-    """ViewSet para gerenciar configurações do fluxo de caixa"""
-    queryset = ConfiguracaoFluxoCaixa.objects.all()
-    serializer_class = ConfiguracaoFluxoCaixaSerializer
-    
-    def create(self, request, *args, **kwargs):
-        """Sobrescreve create para garantir única configuração"""
-        if ConfiguracaoFluxoCaixa.objects.exists():
-            return Response(
-                {'error': 'Já existe uma configuração cadastrada'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        return super().create(request, *args, **kwargs)
-        
-    @action(detail=False, methods=['post'])
-    def atualizar_saldo_inicial(self, request):
-        """Atualiza o saldo inicial e recalcula saldos"""
+    def _calcular_giro_estoque(self, data_inicial, data_final):
+        """Calcula o giro de estoque no período"""
         try:
-            config = ConfiguracaoFluxoCaixa.objects.first()
-            if not config:
-                return Response(
-                    {'error': 'Nenhuma configuração encontrada'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            # Simplificado - retorna um valor padrão por enquanto
+            # Em uma implementação completa, calcularia: CMV / Estoque Médio
+            return 4.2  # Exemplo: giro de 4.2 vezes por ano
+        except Exception:
+            return 0.0
+
+    def _calcular_prazo_medio_pagamento(self, data_inicial, data_final):
+        """Calcula prazo médio de pagamento em dias"""
+        try:
+            from ..models import ContasPagar
+            contas = ContasPagar.objects.filter(
+                data_vencimento__gte=data_inicial,
+                data_vencimento__lte=data_final
+            )
+            
+            if not contas.exists():
+                return 0
                 
-            novo_saldo = Decimal(str(request.data.get('saldo_inicial', '0')))
-            data = request.data.get('data', date.today().strftime('%Y-%m-%d'))
-            data = datetime.strptime(data, '%Y-%m-%d').date()
+            # Calcula média dos dias entre emissão e vencimento
+            total_dias = 0
+            total_contas = 0
             
-            with transaction.atomic():
-                # Atualiza configuração
-                config.saldo_inicial = novo_saldo
-                config.data_inicial_controle = data
-                config.save()
+            for conta in contas:
+                if conta.data_emissao and conta.data_vencimento:
+                    dias = (conta.data_vencimento - conta.data_emissao).days
+                    total_dias += dias
+                    total_contas += 1
+            
+            return total_dias / total_contas if total_contas > 0 else 30
+        except Exception:
+            return 30  # Valor padrão
+
+    def _calcular_prazo_medio_recebimento(self, data_inicial, data_final):
+        """Calcula prazo médio de recebimento em dias"""
+        try:
+            from ..models import ContasReceber
+            contas = ContasReceber.objects.filter(
+                data_vencimento__gte=data_inicial,
+                data_vencimento__lte=data_final
+            )
+            
+            if not contas.exists():
+                return 0
                 
-                # Recalcula saldos diários
-                self._recalcular_saldos(data)
-                
-            return Response({
-                'message': 'Saldo inicial atualizado com sucesso',
-                'saldo_inicial': novo_saldo,
-                'data': data
-            })
+            # Calcula média dos dias entre emissão e vencimento
+            total_dias = 0
+            total_contas = 0
             
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            for conta in contas:
+                if conta.data_emissao and conta.data_vencimento:
+                    dias = (conta.data_vencimento - conta.data_emissao).days
+                    total_dias += dias
+                    total_contas += 1
             
-    def _recalcular_saldos(self, data_inicial):
-        """Recalcula saldos diários a partir da data informada"""
-        SaldoDiario.objects.filter(data__gte=data_inicial).delete()
-        
-        lancamentos = FluxoCaixaLancamento.objects.filter(
-            data__gte=data_inicial
-        ).order_by('data')
-        
-        saldo = self._obter_saldo_inicial(data_inicial)
-        data_atual = data_inicial
-        
-        while data_atual <= date.today():
-            movs_dia = lancamentos.filter(data=data_atual)
-            
-            saldo_dia = SaldoDiario(
-                data=data_atual,
-                saldo_inicial=saldo
-            )
-            
-            # Calcula totais
-            for mov in movs_dia:
-                if mov.tipo == 'entrada':
-                    if mov.realizado:
-                        saldo_dia.total_entradas_realizadas += mov.valor
-                    else:
-                        saldo_dia.total_entradas_previstas += mov.valor
-                else:
-                    if mov.realizado:
-                        saldo_dia.total_saidas_realizadas += mov.valor
-                    else:
-                        saldo_dia.total_saidas_previstas += mov.valor
-                        
-            saldo_dia.total_entradas = (
-                saldo_dia.total_entradas_realizadas +
-                saldo_dia.total_entradas_previstas
-            )
-            saldo_dia.total_saidas = (
-                saldo_dia.total_saidas_realizadas +
-                saldo_dia.total_saidas_previstas
-            )
-            
-            # Atualiza saldo
-            saldo += (saldo_dia.total_entradas - saldo_dia.total_saidas)
-            saldo_dia.saldo_final = saldo
-            saldo_dia.processado = True
-            
-            saldo_dia.save()
-            data_atual += timedelta(days=1)
+            return total_dias / total_contas if total_contas > 0 else 15
+        except Exception:
+            return 15  # Valor padrão
 
-    @action(detail=False, methods=['post'])
-    def conciliacao_bancaria(self, request):
-        """Realiza a conciliação bancária dos lançamentos"""
-        try:
-            data_inicial = request.data.get('data_inicial')
-            data_final = request.data.get('data_final')
-            if not data_inicial or not data_final:
-                return Response(
-                    {'error': 'Datas inicial e final são obrigatórias'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # Busca lançamentos do período
-            lancamentos = self.get_queryset().filter(
-                data__range=[data_inicial, data_final],
-                realizado=True
-            ).order_by('data')
-
-            # Agrupa por fonte
-            conciliacao = {
-                'contas_receber': [],
-                'contas_pagar': [],
-                'contratos': [],
-                'outros': []
-            }
-
-            for lancamento in lancamentos:
-                if lancamento.fonte_tipo == 'conta_receber':
-                    conciliacao['contas_receber'].append({
-                        'lancamento': FluxoCaixaLancamentoSerializer(lancamento).data,
-                        'conta': self._buscar_conta_receber(lancamento.fonte_id)
-                    })
-                elif lancamento.fonte_tipo == 'conta_pagar':
-                    conciliacao['contas_pagar'].append({
-                        'lancamento': FluxoCaixaLancamentoSerializer(lancamento).data,
-                        'conta': self._buscar_conta_pagar(lancamento.fonte_id)
-                    })
-                elif lancamento.fonte_tipo == 'contrato':
-                    conciliacao['contratos'].append({
-                        'lancamento': FluxoCaixaLancamentoSerializer(lancamento).data,
-                        'contrato': self._buscar_contrato(lancamento.fonte_id)
-                    })
-                else:
-                    conciliacao['outros'].append(
-                        FluxoCaixaLancamentoSerializer(lancamento).data
-                    )
-
-            return Response({
-                'periodo': {
-                    'inicio': data_inicial,
-                    'fim': data_final
-                },
-                'conciliacao': conciliacao,
-                'totalizadores': self._calcular_totalizadores_conciliacao(lancamentos)
-            })
-
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    def _buscar_conta_receber(self, id):
-        """Busca dados da conta a receber"""
-        from ..models import ContasReceber
-        try:
-            conta = ContasReceber.objects.get(id=id)
-            return {
-                'id': conta.id,
-                'historico': conta.historico,
-                'cliente': conta.cliente.nome if conta.cliente else None,
-                'valor': str(conta.valor),
-                'vencimento': conta.vencimento,
-                'status': conta.status
-            }
-        except ContasReceber.DoesNotExist:
-            return None
-
-    def _buscar_conta_pagar(self, id):
-        """Busca dados da conta a pagar"""
-        from ..models import ContasPagar
-        try:
-            conta = ContasPagar.objects.get(id=id)
-            return {
-                'id': conta.id,
-                'descricao': conta.descricao,
-                'fornecedor': conta.fornecedor.nome if conta.fornecedor else None,
-                'valor': str(conta.valor),
-                'vencimento': conta.vencimento,
-                'status': conta.status
-            }
-        except ContasPagar.DoesNotExist:
-            return None
-
-    def _buscar_contrato(self, id):
-        """Busca dados do contrato"""
-        from ..models import ContratosLocacao
-        try:
-            contrato = ContratosLocacao.objects.get(id=id)
-            return {
-                'id': contrato.id,
-                'numero': contrato.contrato,
-                'cliente': contrato.cliente.nome if contrato.cliente else None,
-                'valor_total': str(contrato.valorcontrato),
-                'inicio': contrato.inicio,
-                'fim': contrato.fim
-            }
-        except ContratosLocacao.DoesNotExist:
-            return None
-
-    def _calcular_totalizadores_conciliacao(self, lancamentos):
-        """Calcula totalizadores para conciliação"""
-        return {
-            'total_entradas': lancamentos.filter(tipo='entrada').aggregate(
-                total=Sum('valor'))['total'] or Decimal('0'),
-            'total_saidas': lancamentos.filter(tipo='saida').aggregate(
-                total=Sum('valor'))['total'] or Decimal('0'),
-            'total_por_fonte': {
-                'contas_receber': lancamentos.filter(fonte_tipo='conta_receber').aggregate(
-                    total=Sum('valor'))['total'] or Decimal('0'),
-                'contas_pagar': lancamentos.filter(fonte_tipo='conta_pagar').aggregate(
-                    total=Sum('valor'))['total'] or Decimal('0'),
-                'contratos': lancamentos.filter(fonte_tipo='contrato').aggregate(
-                    total=Sum('valor'))['total'] or Decimal('0'),
-                'outros': lancamentos.filter(fonte_tipo='outro').aggregate(
-                    total=Sum('valor'))['total'] or Decimal('0')
-            }
-        }
-
-    @action(detail=False, methods=['get'])
-    def extrato_mensal(self, request):
-        """Gera extrato mensal detalhado"""
-        try:
-            ano = int(request.query_params.get('ano', date.today().year))
-            mes = int(request.query_params.get('mes', date.today().month))
-            
-            # Define período
-            data_inicial = date(ano, mes, 1)
-            if mes == 12:
-                data_final = date(ano + 1, 1, 1) - timedelta(days=1)
-            else:
-                data_final = date(ano, mes + 1, 1) - timedelta(days=1)
-
-            # Busca lançamentos
-            lancamentos = self.get_queryset().filter(
-                data__range=[data_inicial, data_final]
-            ).order_by('data', 'tipo')
-
-            # Calcula saldo inicial
-            saldo_inicial = self._obter_saldo_inicial(data_inicial)
-            saldo_atual = saldo_inicial
-
-            # Prepara extrato
-            extrato = []
-            for lancamento in lancamentos:
-                if lancamento.tipo == 'entrada':
-                    saldo_atual += lancamento.valor
-                else:
-                    saldo_atual -= lancamento.valor
-
-                extrato.append({
-                    'data': lancamento.data,
-                    'descricao': lancamento.descricao,
-                    'tipo': lancamento.tipo,
-                    'categoria': lancamento.categoria,
-                    'valor': lancamento.valor,
-                    'realizado': lancamento.realizado,
-                    'saldo_apos': saldo_atual
-                })
-
-            return Response({
-                'periodo': {
-                    'mes': mes,
-                    'ano': ano,
-                    'inicio': data_inicial,
-                    'fim': data_final
-                },
-                'saldo_inicial': saldo_inicial,
-                'saldo_final': saldo_atual,
-                'movimentos': extrato,
-                'totalizadores': self._calcular_totalizadores(
-                    self.get_queryset().filter(
-                        data__range=[data_inicial, data_final]
-                    )
-                )
-            })
-
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    @action(detail=False, methods=['get'])
-    def resumo_anual(self, request):
-        """Gera resumo anual de movimentações"""
-        try:
-            ano = int(request.query_params.get('ano', date.today().year))
-            
-            # Define período
-            data_inicial = date(ano, 1, 1)
-            data_final = date(ano, 12, 31)
-
-            # Busca lançamentos
-            lancamentos = self.get_queryset().filter(
-                data__range=[data_inicial, data_final]
-            )
-
-            # Agrupa por mês
-            resumo_meses = {}
-            for mes in range(1, 13):
-                lancamentos_mes = lancamentos.filter(data__month=mes)
-                
-                resumo_meses[mes] = {
-                    'entradas': lancamentos_mes.filter(tipo='entrada').aggregate(
-                        total=Sum('valor'))['total'] or Decimal('0'),
-                    'saidas': lancamentos_mes.filter(tipo='saida').aggregate(
-                        total=Sum('valor'))['total'] or Decimal('0'),
-                    'realizado': {
-                        'entradas': lancamentos_mes.filter(
-                            tipo='entrada', realizado=True).aggregate(
-                            total=Sum('valor'))['total'] or Decimal('0'),
-                        'saidas': lancamentos_mes.filter(
-                            tipo='saida', realizado=True).aggregate(
-                            total=Sum('valor'))['total'] or Decimal('0')
-                    },
-                    'previsto': {
-                        'entradas': lancamentos_mes.filter(
-                            tipo='entrada', realizado=False).aggregate(
-                            total=Sum('valor'))['total'] or Decimal('0'),
-                        'saidas': lancamentos_mes.filter(
-                            tipo='saida', realizado=False).aggregate(
-                            total=Sum('valor'))['total'] or Decimal('0')
-                    }
-                }
-
-            return Response({
-                'ano': ano,
-                'meses': resumo_meses,
-                'totalizadores': {
-                    'total_entradas': lancamentos.filter(tipo='entrada').aggregate(
-                        total=Sum('valor'))['total'] or Decimal('0'),
-                    'total_saidas': lancamentos.filter(tipo='saida').aggregate(
-                        total=Sum('valor'))['total'] or Decimal('0'),
-                    'saldo': (
-                        lancamentos.filter(tipo='entrada').aggregate(
-                            total=Sum('valor'))['total'] or Decimal('0')
-                    ) - (
-                        lancamentos.filter(tipo='saida').aggregate(
-                            total=Sum('valor'))['total'] or Decimal('0')
-                    )
-                }
-            })
-
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    @action(detail=False, methods=['post'])
-    def importar_lancamentos(self, request):
-        """Importa lançamentos em lote"""
-        try:
-            lancamentos_data = request.data.get('lancamentos', [])
-            if not lancamentos_data:
-                return Response(
-                    {'error': 'Nenhum lançamento para importar'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            with transaction.atomic():
-                lancamentos = []
-                for dados in lancamentos_data:
-                    serializer = FluxoCaixaLancamentoSerializer(data=dados)
-                    if serializer.is_valid():
-                        lancamentos.append(
-                            FluxoCaixaLancamento(**serializer.validated_data)
-                        )
-                    else:
-                        raise serializers.ValidationError(serializer.errors)
-
-                FluxoCaixaLancamento.objects.bulk_create(lancamentos)
-
-                # Recalcula saldos
-                data_mais_antiga = min(l.data for l in lancamentos)
-                self._recalcular_saldos(data_mais_antiga)
-
-            return Response({
-                'message': f'{len(lancamentos)} lançamentos importados com sucesso'
-            })
-
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-    

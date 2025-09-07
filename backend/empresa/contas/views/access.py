@@ -1,11 +1,11 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum, Q, Count
+from django.db.models import Sum, Q, Count, Case, When, F, DecimalField
 from django.db.models.functions import Coalesce, TruncMonth
 from decimal import Decimal
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import time
 
 
@@ -836,7 +836,7 @@ class ContratosLocacaoViewSet(viewsets.ModelViewSet):
         Retorna os itens de um contrato específico pelo número do contrato.
         URL: /api/contratos_locacao/itens/C1234/
         """
-        contrato = get_object_or_404(ContratosLocacao, contrato=contrato_numero)
+        contrato = get_object_or_404(ContratosLocacao, contrato_numero)
         itens = ItensContratoLocacao.objects.filter(
             contrato=contrato
         ).select_related('categoria')
@@ -1092,3 +1092,404 @@ def suprimentos_por_contrato(request):
         return Response({
             'error': f'Erro interno: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def relatorio_financeiro_periodo(request):
+    """
+    Fornece um relatório de contas a pagar e a receber com base no vencimento
+    dentro de um período especificado.
+    """
+    try:
+        # 1. Obter e validar parâmetros de data
+        today = date.today()
+        data_inicial_str = request.query_params.get('data_inicial', today.strftime('%Y-%m-01'))
+        data_final_str = request.query_params.get('data_final', (today.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1))
+        
+        data_inicial = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
+        data_final = datetime.strptime(data_final_str, '%Y-%m-%d').date()
+
+        # 2. Consultar Contas a Pagar
+        contas_a_pagar_qs = ContasPagar.objects.filter(
+            vencimento__range=[data_inicial, data_final],
+            status='A'  # Apenas contas em aberto
+        ).select_related('fornecedor').order_by('vencimento')
+
+        # 3. Consultar Contas a Receber
+        contas_a_receber_qs = ContasReceber.objects.filter(
+            vencimento__range=[data_inicial, data_final],
+            status='A'  # Apenas contas em aberto
+        ).select_related('cliente').order_by('vencimento')
+
+        # 4. Calcular totais
+        total_a_pagar = contas_a_pagar_qs.aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
+        total_a_receber = contas_a_receber_qs.aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
+
+        # 5. Serializar os dados
+        pagar_serializer = ContasPagarSerializer(contas_a_pagar_qs, many=True)
+        receber_serializer = ContasReceberSerializer(contas_a_receber_qs, many=True)
+
+        # 6. Estruturar a resposta
+        response_data = {
+            'periodo': {
+                'data_inicial': data_inicial,
+                'data_final': data_final,
+            },
+            'resumo': {
+                'total_a_pagar': total_a_pagar,
+                'total_a_receber': total_a_receber,
+                'saldo_previsto': total_a_receber - total_a_pagar
+            },
+            'contas_a_pagar': pagar_serializer.data,
+            'contas_a_receber': receber_serializer.data
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': f'Erro interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def contas_por_data_vencimento(request):
+    """
+    Filtra contas a pagar e receber por data de vencimento
+    Parâmetros:
+    - data_inicio: Data inicial de vencimento (YYYY-MM-DD)
+    - data_fim: Data final de vencimento (YYYY-MM-DD)
+    - tipo: 'pagar', 'receber' ou 'ambos' (padrão: 'ambos')
+    - status: 'P' (Pago), 'A' (Aberto), 'C' (Cancelado) ou 'todos' (padrão: 'A')
+    - incluir_vencidas: 'true' ou 'false' (padrão: 'true')
+    """
+    try:
+        # 1. Obter e validar parâmetros
+        data_inicio_str = request.query_params.get('data_inicio')
+        data_fim_str = request.query_params.get('data_fim')
+        tipo_filtro = request.query_params.get('tipo', 'ambos').lower()
+        status_filtro = request.query_params.get('status', 'A').upper()
+        incluir_vencidas = request.query_params.get('incluir_vencidas', 'true').lower() == 'true'
+        
+        if not data_inicio_str or not data_fim_str:
+            return Response({
+                'error': 'Os parâmetros data_inicio e data_fim são obrigatórios'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
+            data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({
+                'error': 'Formato de data inválido. Use YYYY-MM-DD'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if data_inicio > data_fim:
+            return Response({
+                'error': 'A data de início deve ser anterior ou igual à data de fim'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 2. Validar filtros
+        if tipo_filtro not in ['pagar', 'receber', 'ambos']:
+            return Response({
+                'error': 'Tipo deve ser: pagar, receber ou ambos'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if status_filtro not in ['P', 'A', 'C', 'TODOS']:
+            return Response({
+                'error': 'Status deve ser: P (Pago), A (Aberto), C (Cancelado) ou TODOS'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        hoje = date.today()
+        
+        resultado = {
+            'periodo': {
+                'data_inicio': data_inicio,
+                'data_fim': data_fim
+            },
+            'filtros': {
+                'tipo': tipo_filtro,
+                'status': status_filtro,
+                'incluir_vencidas': incluir_vencidas
+            },
+            'resumo': {
+                'total_contas_pagar': 0,
+                'valor_total_pagar': Decimal('0.00'),
+                'total_contas_receber': 0,
+                'valor_total_receber': Decimal('0.00'),
+                'contas_vencidas_pagar': 0,
+                'valor_vencidas_pagar': Decimal('0.00'),
+                'contas_vencidas_receber': 0,
+                'valor_vencidas_receber': Decimal('0.00')
+            },
+            'contas_a_pagar': [],
+            'contas_a_receber': []
+        }
+        
+        # 3. Filtrar Contas a Pagar
+        if tipo_filtro in ['pagar', 'ambos']:
+            contas_pagar_qs = ContasPagar.objects.filter(
+                vencimento__date__range=[data_inicio, data_fim]
+            ).select_related('fornecedor')
+            
+            if status_filtro != 'TODOS':
+                contas_pagar_qs = contas_pagar_qs.filter(status=status_filtro)
+            
+            # Separar contas vencidas
+            contas_pagar_vencidas = contas_pagar_qs.filter(
+                vencimento__date__lt=hoje,
+                status='A'  # Apenas contas em aberto podem estar vencidas
+            )
+            
+            contas_pagar_qs = contas_pagar_qs.order_by('vencimento', 'fornecedor__nome')
+            
+            # Serializar e calcular totais
+            contas_pagar_data = ContasPagarSerializer(contas_pagar_qs, many=True).data
+            resultado['contas_a_pagar'] = contas_pagar_data
+            resultado['resumo']['total_contas_pagar'] = contas_pagar_qs.count()
+            resultado['resumo']['valor_total_pagar'] = contas_pagar_qs.aggregate(
+                total=Sum('valor')
+            )['total'] or Decimal('0.00')
+            
+            # Totais das vencidas
+            resultado['resumo']['contas_vencidas_pagar'] = contas_pagar_vencidas.count()
+            resultado['resumo']['valor_vencidas_pagar'] = contas_pagar_vencidas.aggregate(
+                total=Sum('valor')
+            )['total'] or Decimal('0.00')
+        
+        # 4. Filtrar Contas a Receber
+        if tipo_filtro in ['receber', 'ambos']:
+            contas_receber_qs = ContasReceber.objects.filter(
+                vencimento__date__range=[data_inicio, data_fim]
+            ).select_related('cliente')
+            
+            if status_filtro != 'TODOS':
+                contas_receber_qs = contas_receber_qs.filter(status=status_filtro)
+            
+            # Separar contas vencidas
+            contas_receber_vencidas = contas_receber_qs.filter(
+                vencimento__date__lt=hoje,
+                status='A'  # Apenas contas em aberto podem estar vencidas
+            )
+            
+            contas_receber_qs = contas_receber_qs.order_by('vencimento', 'cliente__nome')
+            
+            # Serializar e calcular totais
+            contas_receber_data = ContasReceberSerializer(contas_receber_qs, many=True).data
+            resultado['contas_a_receber'] = contas_receber_data
+            resultado['resumo']['total_contas_receber'] = contas_receber_qs.count()
+            resultado['resumo']['valor_total_receber'] = contas_receber_qs.aggregate(
+                total=Sum('valor')
+            )['total'] or Decimal('0.00')
+            
+            # Totais das vencidas
+            resultado['resumo']['contas_vencidas_receber'] = contas_receber_vencidas.count()
+            resultado['resumo']['valor_vencidas_receber'] = contas_receber_vencidas.aggregate(
+                total=Sum('valor')
+            )['total'] or Decimal('0.00')
+        
+        # 5. Calcular saldo previsto se ambos os tipos estão incluídos
+        if tipo_filtro == 'ambos':
+            resultado['resumo']['saldo_previsto'] = (
+                resultado['resumo']['valor_total_receber'] - 
+                resultado['resumo']['valor_total_pagar']
+            )
+            resultado['resumo']['saldo_vencidas'] = (
+                resultado['resumo']['valor_vencidas_receber'] - 
+                resultado['resumo']['valor_vencidas_pagar']
+            )
+        
+        return Response(resultado, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Erro interno: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def contas_por_data_pagamento(request):
+    """
+    Filtra contas a pagar e receber por data de pagamento
+    Parâmetros:
+    - data_inicio: Data inicial de pagamento (YYYY-MM-DD)
+    - data_fim: Data final de pagamento (YYYY-MM-DD)
+    - tipo: 'pagar', 'receber' ou 'ambos' (padrão: 'ambos')
+    - status: 'P' (Pago), 'A' (Aberto), 'C' (Cancelado) ou 'todos' (padrão: 'P')
+    """
+    try:
+        # 1. Obter e validar parâmetros
+        data_inicio_str = request.query_params.get('data_inicio')
+        data_fim_str = request.query_params.get('data_fim')
+        tipo_filtro = request.query_params.get('tipo', 'ambos').lower()
+        status_filtro = request.query_params.get('status', 'P').upper()
+        
+        if not data_inicio_str or not data_fim_str:
+            return Response({
+                'error': 'Os parâmetros data_inicio e data_fim são obrigatórios'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
+            data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({
+                'error': 'Formato de data inválido. Use YYYY-MM-DD'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if data_inicio > data_fim:
+            return Response({
+                'error': 'A data de início deve ser anterior ou igual à data de fim'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 2. Validar filtros
+        if tipo_filtro not in ['pagar', 'receber', 'ambos']:
+            return Response({
+                'error': 'Tipo deve ser: pagar, receber ou ambos'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if status_filtro not in ['P', 'A', 'C', 'TODOS']:
+            return Response({
+                'error': 'Status deve ser: P (Pago), A (Aberto), C (Cancelado) ou TODOS'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        resultado = {
+            'periodo': {
+                'data_inicio': data_inicio,
+                'data_fim': data_fim
+            },
+            'filtros': {
+                'tipo': tipo_filtro,
+                'status': status_filtro
+            },
+            'resumo': {
+                'total_contas_pagar': 0,
+                'valor_total_pagar': Decimal('0.00'),
+                'total_contas_receber': 0,
+                'valor_total_receber': Decimal('0.00')
+            },
+            'contas_a_pagar': [],
+            'contas_a_receber': []
+        }
+        
+        # 3. Filtrar Contas a Pagar
+        if tipo_filtro in ['pagar', 'ambos']:
+            contas_pagar_qs = ContasPagar.objects.filter(
+                data_pagamento__date__range=[data_inicio, data_fim]
+            ).select_related('fornecedor')
+            
+            if status_filtro != 'TODOS':
+                contas_pagar_qs = contas_pagar_qs.filter(status=status_filtro)
+            
+            contas_pagar_qs = contas_pagar_qs.order_by('data_pagamento', 'fornecedor__nome')
+            
+            # Serializar e calcular totais
+            contas_pagar_data = ContasPagarSerializer(contas_pagar_qs, many=True).data
+            resultado['contas_a_pagar'] = contas_pagar_data
+            resultado['resumo']['total_contas_pagar'] = contas_pagar_qs.count()
+            resultado['resumo']['valor_total_pagar'] = contas_pagar_qs.aggregate(
+                total=Sum('valor_pago')
+            )['total'] or Decimal('0.00')
+        
+        # 4. Filtrar Contas a Receber
+        if tipo_filtro in ['receber', 'ambos']:
+            contas_receber_qs = ContasReceber.objects.filter(
+                data_pagamento__date__range=[data_inicio, data_fim]
+            ).select_related('cliente')
+            
+            if status_filtro != 'TODOS':
+                contas_receber_qs = contas_receber_qs.filter(status=status_filtro)
+            
+            contas_receber_qs = contas_receber_qs.order_by('data_pagamento', 'cliente__nome')
+            
+            # Serializar e calcular totais
+            contas_receber_data = ContasReceberSerializer(contas_receber_qs, many=True).data
+            resultado['contas_a_receber'] = contas_receber_data
+            resultado['resumo']['total_contas_receber'] = contas_receber_qs.count()
+            resultado['resumo']['valor_total_receber'] = contas_receber_qs.aggregate(
+                total=Sum('recebido')
+            )['total'] or Decimal('0.00')
+        
+        # 5. Calcular saldo líquido se ambos os tipos estão incluídos
+        if tipo_filtro == 'ambos':
+            resultado['resumo']['saldo_liquido'] = (
+                resultado['resumo']['valor_total_receber'] - 
+                resultado['resumo']['valor_total_pagar']
+            )
+        
+        return Response(resultado, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Erro interno: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def relatorio_valor_estoque(request):
+    """
+    Calcula o valor total do estoque em uma data específica.
+    """
+    try:
+        # 1. Obter e validar o parâmetro de data
+        data_posicao_str = request.query_params.get('data', date.today().strftime('%Y-%m-%d'))
+        data_posicao = datetime.strptime(data_posicao_str, '%Y-%m-%d').date()
+
+        # 2. Calcular saldos de estoque na data
+        saldos = MovimentacoesEstoque.objects.filter(
+            data_movimentacao__date__lte=data_posicao,
+            produto__isnull=False  # Filtrar movimentações sem produto
+        ).values(
+            'produto_id', 
+            'produto__descricao', 
+            'produto__nome',
+            'produto__preco_custo',
+            'produto__grupo_id'
+        ).annotate(
+            saldo_final=Sum(
+                Case(
+                    When(tipo_movimentacao__tipo='E', then=F('quantidade')),
+                    When(tipo_movimentacao__tipo='S', then=-F('quantidade')),
+                    default=0,
+                    output_field=DecimalField()
+                )
+            )
+        ).order_by('produto__nome')
+
+        # 3. Calcular o valor total e preparar detalhes
+        valor_total_estoque = Decimal('0.00')
+        detalhes_produtos = []
+        
+        # Buscar nomes dos grupos/categorias para otimizar consultas
+        grupos_ids = [saldo['produto__grupo_id'] for saldo in saldos if saldo['produto__grupo_id'] and saldo['saldo_final'] > 0]
+        grupos_dict = {grupo.id: grupo.nome for grupo in Grupos.objects.filter(id__in=grupos_ids)} if grupos_ids else {}
+
+        for saldo in saldos:
+            if saldo['saldo_final'] > 0:
+                custo = saldo['produto__preco_custo'] or Decimal('0.00')
+                valor_produto = saldo['saldo_final'] * custo
+                valor_total_estoque += valor_produto
+                
+                # Obter nome da categoria/grupo
+                grupo_id = saldo['produto__grupo_id']
+                categoria_nome = grupos_dict.get(grupo_id, 'Sem categoria') if grupo_id else 'Sem categoria'
+                
+                detalhes_produtos.append({
+                    'produto_id': saldo['produto_id'],
+                    'produto_descricao': saldo['produto__descricao'] or saldo['produto__nome'] or 'Produto sem nome',
+                    'categoria': categoria_nome,
+                    'quantidade_em_estoque': saldo['saldo_final'],
+                    'custo_unitario': custo,
+                    'valor_total_produto': valor_produto
+                })
+
+        # 4. Estruturar a resposta
+        response_data = {
+            'data_posicao': data_posicao,
+            'valor_total_estoque': valor_total_estoque,
+            'total_produtos_em_estoque': len(detalhes_produtos),
+            'detalhes_por_produto': detalhes_produtos
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({'error': f'Erro interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

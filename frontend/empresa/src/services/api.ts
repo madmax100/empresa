@@ -1,5 +1,5 @@
 // src/services/api.ts
-import { Cliente, ContasPagarResponse, ContasReceberResponse, Contrato, ContratoExpandido, DashboardContrato, DashboardFiltros, DashboardResponse, FilterParams, ItemContrato, Produto } from '@/types/models';
+import { Cliente, ContasPagarResponse, ContasReceberResponse, Contrato, ContratoExpandido, DashboardContrato, DashboardFiltros, ItemContrato, Produto } from '@/types/models';
 import { NotaFiscalAgrupamento, NotaFiscalFiltros, NotaFiscalResponse, NotaFiscalSaida } from '@/types/notas_fiscais/models';
 import axios from 'axios';
 import config from '@/config';
@@ -249,50 +249,16 @@ export const contasPagarService = {
 
 
 export const financeiroDashboard = {
-    resumoGeral: async (filters: FilterParams): Promise<DashboardResponse> => {
-        try {
-            const params = new URLSearchParams({
-                data_inicio: filters.dataInicial,
-                data_fim: filters.dataFinal,
-                ...(filters.status && filters.status !== 'all' ? { status: filters.status } : {}),
-                ...(filters.searchTerm ? { searchTerm: filters.searchTerm } : {})
-            });
-
-            console.log('🏦 Parâmetros enviados para API:', Object.fromEntries(params));
-
-            const [contasReceber, contasPagar] = await Promise.all([
-                api.get<ContasReceberResponse>(`/contas_receber/dashboard/?${params}`),
-                api.get<ContasPagarResponse>(`/contas_pagar/dashboard/?${params}`)
-            ]);
-
-            return {
-                contasReceber: contasReceber.data,
-                contasPagar: contasPagar.data,
-                saldo: {
-                    total_atrasado: 
-                        contasReceber.data.resumo.total_atrasado - 
-                        contasPagar.data.resumo.total_atrasado,
-                    total_pago_periodo: 
-                        contasReceber.data.resumo.total_pago_periodo - 
-                        contasPagar.data.resumo.total_pago_periodo,
-                    total_cancelado_periodo: 
-                        contasReceber.data.resumo.total_cancelado_periodo - 
-                        contasPagar.data.resumo.total_cancelado_periodo,
-                    total_aberto_periodo: 
-                        contasReceber.data.resumo.total_aberto_periodo - 
-                        contasPagar.data.resumo.total_aberto_periodo,
-                    quantidade_titulos: 
-                        contasReceber.data.resumo.quantidade_titulos + 
-                        contasPagar.data.resumo.quantidade_titulos,
-                    quantidade_atrasados: 
-                        contasReceber.data.resumo.quantidade_atrasados_periodo + 
-                        contasPagar.data.resumo.quantidade_atrasados_periodo
-                }
-            };
-        } catch (error) {
-            console.error('Erro ao buscar dados financeiros:', error);
-            throw new Error('Falha ao carregar dados financeiros');
-        }
+    resumoGeral: (params: { dataInicial: string, dataFinal: string, status: string, searchTerm: string }) => {
+        const queryParams = new URLSearchParams({
+            data_inicio: params.dataInicial,
+            data_fim: params.dataFinal,
+            status: params.status,
+            search: params.searchTerm,
+            incluir_vencidas: 'true' // Adicionado para sempre buscar vencidas
+        });
+        // Usando um endpoint unificado que retorna todos os dados necessários
+        return api.get(`/contas/dashboard-financeiro/?${queryParams.toString()}`).then(res => res.data);
     },
 
     porCliente: async (clienteId: string) => {

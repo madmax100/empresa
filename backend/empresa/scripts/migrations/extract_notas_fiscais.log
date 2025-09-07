@@ -1,0 +1,146 @@
+2025-09-01 21:36:13,135 - INFO - Conectando ao banco de dados: C:\Users\Cirilo\Documents\Bancos\Extratos\Extratos.mdb
+2025-09-01 21:36:14,181 - ERROR - Erro de conexão com o banco de dados: ('42000', '[42000] [Microsoft][Driver ODBC Microsoft Access] Senha inválida. (-1905) (SQLDriverConnect); [42000] [Microsoft][Driver ODBC Microsoft Access] Senha inválida. (-1905)')
+2025-09-01 21:36:45,631 - INFO - Conectando ao banco de dados: C:\Users\Cirilo\Documents\Bancos\Extratos\Extratos.mdb
+2025-09-01 21:36:46,450 - INFO - Tentando conexão com senha...
+2025-09-01 21:36:46,867 - ERROR - Erro de conexão com o banco de dados: ('42000', '[42000] [Microsoft][Driver ODBC Microsoft Access] Senha inválida. (-1905) (SQLDriverConnect); [42000] [Microsoft][Driver ODBC Microsoft Access] Senha inválida. (-1905)')
+2025-09-01 21:37:11,109 - INFO - Conectando ao banco de dados: C:\Users\Cirilo\Documents\Bancos\Extratos\Extratos.mdb
+2025-09-01 21:37:11,110 - INFO - Tentando sem senha...
+2025-09-01 21:37:11,977 - INFO - Tentando senha: ********
+2025-09-01 21:37:12,399 - INFO - Tentando senha: ******
+2025-09-01 21:37:12,685 - INFO - Tentando senha: *****
+2025-09-01 21:37:13,034 - INFO - Tentando senha: ********
+2025-09-01 21:37:13,389 - INFO - Tentando senha: ********
+2025-09-01 21:37:13,899 - INFO - Tentando senha: *****
+2025-09-01 21:37:14,409 - ERROR - Erro inesperado: Não foi possível conectar com nenhuma das senhas testadas
+2025-09-01 21:37:49,540 - INFO - Conectando ao banco de dados: C:\Users\Cirilo\Documents\Bancos\Extratos\Extratos.mdb
+2025-09-01 21:37:49,541 - INFO - Tentando senha: ******
+2025-09-01 21:37:49,861 - INFO - Conexão estabelecida com sucesso!
+2025-09-01 21:37:49,861 - INFO - Verificando tabelas disponíveis...
+2025-09-01 21:37:49,863 - INFO - Tabelas encontradas: ['Diario', 'Movimentacao', 'NotasFiscais']
+2025-09-01 21:37:49,863 - INFO - Analisando estrutura da tabela NotasFiscais...
+2025-09-01 21:37:49,878 - INFO - Colunas encontradas: ['Chave', 'Produto', 'Documento', 'Data', 'Horario', 'Unitario', 'Quantidade', 'Movimentacao', 'Historico', 'OPERADOR']
+2025-09-01 21:37:49,898 - INFO - Total de registros na tabela: 111113
+2025-09-01 21:37:49,898 - INFO - Extraindo amostra dos dados...
+2025-09-01 21:37:49,900 - INFO - === AMOSTRA DOS DADOS ===
+2025-09-01 21:37:49,900 - INFO - Registro 1:
+2025-09-01 21:37:49,900 - INFO -   Chave: 1
+2025-09-01 21:37:49,900 - INFO -   Produto: 3051
+2025-09-01 21:37:49,901 - INFO -   Documento: 000000
+2025-09-01 21:37:49,901 - INFO -   Data: 2006-07-03 00:00:00
+2025-09-01 21:37:49,901 - INFO -   Horario: 1899-12-30 12:31:49
+2025-09-01 21:37:49,902 - INFO -   Unitario: 260.7600
+2025-09-01 21:37:49,902 - INFO -   Quantidade: 1.0000
+2025-09-01 21:37:49,902 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,902 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,903 - INFO -   OPERADOR: MURILO
+2025-09-01 21:37:49,903 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,904 - INFO - Registro 2:
+2025-09-01 21:37:49,904 - INFO -   Chave: 2
+2025-09-01 21:37:49,905 - INFO -   Produto: 3051
+2025-09-01 21:37:49,905 - INFO -   Documento: 1
+2025-09-01 21:37:49,905 - INFO -   Data: 2006-07-03 00:00:00
+2025-09-01 21:37:49,905 - INFO -   Horario: 1899-12-30 12:33:57
+2025-09-01 21:37:49,906 - INFO -   Unitario: 400.0000
+2025-09-01 21:37:49,906 - INFO -   Quantidade: 1.0000
+2025-09-01 21:37:49,906 - INFO -   Movimentacao: SAIDA
+2025-09-01 21:37:49,906 - INFO -   Historico: NF VENDA GER.:1
+2025-09-01 21:37:49,907 - INFO -   OPERADOR: MURILO
+2025-09-01 21:37:49,907 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,907 - INFO - Registro 3:
+2025-09-01 21:37:49,907 - INFO -   Chave: 3
+2025-09-01 21:37:49,908 - INFO -   Produto: 3326
+2025-09-01 21:37:49,908 - INFO -   Documento: 000000
+2025-09-01 21:37:49,908 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,909 - INFO -   Horario: 1899-12-30 14:42:04
+2025-09-01 21:37:49,909 - INFO -   Unitario: 456.4300
+2025-09-01 21:37:49,909 - INFO -   Quantidade: 1.0000
+2025-09-01 21:37:49,910 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,910 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,910 - INFO -   OPERADOR: IVONNE
+2025-09-01 21:37:49,910 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,911 - INFO - Registro 4:
+2025-09-01 21:37:49,911 - INFO -   Chave: 4
+2025-09-01 21:37:49,911 - INFO -   Produto: 3324
+2025-09-01 21:37:49,912 - INFO -   Documento: 000000
+2025-09-01 21:37:49,912 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,912 - INFO -   Horario: 1899-12-30 14:44:18
+2025-09-01 21:37:49,912 - INFO -   Unitario: 454.4900
+2025-09-01 21:37:49,912 - INFO -   Quantidade: 1.0000
+2025-09-01 21:37:49,913 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,913 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,913 - INFO -   OPERADOR: IVONNE
+2025-09-01 21:37:49,913 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,914 - INFO - Registro 5:
+2025-09-01 21:37:49,914 - INFO -   Chave: 5
+2025-09-01 21:37:49,914 - INFO -   Produto: 3325
+2025-09-01 21:37:49,914 - INFO -   Documento: 000000
+2025-09-01 21:37:49,914 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,915 - INFO -   Horario: 1899-12-30 14:45:30
+2025-09-01 21:37:49,915 - INFO -   Unitario: 440.8900
+2025-09-01 21:37:49,915 - INFO -   Quantidade: 1.0000
+2025-09-01 21:37:49,916 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,916 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,916 - INFO -   OPERADOR: IVONNE
+2025-09-01 21:37:49,916 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,917 - INFO - Registro 6:
+2025-09-01 21:37:49,917 - INFO -   Chave: 6
+2025-09-01 21:37:49,917 - INFO -   Produto: 3323
+2025-09-01 21:37:49,917 - INFO -   Documento: 000000
+2025-09-01 21:37:49,918 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,918 - INFO -   Horario: 1899-12-30 14:48:14
+2025-09-01 21:37:49,919 - INFO -   Unitario: 384.5300
+2025-09-01 21:37:49,919 - INFO -   Quantidade: 1.0000
+2025-09-01 21:37:49,919 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,920 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,920 - INFO -   OPERADOR: IVONNE
+2025-09-01 21:37:49,921 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,921 - INFO - Registro 7:
+2025-09-01 21:37:49,921 - INFO -   Chave: 7
+2025-09-01 21:37:49,922 - INFO -   Produto: 3078
+2025-09-01 21:37:49,922 - INFO -   Documento: 000000
+2025-09-01 21:37:49,922 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,923 - INFO -   Horario: 1899-12-30 14:57:40
+2025-09-01 21:37:49,923 - INFO -   Unitario: 22.0000
+2025-09-01 21:37:49,923 - INFO -   Quantidade: 1.0000
+2025-09-01 21:37:49,924 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,924 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,924 - INFO -   OPERADOR: IVONNE
+2025-09-01 21:37:49,924 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,925 - INFO - Registro 8:
+2025-09-01 21:37:49,925 - INFO -   Chave: 8
+2025-09-01 21:37:49,925 - INFO -   Produto: 3141
+2025-09-01 21:37:49,926 - INFO -   Documento: 000000
+2025-09-01 21:37:49,926 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,926 - INFO -   Horario: 1899-12-30 14:58:34
+2025-09-01 21:37:49,927 - INFO -   Unitario: 37.8000
+2025-09-01 21:37:49,927 - INFO -   Quantidade: 5.0000
+2025-09-01 21:37:49,927 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,928 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,928 - INFO -   OPERADOR: IVONNE
+2025-09-01 21:37:49,928 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,929 - INFO - Registro 9:
+2025-09-01 21:37:49,929 - INFO -   Chave: 9
+2025-09-01 21:37:49,929 - INFO -   Produto: 3114
+2025-09-01 21:37:49,930 - INFO -   Documento: 000000
+2025-09-01 21:37:49,930 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,930 - INFO -   Horario: 1899-12-30 15:02:06
+2025-09-01 21:37:49,930 - INFO -   Unitario: 103.8000
+2025-09-01 21:37:49,931 - INFO -   Quantidade: 2.0000
+2025-09-01 21:37:49,931 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,931 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,931 - INFO -   OPERADOR: IVONNE
+2025-09-01 21:37:49,932 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,932 - INFO - Registro 10:
+2025-09-01 21:37:49,932 - INFO -   Chave: 10
+2025-09-01 21:37:49,932 - INFO -   Produto: 433
+2025-09-01 21:37:49,933 - INFO -   Documento: 000000
+2025-09-01 21:37:49,933 - INFO -   Data: 2006-07-04 00:00:00
+2025-09-01 21:37:49,933 - INFO -   Horario: 1899-12-30 15:10:11
+2025-09-01 21:37:49,933 - INFO -   Unitario: 368.9800
+2025-09-01 21:37:49,934 - INFO -   Quantidade: 3.0000
+2025-09-01 21:37:49,934 - INFO -   Movimentacao: ENTRADA
+2025-09-01 21:37:49,934 - INFO -   Historico: SALDO INICIAL
+2025-09-01 21:37:49,934 - INFO -   OPERADOR: REGINA
+2025-09-01 21:37:49,935 - INFO - --------------------------------------------------
+2025-09-01 21:37:49,935 - INFO - Extraindo todos os dados...
+2025-09-01 21:37:51,803 - ERROR - Erro inesperado: Shape of passed values is (111113, 1), indices imply (111113, 10)

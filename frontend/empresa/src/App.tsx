@@ -10,6 +10,9 @@ import ContractsDashboardGrouped from './components/financial/contracts/Contract
 import ListaContratos from './components/financial/contracts/ContractList';
 import ContasPage from './components/financial/bills/ReceivablesList';
 import BillsManagement from './components/financial/bills/PayblesList';
+import FluxoCaixa from './pages/financial/FluxoCaixa';
+import RelatorioEstoque from './pages/financial/RelatorioEstoque';
+import EstoqueCompleto from './pages/financial/EstoqueCompleto';
 
 const App: React.FC = () => {
   return (
@@ -80,6 +83,24 @@ const App: React.FC = () => {
                   >
                     Indicadores de Contrato
                   </Link>
+                  <Link
+                    to="/financeiro/fluxo-caixa"
+                    className="border-b-2 border-transparent hover:border-gray-300 inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700"
+                  >
+                    Fluxo de Caixa
+                  </Link>
+                  <Link
+                    to="/financeiro/relatorio-estoque"
+                    className="border-b-2 border-transparent hover:border-gray-300 inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700"
+                  >
+                    Relatório Estoque
+                  </Link>
+                  <Link
+                    to="/financeiro/estoque-completo"
+                    className="border-b-2 border-transparent hover:border-gray-300 inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700"
+                  >
+                    Estoque Completo
+                  </Link>
                 </div>
               </div>
             </div>
@@ -98,6 +119,10 @@ const App: React.FC = () => {
             <Route path="/management" element={<BillsManagement />} />
             <Route path="/management-receber" element={<BillsManagement type="receber" />} />
             <Route path="/contracts" element={<ContractIndicators />} />
+            <Route path="/fluxo_caixa" element={<FluxoCaixa />} />
+            <Route path="/financeiro/fluxo-caixa" element={<FluxoCaixa />} />
+            <Route path="/financeiro/relatorio-estoque" element={<RelatorioEstoque />} />
+            <Route path="/financeiro/estoque-completo" element={<EstoqueCompleto />} />
           </Routes>
         </main>
       </div>

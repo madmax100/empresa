@@ -25,10 +25,9 @@ import {
 } from "lucide-react";
 import { financialService } from '@/services/financialService';
 import { 
-  DashboardEstrategico,
-  FluxoCaixaFiltros,
-  DateRange 
+  FluxoCaixaFiltros 
 } from '@/types/financeiro';
+import { DashboardEstrategico } from '@/types/dashboardNovo';
 import { DateRangePicker } from '../../common/DataRangerPicker';
 
 const DREReport: React.FC = () => {
@@ -37,33 +36,29 @@ const DREReport: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FluxoCaixaFiltros>({
-    dataInicial: new Date().toISOString().split('T')[0],
-    dataFinal: new Date().toISOString().split('T')[0],
+    data_inicial: new Date().toISOString().split('T')[0],
+    data_final: new Date().toISOString().split('T')[0],
     tipo: 'todos',
     fonte: 'todos',
     status: 'todos'
   });
 
-  // Carregar dados
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const dashboardData = await financialService.getDashboardEstrategico({
-        dataInicial: filters.dataInicial,
-        dataFinal: filters.dataFinal
-      });
-      setData(dashboardData);
-      setError(null);
-    } catch (err) {
-      console.error('Erro ao carregar DRE:', err);
-      setError('Falha ao carregar dados do DRE');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadData();
+    const loadDataAsync = async () => {
+      try {
+        setLoading(true);
+        const dashboardData = await financialService.getDashboardEstrategico();
+        setData(dashboardData);
+        setError(null);
+      } catch (err) {
+        console.error('Erro ao carregar DRE:', err);
+        setError('Falha ao carregar dados do DRE');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadDataAsync();
   }, [filters]);
 
   // Funções auxiliares
@@ -77,16 +72,7 @@ const DREReport: React.FC = () => {
   // Handler para exportação
   const handleExport = async () => {
     try {
-      const dateRange: DateRange = {
-        inicio: new Date(filters.dataInicial).toISOString().split('T')[0],
-        fim: new Date(filters.dataFinal).toISOString().split('T')[0]
-      };
-      
-      const blob = await financialService.getRelatorioDRE(
-        new Date(dateRange.inicio).getFullYear(),
-        new Date(dateRange.inicio).getMonth() + 1,
-        'excel'
-      );
+      const blob = await financialService.getRelatorioDRE();
       financialService.exportarRelatorio(blob, 'dre.xlsx');
     } catch (err) {
       console.error('Erro ao exportar:', err);
@@ -117,13 +103,13 @@ const DREReport: React.FC = () => {
         <div className="flex gap-4">
           <DateRangePicker
             date={{
-              from: new Date(filters.dataInicial),
-              to: new Date(filters.dataFinal)
+              from: new Date(filters.data_inicial),
+              to: new Date(filters.data_final)
             }}
             onDateChange={range => setFilters(prev => ({
               ...prev,
-              dataInicial: range?.from?.toISOString().split('T')[0] || '',
-              dataFinal: range?.to?.toISOString().split('T')[0] || ''
+              data_inicial: range?.from?.toISOString().split('T')[0] || '',
+              data_final: range?.to?.toISOString().split('T')[0] || ''
             }))}
           />
           <Button variant="outline" onClick={handleExport}>

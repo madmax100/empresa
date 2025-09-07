@@ -6,4 +6,5 @@ import contas.urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('contas/', include(contas.urls)),
+    path('api/', include(contas.urls)),
 ]

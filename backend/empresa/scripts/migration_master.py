@@ -66,6 +66,16 @@ SCRIPTS_SEQUENCE = [
         'desc': 'Produtos',
         'deps': ['migrate_grupos.py', 'migrate_marcas.py']
     },
+    {
+        'file': 'migrate_tipos_movimentacao.py',
+        'desc': 'Tipos de Movimentação de Estoque',
+        'deps': []
+    },
+    {
+        'file': 'migrate_movimentacoes_extratos.py',
+        'desc': 'Movimentações de Estoque (Extratos)',
+        'deps': ['migrate_produtos.py', 'migrate_tipos_movimentacao.py']
+    },
     
     # 2. Contratos de Locação
     {
@@ -144,7 +154,7 @@ def verify_dependencies(script_info, completed_scripts):
 
 def execute_script(script_info):
     """Executa um script individual de migração"""
-    script_path = os.path.join(SCRIPT_DIR+'\migrations', script_info['file'])
+    script_path = os.path.join(SCRIPT_DIR, 'migrations', script_info['file'])
     
     # Verificar existência do script
     if not verify_script_exists(script_path):
@@ -189,14 +199,14 @@ def check_environment():
     """Verifica se o ambiente está configurado corretamente"""
     try:
         # Verificar se o arquivo de configuração existe
-        config_path = os.path.join(SCRIPT_DIR, 'migrations\config.py')
+        config_path = os.path.join(SCRIPT_DIR, 'migrations', 'config.py')
         if not os.path.exists(config_path):
             logger.error(f"Arquivo de configuração não encontrado: {config_path}")
             return False
         
         # Verificar se todos os scripts existem
         for script_info in SCRIPTS_SEQUENCE:
-            script_path = os.path.join(SCRIPT_DIR+'\migrations', script_info['file'])
+            script_path = os.path.join(SCRIPT_DIR, 'migrations', script_info['file'])
             if not verify_script_exists(script_path):
                 return False
         

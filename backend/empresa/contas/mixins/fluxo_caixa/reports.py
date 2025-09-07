@@ -50,84 +50,52 @@ class ReportsMixin:
             return Response({'error': str(e)}, status=400)
 
     def _gerar_relatorio_fluxo_caixa(self, lancamentos, data_inicial, data_final):
-        """Gera estrutura do relatório de fluxo de caixa"""
-        # Análise diária
-        fluxo_diario = lancamentos.annotate(
-            data_ref=TruncDate('data')
-        ).values('data_ref').annotate(
-            entradas=Sum(Case(
-                When(tipo='entrada', then='valor'),
-                default=0,
-                output_field=DecimalField()
-            )),
-            saidas=Sum(Case(
-                When(tipo='saida', then='valor'),
-                default=0,
-                output_field=DecimalField()
-            )),
-            saldo=Sum(Case(
-                When(tipo='entrada', then='valor'),
-                When(tipo='saida', then=F('valor') * -1),
-                output_field=DecimalField()
-            ))
-        ).order_by('data_ref')
+        """Gera estrutura do relatório de fluxo de caixa com contas a pagar e receber."""
+        
+        # 1. Separar Contas a Pagar e a Receber
+        contas_a_pagar_qs = lancamentos.filter(tipo='saida').order_by('data')
+        contas_a_receber_qs = lancamentos.filter(tipo='entrada').order_by('data')
 
-        # Análise por categoria
-        categorias = lancamentos.values(
-            'categoria'
-        ).annotate(
-            entradas=Sum(Case(
-                When(tipo='entrada', then='valor'),
-                default=0,
-                output_field=DecimalField()
-            )),
-            saidas=Sum(Case(
-                When(tipo='saida', then='valor'),
-                default=0,
-                output_field=DecimalField()
-            )),
-            quantidade=Count('id')
-        ).order_by('categoria')
+        # 2. Serializar os dados para a resposta JSON
+        contas_a_pagar = list(contas_a_pagar_qs.values(
+            'id', 'data', 'descricao', 'valor', 'categoria', 
+            'fornecedor__nome', 'realizado'
+        ))
+        contas_a_receber = list(contas_a_receber_qs.values(
+            'id', 'data', 'descricao', 'valor', 'categoria', 
+            'cliente__nome', 'realizado'
+        ))
 
-        # Totalizadores
+        # 3. Calcular totais
         totais = lancamentos.aggregate(
             total_entradas=Sum(Case(
                 When(tipo='entrada', then='valor'),
-                default=0,
+                default=Decimal('0.0'),
                 output_field=DecimalField()
             )),
             total_saidas=Sum(Case(
                 When(tipo='saida', then='valor'),
-                default=0,
+                default=Decimal('0.0'),
                 output_field=DecimalField()
-            )),
-            total_lancamentos=Count('id')
+            ))
         )
 
-        return {
+        # 4. Estruturar a resposta final
+        relatorio = {
             'periodo': {
-                'inicio': data_inicial,
-                'fim': data_final
+                'data_inicial': data_inicial.strftime('%Y-%m-%d'),
+                'data_final': data_final.strftime('%Y-%m-%d'),
             },
-            'fluxo_diario': [{
-                'data': item['data_ref'],
-                'entradas': float(item['entradas']),
-                'saidas': float(item['saidas']),
-                'saldo': float(item['saldo'])
-            } for item in fluxo_diario],
-            'categorias': [{
-                'categoria': item['categoria'],
-                'entradas': float(item['entradas']),
-                'saidas': float(item['saidas']),
-                'quantidade': item['quantidade']
-            } for item in categorias],
-            'totais': {
-                'entradas': float(totais['total_entradas'] or 0),
-                'saidas': float(totais['total_saidas'] or 0),
-                'saldo': float((totais['total_entradas'] or 0) - (totais['total_saidas'] or 0)),
-                'quantidade': totais['total_lancamentos']
-            }
+            'resumo': {
+                'total_a_receber': totais.get('total_entradas') or Decimal('0.00'),
+                'total_a_pagar': totais.get('total_saidas') or Decimal('0.00'),
+                'saldo_periodo': (totais.get('total_entradas') or 0) - (totais.get('total_saidas') or 0)
+            },
+            'contas_a_receber': contas_a_receber,
+            'contas_a_pagar': contas_a_pagar
         }
+        
+        return relatorio
 
     @action(detail=False, methods=['GET'])
     def relatorio_dre(self, request):

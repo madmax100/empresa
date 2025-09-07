@@ -5,7 +5,7 @@ const isDevelopment = import.meta.env.MODE === 'development';
 const config = {
   env: isDevelopment ? 'development' : 'production',
   api: {
-    baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/contas/',
+    baseURL: import.meta.env.VITE_API_URL || (isDevelopment ? 'http://localhost:8000/contas/' : 'http://127.0.0.1:8000/contas/'),
     timeout: 30000,
     longTimeout: 120000,
     maxRetries: 3,
