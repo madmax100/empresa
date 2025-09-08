@@ -3,10 +3,11 @@ import FluxoCaixaDashboard from './components/dashboard/FluxoCaixaDashboard';
 import FluxoLucroDashboard from './components/dashboard/FluxoLucroDashboard';
 import EstoqueDashboard from './components/dashboard/EstoqueDashboard';
 import ContratosPage from './pages/ContratosPage';
+import ResultadosPage from './pages/ResultadosPage';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'contratos'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'contratos' | 'resultados'>('fluxo-realizado');
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
@@ -118,6 +119,26 @@ function App() {
             >
               📋 Contratos de Locação
             </button>
+
+            <button
+              onClick={() => setActivePanel('resultados')}
+              style={{
+                padding: '10px 20px',
+                border: 'none',
+                backgroundColor: activePanel === 'resultados' ? '#3b82f6' : 'transparent',
+                color: activePanel === 'resultados' ? 'white' : '#6b7280',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              📈 Resultados do Período
+            </button>
           </div>
         </div>
       </div>
@@ -128,6 +149,7 @@ function App() {
         {activePanel === 'fluxo-lucro' && <FluxoLucroDashboard />}
         {activePanel === 'estoque' && <EstoqueDashboard />}
         {activePanel === 'contratos' && <ContratosPage />}
+        {activePanel === 'resultados' && <ResultadosPage />}
       </div>
     </div>
   );

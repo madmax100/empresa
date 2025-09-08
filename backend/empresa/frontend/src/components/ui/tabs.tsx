@@ -9,11 +9,12 @@ interface TabsProps {
 
 const Tabs = ({ value, onValueChange, className, children }: TabsProps) => (
   <div className={className} data-tabs-value={value}>
-    {React.Children.map(children, child => 
-      React.isValidElement(child) 
-        ? React.cloneElement(child, { currentValue: value, onValueChange } as any)
-        : child
-    )}
+    {React.Children.map(children, child => {
+      if (React.isValidElement<{ currentValue?: string; onValueChange?: (v: string) => void }>(child)) {
+        return React.cloneElement(child, { currentValue: value, onValueChange });
+      }
+      return child;
+    })}
   </div>
 )
 
@@ -26,11 +27,12 @@ interface TabsListProps {
 
 const TabsList = ({ className, children, currentValue, onValueChange }: TabsListProps) => (
   <div className={`inline-flex h-10 items-center justify-center rounded-md bg-gray-100 p-1 text-gray-500 ${className || ''}`}>
-    {React.Children.map(children, child => 
-      React.isValidElement(child) 
-        ? React.cloneElement(child, { currentValue, onValueChange } as any)
-        : child
-    )}
+    {React.Children.map(children, child => {
+      if (React.isValidElement<{ currentValue?: string; onValueChange?: (v: string) => void }>(child)) {
+        return React.cloneElement(child, { currentValue, onValueChange });
+      }
+      return child;
+    })}
   </div>
 )
 
