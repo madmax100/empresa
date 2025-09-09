@@ -327,7 +327,12 @@ const ContractsDashboardGrouped: React.FC = () => {
 
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   const formatNumber = (value: number) => new Intl.NumberFormat('pt-BR').format(value);
-  const formatPercent = (value: number) => `${value.toFixed(1)}%`;
+  const formatPercent = (value: number) => {
+    if (isNaN(value) || !isFinite(value)) {
+      return '0.0%';
+    }
+    return `${value.toFixed(1)}%`;
+  };
   const formatDateDisplay = (iso: string) => {
     const d = new Date(iso + 'T00:00:00');
     return isNaN(d.getTime()) ? iso : d.toLocaleDateString();
@@ -824,7 +829,7 @@ const ContractsDashboardGrouped: React.FC = () => {
                           fontWeight: '600',
                           color: cliente.margemLiquida >= 0 ? '#059669' : '#dc2626'
                         }}>
-                          {formatPercent((cliente.margemLiquida / cliente.faturamentoTotal) * 100)}
+                          {cliente.faturamentoTotal > 0 ? formatPercent((cliente.margemLiquida / cliente.faturamentoTotal) * 100) : '0.0%'}
                         </td>
                       </tr>
 

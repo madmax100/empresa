@@ -961,7 +961,7 @@ from datetime import datetime
 @api_view(['GET'])
 def suprimentos_por_contrato(request):
     """
-    Endpoint para buscar suprimentos por contrato
+    Endpoint para buscar suprimentos por contrato considerando a vigência do contrato
     """
     try:
         # Parâmetros de entrada
@@ -985,44 +985,72 @@ def suprimentos_por_contrato(request):
                 'error': 'Formato de data inválido. Use YYYY-MM-DD'
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        # Validação de período
+        if data_inicial > data_final:
+            return Response({
+                'error': 'A data inicial não pode ser maior que a data final'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # 1. FILTRAR CONTRATOS VIGENTES NO PERÍODO
+        # Um contrato está vigente no período se:
+        # - Início do contrato <= data_final do período consultado
+        # - Fim do contrato >= data_inicial do período consultado (ou fim = NULL)
+        contratos_vigentes = ContratosLocacao.objects.filter(
+            Q(inicio__lte=data_final) &  # Contrato começou antes ou no final do período
+            (Q(fim__gte=data_inicial) | Q(fim__isnull=True))  # Contrato termina depois do início do período OU está ativo
+        ).select_related('cliente')
+        
+        # Aplicar filtros adicionais se fornecidos
+        if contrato_id:
+            contratos_vigentes = contratos_vigentes.filter(id=contrato_id)
+            
+        if cliente_id:
+            contratos_vigentes = contratos_vigentes.filter(cliente_id=cliente_id)
+        
+        # 2. BUSCAR NOTAS FISCAIS DE SUPRIMENTOS
         # Query otimizada para detectar apenas "SIMPLES REMESSA"
         filtro_remessa = Q(operacao__icontains='SIMPLES REMESSA')
         
-        # Base query das notas fiscais de saída
+        # Filtrar notas dos clientes com contratos vigentes no período
+        clientes_com_contratos_vigentes = contratos_vigentes.values_list('cliente_id', flat=True).distinct()
+        
         notas_query = NotasFiscaisSaida.objects.filter(
             filtro_remessa,
-            data__range=[data_inicial, data_final]
+            data__range=[data_inicial, data_final],
+            cliente_id__in=clientes_com_contratos_vigentes
         ).select_related('cliente', 'vendedor', 'transportadora')
         
-        # Filtros opcionais
-        if contrato_id:
-            # Buscar cliente do contrato específico
-            try:
-                contrato = ContratosLocacao.objects.get(id=contrato_id)
-                notas_query = notas_query.filter(cliente=contrato.cliente)
-            except ContratosLocacao.DoesNotExist:
-                return Response({
-                    'error': f'Contrato {contrato_id} não encontrado'
-                }, status=status.HTTP_404_NOT_FOUND)
         
-        if cliente_id:
-            notas_query = notas_query.filter(cliente_id=cliente_id)
-        
-        # Buscar contratos que têm notas no período (ou contrato específico se informado)
-        contratos_com_notas = ContratosLocacao.objects.filter(
-            cliente__in=notas_query.values_list('cliente_id', flat=True).distinct()
-        )
-        
-        if contrato_id:
-            contratos_com_notas = contratos_com_notas.filter(id=contrato_id)
-        
-        # Processar resultados por contrato
+        # 3. PROCESSAR RESULTADOS POR CONTRATO VIGENTE
         resultados = []
         total_geral_valor = Decimal('0.00')
         total_geral_notas = 0
         total_contratos = 0
+        total_faturamento_periodo = Decimal('0.00')  # Faturamento baseado em valores mensais
         
-        for contrato in contratos_com_notas:
+        # Calcular faturamento proporcional ao período
+        def calcular_faturamento_proporcional(data_inicio, data_fim, contrato_inicio, contrato_fim, valor_mensal):
+            """
+            Calcula o faturamento proporcional aos dias do período consultado
+            """
+            # Período efetivo é a interseção entre período consultado e vigência do contrato
+            inicio_efetivo = max(data_inicio, contrato_inicio)
+            fim_efetivo = min(data_fim, contrato_fim) if contrato_fim else data_fim
+            
+            # Calcular dias vigentes no período
+            dias_vigentes = (fim_efetivo - inicio_efetivo).days + 1  # +1 para incluir o último dia
+            
+            # Calcular faturamento proporcional (assumindo mês de 30 dias)
+            faturamento_proporcional = (valor_mensal * dias_vigentes) / 30
+            
+            return {
+                'dias_vigentes': dias_vigentes,
+                'faturamento_proporcional': faturamento_proporcional,
+                'inicio_efetivo': inicio_efetivo,
+                'fim_efetivo': fim_efetivo
+            }
+        
+        for contrato in contratos_vigentes:
             # Buscar notas específicas deste contrato no período
             notas_contrato = notas_query.filter(
                 cliente_id=contrato.cliente.id
@@ -1034,54 +1062,115 @@ def suprimentos_por_contrato(request):
                 quantidade_notas=Count('id')
             )
             
-            # Se o contrato tem notas no período, incluir nos resultados
-            if totais_contrato['quantidade_notas'] and totais_contrato['quantidade_notas'] > 0:
-                # Buscar todas as notas ordenadas por data
-                todas_as_notas_contrato = notas_contrato.order_by('-data')
-                
-                notas = []
-                for nota in todas_as_notas_contrato:
-                    notas.append({
-                        'id': nota.id,
-                        'numero_nota': nota.numero_nota,
-                        'data': nota.data.strftime('%Y-%m-%d') if nota.data else None,
-                        'operacao': nota.operacao or '',
-                        'cfop': nota.cfop or '',
-                        'valor_total_nota': float(nota.valor_total_nota or 0),
-                        'obs': nota.obs[:100] + '...' if nota.obs and len(nota.obs) > 100 else nota.obs or ''
-                    })
-                
-                resultado_contrato = {
-                    'contrato_id': contrato.id,
-                    'contrato_numero': contrato.contrato,
-                    'cliente': {
-                        'id': contrato.cliente.id,
-                        'nome': contrato.cliente.nome
-                    },
-                    'suprimentos': {
-                        'total_valor': float(totais_contrato['total_valor'] or 0),
-                        'quantidade_notas': totais_contrato['quantidade_notas'] or 0,
-                        'notas': notas
+            # Calcular faturamento proporcional do contrato no período
+            valor_mensal = contrato.valorpacela or Decimal('0.00')
+            calculo_proporcional = calcular_faturamento_proporcional(
+                data_inicial, data_final, 
+                contrato.inicio, contrato.fim,
+                valor_mensal
+            )
+            
+            dias_vigentes = calculo_proporcional['dias_vigentes']
+            faturamento_contrato = calculo_proporcional['faturamento_proporcional']
+            inicio_efetivo = calculo_proporcional['inicio_efetivo']
+            fim_efetivo = calculo_proporcional['fim_efetivo']
+            
+            # Incluir contrato nos resultados mesmo sem notas no período (para mostrar contratos vigentes)
+            # mas destacar se teve atividade de suprimentos
+            
+            # Buscar todas as notas ordenadas por data
+            todas_as_notas_contrato = notas_contrato.order_by('-data')
+            
+            notas = []
+            for nota in todas_as_notas_contrato:
+                notas.append({
+                    'id': nota.id,
+                    'numero_nota': nota.numero_nota,
+                    'data': nota.data.strftime('%Y-%m-%d') if nota.data else None,
+                    'operacao': nota.operacao or '',
+                    'cfop': nota.cfop or '',
+                    'valor_total_nota': float(nota.valor_total_nota or 0),
+                    'obs': nota.obs[:100] + '...' if nota.obs and len(nota.obs) > 100 else nota.obs or ''
+                })
+            
+            resultado_contrato = {
+                'contrato_id': contrato.id,
+                'contrato_numero': contrato.contrato,
+                'vigencia': {
+                    'inicio': contrato.inicio.strftime('%Y-%m-%d') if contrato.inicio else None,
+                    'fim': contrato.fim.strftime('%Y-%m-%d') if contrato.fim else None,
+                    'ativo_no_periodo': True,  # Já filtrado por vigência
+                    'periodo_efetivo': {
+                        'inicio': inicio_efetivo.strftime('%Y-%m-%d'),
+                        'fim': fim_efetivo.strftime('%Y-%m-%d'),
+                        'dias_vigentes': dias_vigentes
                     }
+                },
+                'valores_contratuais': {
+                    'valor_mensal': float(contrato.valorpacela or 0),  # Valor da parcela mensal
+                    'valor_total_contrato': float(contrato.valorcontrato or 0),
+                    'numero_parcelas': contrato.numeroparcelas,
+                    'faturamento_proporcional': float(faturamento_contrato),  # Valor proporcional aos dias
+                    'calculo': f"R$ {float(contrato.valorpacela or 0):.2f} × {dias_vigentes} dias ÷ 30 dias"
+                },
+                'cliente': {
+                    'id': contrato.cliente.id,
+                    'nome': contrato.cliente.nome
+                },
+                'suprimentos': {
+                    'total_valor': float(totais_contrato['total_valor'] or 0),
+                    'quantidade_notas': totais_contrato['quantidade_notas'] or 0,
+                    'notas': notas
+                },
+                'analise_financeira': {
+                    'faturamento_proporcional': float(faturamento_contrato),
+                    'custo_suprimentos': float(totais_contrato['total_valor'] or 0),
+                    'margem_bruta': float(faturamento_contrato - (totais_contrato['total_valor'] or Decimal('0.00'))),
+                    'percentual_margem': float(
+                        ((faturamento_contrato - (totais_contrato['total_valor'] or Decimal('0.00'))) / faturamento_contrato * 100) 
+                        if faturamento_contrato > 0 else 0
+                    ),
+                    'observacao': f"Faturamento proporcional a {dias_vigentes} dias do período"
                 }
-                
-                resultados.append(resultado_contrato)
-                total_contratos += 1
-                
-                # Somar totais gerais
+            }
+            
+            resultados.append(resultado_contrato)
+            total_contratos += 1
+            total_faturamento_periodo += faturamento_contrato
+            
+            # Somar totais gerais apenas se houver atividade
+            if totais_contrato['quantidade_notas'] and totais_contrato['quantidade_notas'] > 0:
                 total_geral_valor += totais_contrato['total_valor'] or Decimal('0.00')
                 total_geral_notas += totais_contrato['quantidade_notas'] or 0
         
-        # Resposta final
+        # 4. RESPOSTA FINAL COM INFORMAÇÕES DE VIGÊNCIA E FATURAMENTO
         response_data = {
             'periodo': {
                 'data_inicial': data_inicial.strftime('%Y-%m-%d'),
                 'data_final': data_final.strftime('%Y-%m-%d')
             },
+            'filtros_aplicados': {
+                'vigencia_considerada': True,
+                'contrato_id': contrato_id,
+                'cliente_id': cliente_id,
+                'observacao': 'Apenas contratos vigentes no período são incluídos'
+            },
             'resumo': {
-                'total_contratos': total_contratos,
+                'total_contratos_vigentes': total_contratos,
                 'total_suprimentos': float(total_geral_valor),
-                'total_notas': total_geral_notas
+                'total_notas': total_geral_notas,
+                'contratos_com_atividade': len([r for r in resultados if r['suprimentos']['quantidade_notas'] > 0])
+            },
+            'resumo_financeiro': {
+                'faturamento_total_proporcional': float(total_faturamento_periodo),
+                'custo_total_suprimentos': float(total_geral_valor),
+                'margem_bruta_total': float(total_faturamento_periodo - total_geral_valor),
+                'percentual_margem_total': float(
+                    ((total_faturamento_periodo - total_geral_valor) / total_faturamento_periodo * 100) 
+                    if total_faturamento_periodo > 0 else 0
+                ),
+                'metodo_calculo': 'proporcional',
+                'observacao': 'Faturamento calculado proporcionalmente aos dias vigentes no período (base: 30 dias/mês)'
             },
             'resultados': resultados
         }

@@ -1,8 +1,8 @@
 import React from 'react';
-import ContractsDashboardGrouped from '../components/financial/contracts/ContractsDashboardGrouped';
+import ContractsDashboardReal from '../components/financial/contracts/ContractsDashboardReal';
 
 const ContratosPage: React.FC = () => {
-  return <ContractsDashboardGrouped />;
+  return <ContractsDashboardReal />;
 };
 
 export default ContratosPage;

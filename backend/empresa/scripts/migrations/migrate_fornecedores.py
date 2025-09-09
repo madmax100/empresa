@@ -119,6 +119,7 @@ def create_table_if_not_exists(cursor):
             email VARCHAR(100),
             contato_nome VARCHAR(100),
             contato_telefone VARCHAR(20),
+            tipo VARCHAR(50),
             data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             ativo BOOLEAN DEFAULT true
         );
@@ -126,6 +127,7 @@ def create_table_if_not_exists(cursor):
         CREATE INDEX IF NOT EXISTS idx_fornecedores_nome ON fornecedores (nome);
         CREATE INDEX IF NOT EXISTS idx_fornecedores_cpf_cnpj ON fornecedores (cpf_cnpj);
         CREATE INDEX IF NOT EXISTS idx_fornecedores_cidade ON fornecedores (cidade);
+        CREATE INDEX IF NOT EXISTS idx_fornecedores_tipo ON fornecedores (tipo);
         """)
         logger.info("Estrutura da tabela fornecedores verificada/criada com sucesso")
     except Exception as e:
@@ -191,10 +193,18 @@ def migrate_fornecedores():
         # Consulta dados do Access
         logger.info("Consultando dados do Access...")
         access_cursor = access_conn.cursor()
+        
+        # Primeiro, vamos verificar as colunas disponíveis
+        access_cursor.execute("SELECT * FROM Fornecedores WHERE 1=0")
+        colunas_disponiveis = [desc[0] for desc in access_cursor.description]
+        logger.info(f"Colunas disponíveis na tabela Fornecedores: {colunas_disponiveis}")
+        
+        # Consulta com as colunas na ordem correta
         access_cursor.execute("""
             SELECT codigo, nome, endereco, bairro, cidade, 
-                   cep, fone, celular, Contato, cgc, 
-                   UF, cgf, email, datacadastro
+                   uf, cep, fone, fax, cgc, 
+                   cgf, contato, datacadastro, celular, email,
+                   especificacao, tipo, IBGE
             FROM Fornecedores 
             ORDER BY codigo
         """)
@@ -205,10 +215,10 @@ def migrate_fornecedores():
                 id, tipo_pessoa, nome, cpf_cnpj, rg_ie,
                 endereco, bairro, cidade, estado, cep,
                 telefone, email, contato_nome, contato_telefone,
-                data_cadastro, ativo
+                tipo, data_cadastro, ativo
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s
             )
         """
         
@@ -231,23 +241,27 @@ def migrate_fornecedores():
                 tipo_pessoa = determinar_tipo_pessoa(cpf_cnpj)
                 
                 # Data de cadastro
-                data_cadastro = row[13] if row[13] else datetime.now()
+                data_cadastro = row[12] if row[12] else datetime.now()
+                
+                # Tipo do fornecedor (posição 16)
+                tipo_fornecedor = clean_string(row[16]) if len(row) > 16 and row[16] else None
                 
                 dados = (
                     fornecedor_id,               # id
                     tipo_pessoa,                 # tipo_pessoa
                     nome,                        # nome
                     cpf_cnpj,                    # cpf_cnpj
-                    clean_string(row[11]),       # rg_ie (cgf)
+                    clean_string(row[10]),       # rg_ie (cgf)
                     clean_string(row[2]),        # endereco
                     clean_string(row[3]),        # bairro
                     clean_string(row[4]),        # cidade
-                    clean_string(row[10]),       # estado (UF)
-                    clean_cep(row[5]),           # cep
-                    clean_phone(row[6]),         # telefone (fone)
-                    clean_string(row[12]),       # email
-                    clean_string(row[8]),        # contato_nome (Contato)
-                    clean_phone(row[7]),         # contato_telefone (celular)
+                    clean_string(row[5]),        # estado (uf)
+                    clean_cep(row[6]),           # cep
+                    clean_phone(row[7]),         # telefone (fone)
+                    clean_string(row[14]),       # email
+                    clean_string(row[11]),       # contato_nome (contato)
+                    clean_phone(row[13]),        # contato_telefone (celular)
+                    tipo_fornecedor,             # tipo
                     data_cadastro,               # data_cadastro
                     True                         # ativo
                 )

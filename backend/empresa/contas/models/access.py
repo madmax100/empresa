@@ -810,6 +810,7 @@ class Fornecedores(models.Model):
     email = models.CharField(max_length=100, null=True, blank=True)
     contato_nome = models.CharField(max_length=100, null=True, blank=True)
     contato_telefone = models.CharField(max_length=20, null=True, blank=True)
+    tipo = models.CharField(max_length=50, null=True, blank=True)  # Novo campo tipo
     data_cadastro = models.DateTimeField(auto_now_add=True, null=True, blank=True)  # Removido default CURRENT_TIMESTAMP
     ativo = models.BooleanField(null=True, blank=True, default=True)
 

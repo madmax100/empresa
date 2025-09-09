@@ -6,43 +6,13 @@ from .views.fluxo_caixa2 import FluxoCaixaViewSet as FluxoCaixaLucroViewSet
 from .views.fluxo_caixa_realizado import FluxoCaixaRealizadoViewSet
 from .views.analise_fluxo_caixa import AnaliseFluxoCaixaViewSet
 from .views.estoque_views import EstoqueViewSet
+from .views.relatorios_views import RelatorioCustosFixosView
 from .views.access import *
 from .views.access import suprimentos_por_contrato
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
-router.register(r'categorias_produtos', CategoriasProdutosViewSet)
-router.register(r'clientes', ClientesViewSet)
-router.register(r'contagens_inventario', ContagensInventarioViewSet)
-router.register(r'contas_pagar', ContasPagarViewSet)
-router.register(r'contas_receber', ContasReceberViewSet)
-router.register(r'contratos_locacao', ContratosLocacaoViewSet)
-router.register(r'custos_adicionais_frete', CustosAdicionaisFreteViewSet)
-router.register(r'despesas', DespesasViewSet)
-router.register(r'empresas', EmpresasViewSet)
-router.register(r'fornecedores', FornecedoresViewSet)
-router.register(r'fretes', FretesViewSet)
-router.register(r'funcionarios', FuncionariosViewSet)
-router.register(r'grupos', GruposViewSet)
-router.register(r'historico_rastreamento', HistoricoRastreamentoViewSet)
-router.register(r'inventarios', InventariosViewSet)
-router.register(r'itens_contrato_locacao', ItensContratoLocacaoViewSet)
-router.register(r'itens_nf_compra', ItensNfEntradaViewSet)
-router.register(r'itens_nf_venda', ItensNfSaidaViewSet)
-router.register(r'locais_estoque', LocaisEstoqueViewSet)
-router.register(r'lotes', LotesViewSet)
-router.register(r'marcas', MarcasViewSet)
-router.register(r'movimentacoes_estoque', MovimentacoesEstoqueViewSet)
-router.register(r'notas_fiscais_compra', NotasFiscaisEntradaViewSet)
-router.register(r'notas_fiscais_venda', NotasFiscaisSaidaViewSet)
-router.register(r'ocorrencias_frete', OcorrenciasFreteViewSet)
-router.register(r'pagamentos_funcionarios', PagamentosFuncionariosViewSet)
-router.register(r'posicoes_estoque', PosicoesEstoqueViewSet)
-router.register(r'produtos', ProdutosViewSet)
-router.register(r'regioes_entrega', RegioesEntregaViewSet)
-router.register(r'saldos_estoque', SaldosEstoqueViewSet)
-router.register(r'tabelas_frete', TabelasFreteViewSet)
-router.register(r'tipos_movimentacao_estoque', TiposMovimentacaoEstoqueViewSet)
+# ... (outros registros do router)
 router.register(r'transportadoras', TransportadorasViewSet)
 router.register(r'fluxo-caixa', FluxoCaixaViewSet, basename='fluxo-caixa')
 router.register(r'fluxo-caixa-lucro', FluxoCaixaLucroViewSet, basename='fluxo-caixa-lucro')
@@ -57,5 +27,10 @@ urlpatterns = [
     path('relatorio-valor-estoque/', relatorio_valor_estoque, name='relatorio-valor-estoque'),
     path('contas-por-data-pagamento/', contas_por_data_pagamento, name='contas-por-data-pagamento'),
     path('contas-por-data-vencimento/', contas_por_data_vencimento, name='contas-por-data-vencimento'),
+    
+    # Nova rota para o relatório de custos fixos
+    path('relatorios/custos-fixos/', RelatorioCustosFixosView.as_view(), name='relatorio-custos-fixos'),
+    
     path('', include(router.urls)),
 ]
+

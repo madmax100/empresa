@@ -238,3 +238,19 @@
         - Total de marcas migradas: 11
         - Total de erros: 0
         
+2025-09-08 01:54:45,048 - INFO - Iniciando migração de marcas às 2025-09-08 01:54:45.048613
+2025-09-08 01:54:45,048 - INFO - Estabelecendo conexões com os bancos de dados...
+2025-09-08 01:54:45,483 - INFO - Iniciando limpeza das tabelas...
+2025-09-08 01:54:45,493 - INFO - Limpando tabela produtos...
+2025-09-08 01:54:45,581 - INFO - Tabela produtos limpa com sucesso
+2025-09-08 01:54:45,582 - INFO - Limpando tabela marcas...
+2025-09-08 01:54:45,585 - INFO - Tabela marcas limpa com sucesso
+2025-09-08 01:54:45,644 - INFO - Limpeza de tabelas concluída com sucesso
+2025-09-08 01:54:45,646 - INFO - Estrutura da tabela marcas verificada/criada com sucesso
+2025-09-08 01:54:45,646 - INFO - Consultando dados do Access...
+2025-09-08 01:54:45,651 - INFO - Iniciando migração dos registros...
+2025-09-08 01:54:45,665 - INFO - 
+        Migração concluída em 0:00:00.616897:
+        - Total de marcas migradas: 11
+        - Total de erros: 0
+        

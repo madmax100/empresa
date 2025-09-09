@@ -4,10 +4,11 @@ import FluxoLucroDashboard from './components/dashboard/FluxoLucroDashboard';
 import EstoqueDashboard from './components/dashboard/EstoqueDashboard';
 import ContratosPage from './pages/ContratosPage';
 import ResultadosPage from './pages/ResultadosPage';
+import CustosFixosPage from './pages/CustosFixosPage';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'contratos' | 'resultados'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'contratos' | 'resultados' | 'custos-fixos'>('fluxo-realizado');
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
@@ -139,6 +140,26 @@ function App() {
             >
               📈 Resultados do Período
             </button>
+
+            <button
+              onClick={() => setActivePanel('custos-fixos')}
+              style={{
+                padding: '10px 20px',
+                border: 'none',
+                backgroundColor: activePanel === 'custos-fixos' ? '#3b82f6' : 'transparent',
+                color: activePanel === 'custos-fixos' ? 'white' : '#6b7280',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              💳 Custos Fixos
+            </button>
           </div>
         </div>
       </div>
@@ -150,6 +171,7 @@ function App() {
         {activePanel === 'estoque' && <EstoqueDashboard />}
         {activePanel === 'contratos' && <ContratosPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
+        {activePanel === 'custos-fixos' && <CustosFixosPage />}
       </div>
     </div>
   );
