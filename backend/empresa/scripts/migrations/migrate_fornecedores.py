@@ -215,10 +215,10 @@ def migrate_fornecedores():
                 id, tipo_pessoa, nome, cpf_cnpj, rg_ie,
                 endereco, bairro, cidade, estado, cep,
                 telefone, email, contato_nome, contato_telefone,
-                tipo, data_cadastro, ativo
+                especificacao, tipo, data_cadastro, ativo
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s
             )
         """
         
@@ -261,6 +261,7 @@ def migrate_fornecedores():
                     clean_string(row[14]),       # email
                     clean_string(row[11]),       # contato_nome (contato)
                     clean_phone(row[13]),        # contato_telefone (celular)
+                    clean_string(row[15]),       # especificacao
                     tipo_fornecedor,             # tipo
                     data_cadastro,               # data_cadastro
                     True                         # ativo

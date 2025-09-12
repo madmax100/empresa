@@ -236,22 +236,64 @@ const EstoqueDashboard: React.FC = () => {
       const dataQuery = dataSelecionada ? `&data=${dataSelecionada}` : '';
       const offset = (paginaAtual - 1) * itensPorPagina;
 
+      const estoqueGeralUrl = `http://127.0.0.1:8000/contas/estoque-controle/estoque_atual/?limite=${itensPorPagina}&offset=${offset}${dataQuery}`;
+      const estoqueTopUrl = `http://127.0.0.1:8000/contas/estoque-controle/estoque_atual/?limite=100&ordem=valor_atual&reverso=true${dataQuery}`;
+      const estoqueCriticoUrl = `http://127.0.0.1:8000/contas/estoque-controle/estoque_critico/?limite=10${dataQuery}`;
+      const produtosMovimentadosUrl = `http://127.0.0.1:8000/contas/estoque-controle/produtos_mais_movimentados/?limite=10${dataQuery}`;
+
+      console.log('🔗 URLs sendo chamadas:');
+      console.log('📦 Estoque Geral:', estoqueGeralUrl);
+      console.log('💎 Estoque Top:', estoqueTopUrl);
+      console.log('⚠️ Estoque Crítico:', estoqueCriticoUrl);
+      console.log('🔄 Produtos Movimentados:', produtosMovimentadosUrl);
+
       const [
         estoqueGeralResponse,
         estoqueTopResponse,
         estoqueCriticoResponse,
         produtosMovimentadosResponse
       ] = await Promise.all([
-        fetch(`http://127.0.0.1:8000/api/estoque-controle/estoque_atual/?limite=${itensPorPagina}&offset=${offset}${dataQuery}`),
-        fetch(`http://127.0.0.1:8000/api/estoque-controle/estoque_atual/?limite=100&ordem=valor_atual&reverso=true${dataQuery}`),
-        fetch(`http://127.0.0.1:8000/api/estoque-controle/estoque_critico/?limite=10${dataQuery}`),
-        fetch(`http://127.0.0.1:8000/api/estoque-controle/produtos_mais_movimentados/?limite=10${dataQuery}`)
+        fetch(estoqueGeralUrl),
+        fetch(estoqueTopUrl),
+        fetch(estoqueCriticoUrl),
+        fetch(produtosMovimentadosUrl)
       ]);
 
-      const estoqueGeral = await estoqueGeralResponse.json();
-      const estoqueTop = await estoqueTopResponse.json();
-      const estoqueCritico = await estoqueCriticoResponse.json();
-      const produtosMovimentados = await produtosMovimentadosResponse.json();
+      console.log('🌐 Status das respostas:');
+      console.log('📦 Estoque Geral:', estoqueGeralResponse.status, estoqueGeralResponse.statusText);
+      console.log('💎 Estoque Top:', estoqueTopResponse.status, estoqueTopResponse.statusText);
+      console.log('⚠️ Estoque Crítico:', estoqueCriticoResponse.status, estoqueCriticoResponse.statusText);
+      console.log('🔄 Produtos Movimentados:', produtosMovimentadosResponse.status, produtosMovimentadosResponse.statusText);
+
+      // Verificar se todas as requisições foram bem-sucedidas
+      if (!estoqueGeralResponse.ok) {
+        const errorText = await estoqueGeralResponse.text();
+        console.error('❌ Erro no endpoint de estoque geral:', errorText);
+        throw new Error(`Erro no estoque geral: ${estoqueGeralResponse.status} - ${errorText}`);
+      }
+      if (!estoqueTopResponse.ok) {
+        const errorText = await estoqueTopResponse.text();
+        console.error('❌ Erro no endpoint de estoque top:', errorText);
+      }
+      if (!estoqueCriticoResponse.ok) {
+        const errorText = await estoqueCriticoResponse.text();
+        console.error('❌ Erro no endpoint de estoque crítico:', errorText);
+      }
+      if (!produtosMovimentadosResponse.ok) {
+        const errorText = await produtosMovimentadosResponse.text();
+        console.error('❌ Erro no endpoint de produtos movimentados:', errorText);
+      }
+
+      const estoqueGeral = estoqueGeralResponse.ok ? await estoqueGeralResponse.json() : null;
+      const estoqueTop = estoqueTopResponse.ok ? await estoqueTopResponse.json() : null;
+      const estoqueCritico = estoqueCriticoResponse.ok ? await estoqueCriticoResponse.json() : null;
+      const produtosMovimentados = produtosMovimentadosResponse.ok ? await produtosMovimentadosResponse.json() : null;
+
+      console.log('🔍 DEBUG - Dados recebidos da API:');
+      console.log('📦 Estoque Geral:', estoqueGeral);
+      console.log('💎 Estoque Top:', estoqueTop);
+      console.log('⚠️ Estoque Crítico:', estoqueCritico);
+      console.log('🔄 Produtos Movimentados:', produtosMovimentados);
 
       setEstoqueGeralData(estoqueGeral);
       setEstoqueTopData(estoqueTop);
@@ -281,7 +323,7 @@ const EstoqueDashboard: React.FC = () => {
     
     try {
       const dataQuery = dataSelecionada ? `&data=${dataSelecionada}` : '';
-      const response = await fetch(`http://127.0.0.1:8000/api/estoque-controle/estoque_atual/?produto_id=${produtoEspecificoId}${dataQuery}`);
+      const response = await fetch(`http://127.0.0.1:8000/contas/estoque-controle/estoque_atual/?produto_id=${produtoEspecificoId}${dataQuery}`);
       const data = await response.json();
       setProdutoEspecificoData(data);
     } catch (err) {
@@ -300,7 +342,7 @@ const EstoqueDashboard: React.FC = () => {
       const dataInicioStr = dataInicio.toISOString().split('T')[0];
 
       const parametrosDetalhes = incluirDetalhes ? '&incluir_detalhes=true' : '';
-      const response = await fetch(`http://127.0.0.1:8000/api/estoque-controle/movimentacoes_periodo/?data_inicio=${dataInicioStr}&data_fim=${dataFim}${parametrosDetalhes}`);
+      const response = await fetch(`http://127.0.0.1:8000/contas/estoque-controle/movimentacoes_periodo/?data_inicio=${dataInicioStr}&data_fim=${dataFim}${parametrosDetalhes}`);
       const data = await response.json();
       setMovimentacoesPeriodoData(data);
     } catch (err) {
@@ -359,7 +401,7 @@ const EstoqueDashboard: React.FC = () => {
         console.log('� Fazendo requisição simples para testar...');
         
         // Teste simples primeiro
-        const response = await fetch(`http://127.0.0.1:8000/api/estoque-controle/estoque_atual/${dataSelecionada ? `?data=${dataSelecionada}` : ''}`);
+        const response = await fetch(`http://127.0.0.1:8000/contas/estoque-controle/estoque_atual/${dataSelecionada ? `?data=${dataSelecionada}` : ''}`);
         const dados = await response.json();
         
         console.log('✅ Resposta recebida:', dados);
@@ -380,9 +422,9 @@ const EstoqueDashboard: React.FC = () => {
           estoqueCriticoResponse,
           produtosMovimentadosResponse
         ] = await Promise.all([
-          fetch(`http://127.0.0.1:8000/api/estoque-controle/estoque_atual/?limite=100&ordem=valor_atual&reverso=true${dataQueryParam}`),
-          fetch(`http://127.0.0.1:8000/api/estoque-controle/estoque_critico/?limite=10${dataQueryParam}`),
-          fetch(`http://127.0.0.1:8000/api/estoque-controle/produtos_mais_movimentados/?limite=10${dataQueryParam}`)
+          fetch(`http://127.0.0.1:8000/contas/estoque-controle/estoque_atual/?limite=100&ordem=valor_atual&reverso=true${dataQueryParam}`),
+          fetch(`http://127.0.0.1:8000/contas/estoque-controle/estoque_critico/?limite=10${dataQueryParam}`),
+          fetch(`http://127.0.0.1:8000/contas/estoque-controle/produtos_mais_movimentados/?limite=10${dataQueryParam}`)
         ]);
 
         const estoqueTop = await estoqueTopResponse.json();
@@ -662,11 +704,13 @@ const EstoqueDashboard: React.FC = () => {
       <div style={{ backgroundColor: 'white', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
         
         {/* Estoque Geral Tab */}
-        {activeTab === 'geral' && estoqueGeralData && (
+        {activeTab === 'geral' && (
           <div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#111827', marginBottom: '24px' }}>
-              📦 Estoque Geral - Página {paginaAtual} de {totalPaginas}
-            </h2>
+            {estoqueGeralData ? (
+              <>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#111827', marginBottom: '24px' }}>
+                  📦 Estoque Geral - Página {paginaAtual} de {totalPaginas}
+                </h2>
             
             {/* Controles de Paginação - Topo */}
             <div style={{ 
@@ -753,7 +797,7 @@ const EstoqueDashboard: React.FC = () => {
               display: 'grid', 
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
               gap: '16px',
-              marginBottom: '24px'
+              marginBottom: '16px'
             }}>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#eff6ff', borderRadius: '8px' }}>
                 <div style={{ fontSize: '0.875rem', color: '#2563eb', fontWeight: '500' }}>
@@ -761,6 +805,9 @@ const EstoqueDashboard: React.FC = () => {
                 </div>
                 <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#1d4ed8', marginTop: '4px' }}>
                   {formatNumber(estoqueGeralData?.estatisticas?.total_produtos)}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                  Cadastrados no sistema
                 </div>
               </div>
 
@@ -771,15 +818,56 @@ const EstoqueDashboard: React.FC = () => {
                 <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#15803d', marginTop: '4px' }}>
                   {formatCurrency(estoqueGeralData?.estatisticas?.valor_total_atual || 0)}
                 </div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                  Na data: {formatDate(estoqueGeralData?.parametros?.data_consulta || dataSelecionada)}
+                </div>
+              </div>
+
+              <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#fef3f2', borderRadius: '8px' }}>
+                <div style={{ fontSize: '0.875rem', color: '#b91c1c', fontWeight: '500' }}>
+                  � Produtos com Estoque
+                </div>
+                <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#dc2626', marginTop: '4px' }}>
+                  {formatNumber(estoqueGeralData?.estatisticas?.produtos_com_estoque)}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                  Com quantidade {'>'} 0
+                </div>
               </div>
 
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#fefce8', borderRadius: '8px' }}>
                 <div style={{ fontSize: '0.875rem', color: '#ca8a04', fontWeight: '500' }}>
-                  📅 Data da Consulta
+                  📊 Variação de Valor
                 </div>
-                <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#a16207', marginTop: '4px' }}>
-                  {formatDate(estoqueGeralData?.parametros?.data_consulta || '')}
+                <div style={{ 
+                  fontSize: '1.25rem', 
+                  fontWeight: '700', 
+                  color: (estoqueGeralData?.estatisticas?.variacao_total || 0) >= 0 ? '#15803d' : '#dc2626', 
+                  marginTop: '4px' 
+                }}>
+                  {formatCurrency(estoqueGeralData?.estatisticas?.variacao_total || 0)}
                 </div>
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                  Desde o início
+                </div>
+              </div>
+            </div>
+
+            {/* Aviso sobre a data consultada */}
+            <div style={{
+              backgroundColor: '#f0f9ff',
+              border: '1px solid #bae6fd',
+              borderRadius: '6px',
+              padding: '12px',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <div style={{ color: '#0369a1', fontSize: '1rem' }}>ℹ️</div>
+              <div style={{ fontSize: '0.875rem', color: '#0369a1' }}>
+                <strong>Importante:</strong> Todos os valores e quantidades mostrados refletem o estado do estoque na data selecionada: 
+                <strong> {formatDate(estoqueGeralData?.parametros?.data_consulta || dataSelecionada)}</strong>
               </div>
             </div>
 
@@ -917,6 +1005,46 @@ const EstoqueDashboard: React.FC = () => {
                 </button>
               </div>
             </div>
+              </>
+            ) : (
+              <div style={{
+                textAlign: 'center',
+                padding: '64px 24px',
+                backgroundColor: '#f9fafb',
+                borderRadius: '12px',
+                border: '2px dashed #d1d5db',
+                color: '#6b7280'
+              }}>
+                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📦</div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                  Dados do Estoque Não Carregados
+                </h3>
+                <p style={{ fontSize: '1rem', marginBottom: '16px' }}>
+                  Os dados do estoque geral não foram carregados ainda ou não há dados disponíveis para a data selecionada.
+                </p>
+                <p style={{ fontSize: '0.875rem', color: '#9ca3af', marginBottom: '24px' }}>
+                  Data selecionada: <strong>{formatDate(dataSelecionada)}</strong>
+                </p>
+                <button
+                  onClick={loadData}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#2563eb',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  🔄 Carregar Dados do Estoque
+                </button>
+              </div>
+            )}
           </div>
         )}
 

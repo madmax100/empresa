@@ -6,7 +6,7 @@ from .views.fluxo_caixa2 import FluxoCaixaViewSet as FluxoCaixaLucroViewSet
 from .views.fluxo_caixa_realizado import FluxoCaixaRealizadoViewSet
 from .views.analise_fluxo_caixa import AnaliseFluxoCaixaViewSet
 from .views.estoque_views import EstoqueViewSet
-from .views.relatorios_views import RelatorioCustosFixosView
+from .views.relatorios_views import RelatorioCustosFixosView, RelatorioCustosVariaveisView, RelatorioFaturamentoView
 from .views.access import *
 from .views.access import suprimentos_por_contrato
 
@@ -27,9 +27,16 @@ urlpatterns = [
     path('relatorio-valor-estoque/', relatorio_valor_estoque, name='relatorio-valor-estoque'),
     path('contas-por-data-pagamento/', contas_por_data_pagamento, name='contas-por-data-pagamento'),
     path('contas-por-data-vencimento/', contas_por_data_vencimento, name='contas-por-data-vencimento'),
+    path('contas-nao-pagas-por-data-corte/', contas_nao_pagas_por_data_corte, name='contas-nao-pagas-por-data-corte'),
     
     # Nova rota para o relatório de custos fixos
     path('relatorios/custos-fixos/', RelatorioCustosFixosView.as_view(), name='relatorio-custos-fixos'),
+    
+    # Nova rota para o relatório de custos variáveis
+    path('relatorios/custos-variaveis/', RelatorioCustosVariaveisView.as_view(), name='relatorio-custos-variaveis'),
+    
+    # Nova rota para o relatório de faturamento
+    path('relatorios/faturamento/', RelatorioFaturamentoView.as_view(), name='relatorio-faturamento'),
     
     path('', include(router.urls)),
 ]

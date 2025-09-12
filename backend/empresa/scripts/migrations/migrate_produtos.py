@@ -139,7 +139,6 @@ def clean_tables(pg_conn):
             'itens_nf_entrada',
             'itens_nf_saida',
             'itens_contrato_locacao',
-            'movimentacoes_estoque',
             'saldos_estoque',
             'produtos'
         ]

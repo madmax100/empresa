@@ -5,10 +5,13 @@ import EstoqueDashboard from './components/dashboard/EstoqueDashboard';
 import ContratosPage from './pages/ContratosPage';
 import ResultadosPage from './pages/ResultadosPage';
 import CustosFixosPage from './pages/CustosFixosPage';
+import CustosVariaveisPage from './pages/CustosVariaveisPage';
+import { FaturamentoPage } from './pages/FaturamentoPage';
+import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'contratos' | 'resultados' | 'custos-fixos'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api'>('fluxo-realizado');
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
@@ -160,6 +163,66 @@ function App() {
             >
               💳 Custos Fixos
             </button>
+
+            <button
+              onClick={() => setActivePanel('custos-variaveis')}
+              style={{
+                padding: '10px 20px',
+                border: 'none',
+                backgroundColor: activePanel === 'custos-variaveis' ? '#3b82f6' : 'transparent',
+                color: activePanel === 'custos-variaveis' ? 'white' : '#6b7280',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              💰 Custos Variáveis
+            </button>
+
+            <button
+              onClick={() => setActivePanel('faturamento')}
+              style={{
+                padding: '10px 20px',
+                border: 'none',
+                backgroundColor: activePanel === 'faturamento' ? '#3b82f6' : 'transparent',
+                color: activePanel === 'faturamento' ? 'white' : '#6b7280',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              🧾 Faturamento
+            </button>
+
+            <button
+              onClick={() => setActivePanel('test-api')}
+              style={{
+                padding: '10px 20px',
+                border: 'none',
+                backgroundColor: activePanel === 'test-api' ? '#3b82f6' : 'transparent',
+                color: activePanel === 'test-api' ? 'white' : '#6b7280',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              🧪 Teste API
+            </button>
           </div>
         </div>
       </div>
@@ -172,6 +235,9 @@ function App() {
         {activePanel === 'contratos' && <ContratosPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
+        {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
+        {activePanel === 'faturamento' && <FaturamentoPage />}
+        {activePanel === 'test-api' && <TestApiConnection />}
       </div>
     </div>
   );

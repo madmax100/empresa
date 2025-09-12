@@ -12,6 +12,7 @@ import pandas as pd
 from datetime import datetime, date, time
 import logging
 from decimal import Decimal, InvalidOperation
+import pytz
 
 # Configurar o ambiente Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -20,6 +21,7 @@ django.setup()
 
 from contas.models.access import MovimentacoesEstoque, Produtos, TiposMovimentacaoEstoque
 from django.db import transaction
+from django.utils import timezone
 
 # Configuração de logging
 logging.basicConfig(
@@ -242,7 +244,7 @@ class MovimentacoesExtratosImporter:
                 nome=f"Produto {codigo}",
                 ativo=True,
                 preco_venda=Decimal('0.00'),
-                categoria_produtos_id=1  # Assumindo que existe uma categoria padrão
+                grupo_id=None  # Deixar como None já que o campo permite null
             )
             logging.info(f"Produto criado: {produto.nome} (código: {codigo})")
             return produto

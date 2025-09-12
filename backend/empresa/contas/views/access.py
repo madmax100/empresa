@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum, Q, Count, Case, When, F, DecimalField
+from django.db.models import Sum, Q, Count, Case, When, F, DecimalField, Min, Max
 from django.db.models.functions import Coalesce, TruncMonth
 from decimal import Decimal
 from datetime import date, timedelta, datetime
@@ -1582,3 +1582,298 @@ def relatorio_valor_estoque(request):
 
     except Exception as e:
         return Response({'error': f'Erro interno: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def contas_nao_pagas_por_data_corte(request):
+    """
+    Endpoint para mostrar total de contas a pagar e receber não pagas 
+    antes e depois de uma data de corte, agrupadas por fornecedor/cliente.
+    
+    Parâmetros:
+    - data_corte: Data de referência (YYYY-MM-DD) - obrigatório
+    - tipo: 'pagar', 'receber' ou 'ambos' (padrão: 'ambos')
+    - incluir_canceladas: true/false (padrão: false)
+    - filtrar_por_data_emissao: true/false (padrão: false) - filtra apenas contas com data de emissão anterior à data de corte
+    """
+    
+    def classificar_tipo_custo(especificacao):
+        """
+        Classifica fornecedores como custos fixos ou variáveis baseado na especificação
+        """
+        custos_fixos = {
+            'SALARIOS', 'PRO-LABORE', 'HONOR. CONTABEIS', 'LUZ', 'AGUA', 'TELEFONE',
+            'IMPOSTOS', 'ENCARGOS', 'REFEICAO', 'BENEFICIOS', 'OUTRAS DESPESAS',
+            'MAT. DE ESCRITORIO', 'PAGTO SERVICOS', 'EMPRESTIMO', 'DESP. FINANCEIRAS'
+        }
+        
+        custos_variaveis = {
+            'FORNECEDORES', 'FRETE', 'COMISSOES', 'DESP. VEICULOS'
+        }
+        
+        if not especificacao:
+            return 'NÃO CLASSIFICADO'
+        
+        especificacao_upper = especificacao.upper()
+        
+        if especificacao_upper in custos_fixos:
+            return 'FIXO'
+        elif especificacao_upper in custos_variaveis:
+            return 'VARIÁVEL'
+        else:
+            return 'NÃO CLASSIFICADO'
+    try:
+        # 1. Validar parâmetros
+        data_corte_str = request.query_params.get('data_corte')
+        tipo_filtro = request.query_params.get('tipo', 'ambos').lower()
+        incluir_canceladas = request.query_params.get('incluir_canceladas', 'false').lower() == 'true'
+        filtrar_por_data_emissao = request.query_params.get('filtrar_por_data_emissao', 'false').lower() == 'true'
+        
+        if not data_corte_str:
+            return Response({
+                'error': 'O parâmetro data_corte é obrigatório'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            data_corte = datetime.strptime(data_corte_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({
+                'error': 'Formato de data inválido. Use YYYY-MM-DD'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        if tipo_filtro not in ['pagar', 'receber', 'ambos']:
+            return Response({
+                'error': 'Tipo deve ser: pagar, receber ou ambos'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        resultado = {
+            'data_corte': data_corte,
+            'filtros': {
+                'tipo': tipo_filtro,
+                'incluir_canceladas': incluir_canceladas,
+                'filtrar_por_data_emissao': filtrar_por_data_emissao
+            },
+            'resumo_geral': {
+                'antes_data_corte': {
+                    'total_contas_pagar': 0,
+                    'valor_total_pagar': Decimal('0.00'),
+                    'total_contas_receber': 0,
+                    'valor_total_receber': Decimal('0.00'),
+                    'total_fornecedores': 0,
+                    'total_clientes': 0
+                },
+                'depois_data_corte': {
+                    'total_contas_pagar': 0,
+                    'valor_total_pagar': Decimal('0.00'),
+                    'total_contas_receber': 0,
+                    'valor_total_receber': Decimal('0.00'),
+                    'total_fornecedores': 0,
+                    'total_clientes': 0
+                }
+            },
+            'detalhamento': {
+                'contas_a_pagar': {
+                    'antes_data_corte': [],
+                    'depois_data_corte': []
+                },
+                'contas_a_receber': {
+                    'antes_data_corte': [],
+                    'depois_data_corte': []
+                }
+            }
+        }
+        
+        # 2. Processar Contas a Pagar
+        if tipo_filtro in ['pagar', 'ambos']:
+            # Base query para contas não pagas
+            base_query = ContasPagar.objects.filter(status='A').select_related('fornecedor')
+            
+            if not incluir_canceladas:
+                base_query = base_query.exclude(status='C')
+            
+            # Adicionar filtro por data de emissão se solicitado
+            if filtrar_por_data_emissao:
+                base_query = base_query.filter(data__lt=data_corte, data__isnull=False)
+            
+            # Contas antes da data de corte
+            contas_antes = base_query.filter(
+                vencimento__lt=data_corte
+            ).values(
+                'fornecedor__id',
+                'fornecedor__nome',
+                'fornecedor__cpf_cnpj',
+                'fornecedor__especificacao'
+            ).annotate(
+                total_contas=Count('id'),
+                valor_total=Sum('valor'),
+                menor_vencimento=Min('vencimento'),
+                maior_vencimento=Max('vencimento')
+            ).order_by('fornecedor__especificacao', 'fornecedor__nome')
+            
+            # Contas depois da data de corte
+            contas_depois = base_query.filter(
+                vencimento__gte=data_corte
+            ).values(
+                'fornecedor__id',
+                'fornecedor__nome',
+                'fornecedor__cpf_cnpj',
+                'fornecedor__especificacao'
+            ).annotate(
+                total_contas=Count('id'),
+                valor_total=Sum('valor'),
+                menor_vencimento=Min('vencimento'),
+                maior_vencimento=Max('vencimento')
+            ).order_by('fornecedor__especificacao', 'fornecedor__nome')
+            
+            # Formatar dados de contas a pagar
+            def formatar_contas_pagar(queryset):
+                lista = []
+                for item in queryset:
+                    especificacao = item['fornecedor__especificacao']
+                    tipo_custo = classificar_tipo_custo(especificacao)
+                    
+                    lista.append({
+                        'fornecedor': {
+                            'id': item['fornecedor__id'],
+                            'nome': item['fornecedor__nome'],
+                            'cnpj_cpf': item['fornecedor__cpf_cnpj'],
+                            'especificacao': especificacao,
+                            'tipo_custo': tipo_custo
+                        },
+                        'total_contas': item['total_contas'],
+                        'valor_total': float(item['valor_total'] or Decimal('0.00')),
+                        'periodo_vencimento': {
+                            'menor_data': item['menor_vencimento'],
+                            'maior_data': item['maior_vencimento']
+                        }
+                    })
+                return lista
+            
+            resultado['detalhamento']['contas_a_pagar']['antes_data_corte'] = formatar_contas_pagar(contas_antes)
+            resultado['detalhamento']['contas_a_pagar']['depois_data_corte'] = formatar_contas_pagar(contas_depois)
+            
+            # Função para calcular totais por tipo de custo
+            def calcular_totais_por_tipo_custo(contas_lista):
+                totais = {
+                    'FIXO': {'total_contas': 0, 'valor_total': 0.0},
+                    'VARIÁVEL': {'total_contas': 0, 'valor_total': 0.0},
+                    'NÃO CLASSIFICADO': {'total_contas': 0, 'valor_total': 0.0}
+                }
+                
+                for conta in contas_lista:
+                    tipo_custo = conta['fornecedor']['tipo_custo']
+                    totais[tipo_custo]['total_contas'] += conta['total_contas']
+                    totais[tipo_custo]['valor_total'] += conta['valor_total']
+                
+                return totais
+            
+            # Calcular totais para contas a pagar
+            resultado['resumo_geral']['antes_data_corte']['total_contas_pagar'] = sum(c['total_contas'] for c in resultado['detalhamento']['contas_a_pagar']['antes_data_corte'])
+            resultado['resumo_geral']['antes_data_corte']['valor_total_pagar'] = sum(c['valor_total'] for c in resultado['detalhamento']['contas_a_pagar']['antes_data_corte'])
+            resultado['resumo_geral']['antes_data_corte']['total_fornecedores'] = len(resultado['detalhamento']['contas_a_pagar']['antes_data_corte'])
+            resultado['resumo_geral']['antes_data_corte']['custos_por_tipo'] = calcular_totais_por_tipo_custo(resultado['detalhamento']['contas_a_pagar']['antes_data_corte'])
+            
+            resultado['resumo_geral']['depois_data_corte']['total_contas_pagar'] = sum(c['total_contas'] for c in resultado['detalhamento']['contas_a_pagar']['depois_data_corte'])
+            resultado['resumo_geral']['depois_data_corte']['valor_total_pagar'] = sum(c['valor_total'] for c in resultado['detalhamento']['contas_a_pagar']['depois_data_corte'])
+            resultado['resumo_geral']['depois_data_corte']['total_fornecedores'] = len(resultado['detalhamento']['contas_a_pagar']['depois_data_corte'])
+            resultado['resumo_geral']['depois_data_corte']['custos_por_tipo'] = calcular_totais_por_tipo_custo(resultado['detalhamento']['contas_a_pagar']['depois_data_corte'])
+        
+        # 3. Processar Contas a Receber
+        if tipo_filtro in ['receber', 'ambos']:
+            # Base query para contas não recebidas
+            base_query = ContasReceber.objects.filter(status='A').select_related('cliente')
+            
+            if not incluir_canceladas:
+                base_query = base_query.exclude(status='C')
+            
+            # Adicionar filtro por data de emissão se solicitado
+            if filtrar_por_data_emissao:
+                base_query = base_query.filter(data__lt=data_corte, data__isnull=False)
+            
+            # Contas antes da data de corte
+            contas_antes = base_query.filter(
+                vencimento__lt=data_corte
+            ).values(
+                'cliente__id',
+                'cliente__nome',
+                'cliente__cpf_cnpj'
+            ).annotate(
+                total_contas=Count('id'),
+                valor_total=Sum('valor'),
+                menor_vencimento=Min('vencimento'),
+                maior_vencimento=Max('vencimento')
+            ).order_by('cliente__nome')
+            
+            # Contas depois da data de corte
+            contas_depois = base_query.filter(
+                vencimento__gte=data_corte
+            ).values(
+                'cliente__id',
+                'cliente__nome',
+                'cliente__cpf_cnpj'
+            ).annotate(
+                total_contas=Count('id'),
+                valor_total=Sum('valor'),
+                menor_vencimento=Min('vencimento'),
+                maior_vencimento=Max('vencimento')
+            ).order_by('cliente__nome')
+            
+            # Formatar dados de contas a receber
+            def formatar_contas_receber(queryset):
+                lista = []
+                for item in queryset:
+                    lista.append({
+                        'cliente': {
+                            'id': item['cliente__id'],
+                            'nome': item['cliente__nome'],
+                            'cnpj_cpf': item['cliente__cpf_cnpj']
+                        },
+                        'total_contas': item['total_contas'],
+                        'valor_total': float(item['valor_total'] or Decimal('0.00')),
+                        'periodo_vencimento': {
+                            'menor_data': item['menor_vencimento'],
+                            'maior_data': item['maior_vencimento']
+                        }
+                    })
+                return lista
+            
+            resultado['detalhamento']['contas_a_receber']['antes_data_corte'] = formatar_contas_receber(contas_antes)
+            resultado['detalhamento']['contas_a_receber']['depois_data_corte'] = formatar_contas_receber(contas_depois)
+            
+            # Calcular totais para contas a receber
+            resultado['resumo_geral']['antes_data_corte']['total_contas_receber'] = sum(c['total_contas'] for c in resultado['detalhamento']['contas_a_receber']['antes_data_corte'])
+            resultado['resumo_geral']['antes_data_corte']['valor_total_receber'] = sum(c['valor_total'] for c in resultado['detalhamento']['contas_a_receber']['antes_data_corte'])
+            resultado['resumo_geral']['antes_data_corte']['total_clientes'] = len(resultado['detalhamento']['contas_a_receber']['antes_data_corte'])
+            
+            resultado['resumo_geral']['depois_data_corte']['total_contas_receber'] = sum(c['total_contas'] for c in resultado['detalhamento']['contas_a_receber']['depois_data_corte'])
+            resultado['resumo_geral']['depois_data_corte']['valor_total_receber'] = sum(c['valor_total'] for c in resultado['detalhamento']['contas_a_receber']['depois_data_corte'])
+            resultado['resumo_geral']['depois_data_corte']['total_clientes'] = len(resultado['detalhamento']['contas_a_receber']['depois_data_corte'])
+        
+        # 4. Calcular saldos líquidos
+        antes_valor_receber = Decimal(str(resultado['resumo_geral']['antes_data_corte']['valor_total_receber']))
+        antes_valor_pagar = Decimal(str(resultado['resumo_geral']['antes_data_corte']['valor_total_pagar']))
+        depois_valor_receber = Decimal(str(resultado['resumo_geral']['depois_data_corte']['valor_total_receber']))
+        depois_valor_pagar = Decimal(str(resultado['resumo_geral']['depois_data_corte']['valor_total_pagar']))
+        
+        antes_saldo = antes_valor_receber - antes_valor_pagar
+        depois_saldo = depois_valor_receber - depois_valor_pagar
+        
+        resultado['resumo_geral']['antes_data_corte']['saldo_liquido'] = float(antes_saldo)
+        resultado['resumo_geral']['depois_data_corte']['saldo_liquido'] = float(depois_saldo)
+        resultado['resumo_geral']['saldo_total'] = float(antes_saldo + depois_saldo)
+        
+        # 5. Adicionar metadados
+        resultado['metadados'] = {
+            'data_consulta': datetime.now().isoformat(),
+            'total_registros_antes': (resultado['resumo_geral']['antes_data_corte']['total_contas_pagar'] + 
+                                    resultado['resumo_geral']['antes_data_corte']['total_contas_receber']),
+            'total_registros_depois': (resultado['resumo_geral']['depois_data_corte']['total_contas_pagar'] + 
+                                     resultado['resumo_geral']['depois_data_corte']['total_contas_receber'])
+        }
+        
+        return Response(resultado, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'error': f'Erro interno: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

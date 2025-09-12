@@ -2,37 +2,36 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, F
 from datetime import datetime, date
 from decimal import Decimal
 from collections import defaultdict
 
-from ..models.access import MovimentacoesEstoque, Produtos
+from ..models.access import MovimentacoesEstoque, Produtos, EstoqueInicial, Grupos
 
 
 class EstoqueViewSet(viewsets.ViewSet):
     """ViewSet para controle de estoque com base no estoque inicial de 2025"""
     
     def _carregar_estoque_inicial(self):
-        """Carrega o estoque inicial de 01/01/2025"""
+        """Carrega o estoque inicial de 01/01/2025 da tabela EstoqueInicial"""
         estoque_inicial = {}
         
-        movimentacoes_iniciais = MovimentacoesEstoque.objects.filter(
-            documento_referencia='EST_INICIAL_2025',
-            data_movimentacao__date='2025-01-01',
-            tipo_movimentacao=3  # Tipo 3 = Estoque inicial
+        # Usar tabela específica de estoque inicial
+        estoques_iniciais = EstoqueInicial.objects.filter(
+            data_inicial=date(2025, 1, 1)
         ).select_related('produto')
         
-        for mov in movimentacoes_iniciais:
-            produto_id = mov.produto if isinstance(mov.produto, int) else mov.produto.id
+        for est in estoques_iniciais:
+            produto_id = est.produto.id
             
             estoque_inicial[produto_id] = {
                 'produto_id': produto_id,
-                'quantidade_inicial': mov.quantidade,
-                'custo_unitario': mov.custo_unitario,
-                'valor_total_inicial': mov.valor_total,
-                'data_inicial': mov.data_movimentacao.date(),
-                'documento': mov.documento_referencia
+                'quantidade_inicial': est.quantidade_inicial,
+                'custo_unitario': est.valor_unitario_inicial,
+                'valor_total_inicial': est.valor_total_inicial,
+                'data_inicial': est.data_inicial,
+                'documento': 'EST_INICIAL_2025'
             }
             
         return estoque_inicial
@@ -140,14 +139,30 @@ class EstoqueViewSet(viewsets.ViewSet):
                         pid, dados_iniciais, movs_produto, data_final
                     )
                     
-                    # Busca informações do produto
+                    # Busca informações do produto com grupo
                     try:
-                        produto = Produtos.objects.get(id=pid)
+                        produto = Produtos.objects.select_related().get(id=pid)
                         nome_produto = produto.nome or f"Produto ID {pid}"
                         referencia = produto.referencia or "N/A"
-                    except:
+                        
+                        # Buscar informações do grupo
+                        if produto.grupo_id:
+                            try:
+                                grupo = Grupos.objects.get(id=produto.grupo_id)
+                                nome_grupo = grupo.nome
+                                grupo_id = grupo.id
+                            except Grupos.DoesNotExist:
+                                nome_grupo = "Sem Grupo"
+                                grupo_id = None
+                        else:
+                            nome_grupo = "Sem Grupo"
+                            grupo_id = None
+                            
+                    except Produtos.DoesNotExist:
                         nome_produto = f"Produto ID {pid}"
                         referencia = "N/A"
+                        nome_grupo = "Sem Grupo"
+                        grupo_id = None
                     
                     # Serializa movimentações recentes para JSON
                     movimentacoes_serializadas = []
@@ -173,6 +188,8 @@ class EstoqueViewSet(viewsets.ViewSet):
                         'produto_id': pid,
                         'nome': nome_produto,
                         'referencia': referencia,
+                        'grupo_id': grupo_id,
+                        'grupo_nome': nome_grupo,
                         'quantidade_inicial': float(dados_iniciais['quantidade_inicial']),
                         'quantidade_atual': float(quantidade_atual),
                         'variacao_quantidade': float(quantidade_atual - dados_iniciais['quantidade_inicial']),

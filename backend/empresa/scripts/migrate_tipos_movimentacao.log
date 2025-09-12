@@ -13,3 +13,19 @@
 2025-09-08 01:54:59,920 - INFO - • ENT - Entrada de Estoque (Tipo: E)
 2025-09-08 01:54:59,920 - INFO - • SAI - Saída de Estoque (Tipo: S)
 2025-09-08 01:54:59,920 - INFO - === CRIAÇÃO DE TIPOS CONCLUÍDA COM SUCESSO ===
+2025-09-09 04:03:45,577 - INFO - === INICIANDO CRIAÇÃO DE TIPOS DE MOVIMENTAÇÃO ===
+2025-09-09 04:03:45,640 - INFO - Tipos de movimentação existentes: 0
+2025-09-09 04:03:45,640 - INFO - Tipo criado: ENT - Entrada de Estoque
+2025-09-09 04:03:45,640 - INFO - Tipo criado: SAI - Saída de Estoque
+2025-09-09 04:03:45,640 - INFO - --- TIPOS CADASTRADOS ---
+2025-09-09 04:03:45,640 - INFO - • ENT - Entrada de Estoque (Tipo: E)
+2025-09-09 04:03:45,640 - INFO - • SAI - Saída de Estoque (Tipo: S)
+2025-09-09 04:03:45,640 - INFO - === CRIAÇÃO DE TIPOS CONCLUÍDA COM SUCESSO ===
+2025-09-09 04:36:56,932 - INFO - === INICIANDO CRIAÇÃO DE TIPOS DE MOVIMENTAÇÃO ===
+2025-09-09 04:36:56,995 - INFO - Tipos de movimentação existentes: 0
+2025-09-09 04:36:57,000 - INFO - Tipo criado: ENT - Entrada de Estoque
+2025-09-09 04:36:57,002 - INFO - Tipo criado: SAI - Saída de Estoque
+2025-09-09 04:36:57,002 - INFO - --- TIPOS CADASTRADOS ---
+2025-09-09 04:36:57,003 - INFO - • ENT - Entrada de Estoque (Tipo: E)
+2025-09-09 04:36:57,003 - INFO - • SAI - Saída de Estoque (Tipo: S)
+2025-09-09 04:36:57,003 - INFO - === CRIAÇÃO DE TIPOS CONCLUÍDA COM SUCESSO ===

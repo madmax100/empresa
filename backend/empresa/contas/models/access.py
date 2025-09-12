@@ -811,6 +811,7 @@ class Fornecedores(models.Model):
     contato_nome = models.CharField(max_length=100, null=True, blank=True)
     contato_telefone = models.CharField(max_length=20, null=True, blank=True)
     tipo = models.CharField(max_length=50, null=True, blank=True)  # Novo campo tipo
+    especificacao = models.TextField(null=True, blank=True)  # Campo especificacao do Access
     data_cadastro = models.DateTimeField(auto_now_add=True, null=True, blank=True)  # Removido default CURRENT_TIMESTAMP
     ativo = models.BooleanField(null=True, blank=True, default=True)
 
@@ -1951,5 +1952,31 @@ class ItensNfServico(models.Model):
 
     def save(self, *args, **kwargs):
         self.clean()
+        super().save(*args, **kwargs)
+
+
+class EstoqueInicial(models.Model):
+    """Modelo para armazenar o estoque inicial de 01/01/2025"""
+    produto = models.ForeignKey('Produtos', on_delete=models.CASCADE)
+    data_inicial = models.DateField(default='2025-01-01')
+    quantidade_inicial = models.DecimalField(max_digits=10, decimal_places=3, default=0.0)
+    valor_unitario_inicial = models.DecimalField(max_digits=10, decimal_places=4, default=0.0)
+    valor_total_inicial = models.DecimalField(max_digits=15, decimal_places=2, default=0.0)
+    data_calculo = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'estoque_inicial'
+        unique_together = ['produto', 'data_inicial']
+        indexes = [
+            models.Index(fields=['produto']),
+            models.Index(fields=['data_inicial']),
+        ]
+
+    def __str__(self):
+        return f"Estoque Inicial {self.produto.codigo} - {self.data_inicial}"
+
+    def save(self, *args, **kwargs):
+        if self.quantidade_inicial and self.valor_unitario_inicial:
+            self.valor_total_inicial = self.quantidade_inicial * self.valor_unitario_inicial
         super().save(*args, **kwargs)
 

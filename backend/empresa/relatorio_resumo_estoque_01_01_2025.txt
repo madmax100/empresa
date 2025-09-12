@@ -1,0 +1,69 @@
+RELATÓRIO RESUMO - ESTOQUE EM 01/01/2025
+==================================================
+
+Data/Hora da geração: 11/09/2025 04:12:44
+Arquivo base: estoque_01_01_2025_20250911_041127.csv
+
+ESTATÍSTICAS GERAIS:
+- Total de produtos: 2982
+- Produtos com estoque positivo: 1643
+- Produtos com estoque zero: 1306
+- Produtos com estoque negativo: 33
+- Somatória total: 19347.08
+
+TOP 20 PRODUTOS COM MAIOR ESTOQUE:
+Produto 5828.0: 5470.085
+Produto 4094.0: 1170.0
+Produto 4390.0: 1044.0
+Produto 3998.0: 828.0
+Produto 5587.0: 610.0
+Produto 4004.0: 291.0
+Produto 3729.0: 278.0
+Produto 5491.0: 240.0
+Produto 3310.0: 219.0
+Produto 5592.0: 200.0
+Produto 5593.0: 200.0
+Produto 5594.0: 200.0
+Produto 5599.0: 200.0
+Produto 5601.0: 200.0
+Produto 5851.0: 200.0
+Produto 3321.0: 195.0
+Produto 4145.0: 174.0
+Produto 5222.0: 130.0
+Produto 2857.0: 128.0
+Produto 3151.0: 116.0
+
+PRODUTOS COM ESTOQUE NEGATIVO:
+Produto 3057.0: -550.0
+Produto 3564.0: -176.0
+Produto 3691.0: -6.0
+Produto 4484.0: -6.0
+Produto 5100.0: -6.0
+Produto 5076.0: -5.0
+Produto 5102.0: -5.0
+Produto 2842.0: -4.0
+Produto 5153.0: -4.0
+Produto 3764.0: -3.0
+Produto 5078.0: -3.0
+Produto 5149.0: -2.0
+Produto 1650.0: -2.0
+Produto 3603.0: -1.0
+Produto 3222.0: -1.0
+Produto 3331.0: -1.0
+Produto 4277.0: -1.0
+Produto 4169.0: -1.0
+Produto 4135.0: -1.0
+Produto 4073.0: -1.0
+Produto 4002.0: -1.0
+Produto 3625.0: -1.0
+Produto 3362.0: -1.0
+Produto 5075.0: -1.0
+Produto 5074.0: -1.0
+Produto 4904.0: -1.0
+Produto 5138.0: -1.0
+Produto 5136.0: -1.0
+Produto 5144.0: -1.0
+Produto 5366.0: -1.0
+Produto 6115.0: -1.0
+Produto 6205.0: -1.0
+Produto 6304.0: -1.0
