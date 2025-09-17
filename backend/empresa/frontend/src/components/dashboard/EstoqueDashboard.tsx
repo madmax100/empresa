@@ -4,20 +4,27 @@ import api from '../../services/api'; // Importando o serviço da API
 
 // Função para formatar moeda
 const formatCurrency = (value: number) => {
+  const numValue = Number(value) || 0;
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  }).format(value);
+  }).format(numValue);
 };
 
 // Função para formatar números
 const formatNumber = (value: number) => {
-  return new Intl.NumberFormat('pt-BR').format(value);
+  const numValue = Number(value) || 0;
+  return new Intl.NumberFormat('pt-BR').format(numValue);
 };
 
 // Função para formatar data
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('pt-BR');
+  if (!dateString) return '-';
+  try {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  } catch {
+    return '-';
+  }
 };
 
 // Interfaces para os dados dos endpoints - Estrutura real dos dados
@@ -164,7 +171,7 @@ interface EstoquePorGrupo {
   grupo_id: number;
   grupo_nome: string;
   valor_total_estoque: number;
-  num_produtos: number; 
+  num_produtos?: number; // Tornando opcional caso o backend não envie
 }
 
 // Interface para a lista de grupos
@@ -287,15 +294,48 @@ const EstoqueDashboard: React.FC = () => {
   useEffect(() => {
     if (estoquePorGrupo.length > 0 && selectedGrupos.size > 0) {
       const gruposSelecionadosData = estoquePorGrupo.filter(g => selectedGrupos.has(g.grupo_id));
-      const total = gruposSelecionadosData.reduce((acc, g) => acc + g.valor_total_estoque, 0);
-      const totalProdutos = gruposSelecionadosData.reduce((acc, g) => acc + g.num_produtos, 0);
+      
+      console.log('Grupos selecionados:', gruposSelecionadosData);
+      
+      const total = gruposSelecionadosData.reduce((acc, g) => {
+        const valor = Number(g.valor_total_estoque) || 0;
+        return acc + valor;
+      }, 0);
+      
+      // Calcular total de produtos
+      let totalProdutos = 0;
+      
+      // Primeiro, tentar usar num_produtos se disponível
+      const totalFromNumProdutos = gruposSelecionadosData.reduce((acc, g) => {
+        if (g.num_produtos !== undefined && g.num_produtos !== null && !isNaN(g.num_produtos)) {
+          return acc + Number(g.num_produtos);
+        }
+        return acc;
+      }, 0);
+      
+      if (totalFromNumProdutos > 0) {
+        totalProdutos = totalFromNumProdutos;
+      } else {
+        // Fallback: contar produtos dos grupos expandidos
+        totalProdutos = gruposSelecionadosData.reduce((acc, g) => {
+          const produtosDoGrupo = produtosPorGrupo[g.grupo_id];
+          if (produtosDoGrupo && Array.isArray(produtosDoGrupo)) {
+            return acc + produtosDoGrupo.length;
+          }
+          // Se não temos dados dos produtos, assumir pelo menos 1 produto por grupo
+          return acc + 1;
+        }, 0);
+      }
+      
+      console.log('Total calculado:', total, 'Total produtos:', totalProdutos);
+      
       setValorTotalSelecionado(total);
       setTotalItens(totalProdutos);
     } else {
       setValorTotalSelecionado(0);
       setTotalItens(0);
     }
-  }, [estoquePorGrupo, selectedGrupos]);
+  }, [estoquePorGrupo, selectedGrupos, produtosPorGrupo]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -340,6 +380,9 @@ const EstoqueDashboard: React.FC = () => {
       setEstoquePorGrupo(estoqueGrupoRes.data.estoque_por_grupo);
       setEstoqueAtual(estoqueTopRes.data);
       setProdutosCriticos(estoqueCriticoRes.data);
+
+      // Debug: verificar estrutura dos dados
+      console.log('Dados de estoque por grupo:', estoqueGrupoRes.data.estoque_por_grupo);
 
     } catch (err) {
       console.error('Erro ao carregar dados do estoque:', err);
@@ -603,7 +646,7 @@ const EstoqueDashboard: React.FC = () => {
           textAlign: 'center'
         }}>
           <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '4px' }}>📦 Total de Itens</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{formatNumber(totalItens)}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{totalItens > 0 ? formatNumber(totalItens) : '0'}</div>
         </div>
         <div style={{
           backgroundColor: 'white',
@@ -613,7 +656,7 @@ const EstoqueDashboard: React.FC = () => {
           textAlign: 'center'
         }}>
           <div style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '4px' }}>💵 Total Grupos Selecionados</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{formatCurrency(valorTotalSelecionado)}</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>{valorTotalSelecionado > 0 ? formatCurrency(valorTotalSelecionado) : 'R$ 0,00'}</div>
         </div>
       </div>
 
@@ -648,22 +691,76 @@ const EstoqueDashboard: React.FC = () => {
         {activeTab === 'geral' && estoquePorGrupo && (
           <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '16px' }}>Estoque por Grupo</h2>
+            
+            {/* Resumo dos grupos selecionados */}
+            {selectedGrupos.size > 0 && (
+              <div style={{ 
+                backgroundColor: '#f0f9ff', 
+                padding: '12px', 
+                borderRadius: '6px', 
+                marginBottom: '16px',
+                border: '1px solid #0ea5e9'
+              }}>
+                <div style={{ fontSize: '0.875rem', color: '#0c4a6e', marginBottom: '4px' }}>
+                  📊 {selectedGrupos.size} grupo(s) selecionado(s)
+                </div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#0c4a6e' }}>
+                  Total: {formatCurrency(valorTotalSelecionado)} | Produtos: {totalItens > 0 ? formatNumber(totalItens) : '0'}
+                </div>
+              </div>
+            )}
+            
             {/* Tabela de grupos */}
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <th style={{ padding: '12px', textAlign: 'left', color: '#374151' }}>Grupo</th>
+                  <th style={{ padding: '12px', textAlign: 'left', color: '#374151' }}>
+                    <input 
+                      type="checkbox" 
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedGrupos(new Set(estoquePorGrupo.map(g => g.grupo_id)));
+                        } else {
+                          setSelectedGrupos(new Set());
+                        }
+                      }}
+                      checked={selectedGrupos.size === estoquePorGrupo.length && estoquePorGrupo.length > 0}
+                      style={{ marginRight: '8px' }}
+                    />
+                    Grupo
+                  </th>
                   <th style={{ padding: '12px', textAlign: 'right', color: '#374151' }}>Valor em Estoque</th>
                 </tr>
               </thead>
               <tbody>
                 {estoquePorGrupo.map(grupo => (
                   <React.Fragment key={grupo.grupo_id}>
-                    <tr 
-                      onClick={() => carregarProdutosDoGrupo(grupo.grupo_id)}
-                      style={{ cursor: 'pointer', borderBottom: '1px solid #f3f4f6' }}
-                    >
-                      <td style={{ padding: '12px' }}>{grupo.grupo_nome}</td>
+                    <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <td style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedGrupos.has(grupo.grupo_id)}
+                          onChange={() => handleGrupoSelection(grupo.grupo_id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span
+                          onClick={() => carregarProdutosDoGrupo(grupo.grupo_id)}
+                          style={{ 
+                            cursor: 'pointer', 
+                            fontSize: '14px', 
+                            color: '#6b7280',
+                            marginRight: '4px'
+                          }}
+                        >
+                          {grupoExpandidoId === grupo.grupo_id ? '▼' : '►'}
+                        </span>
+                        <span 
+                          onClick={() => carregarProdutosDoGrupo(grupo.grupo_id)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {grupo.grupo_nome}
+                        </span>
+                      </td>
                       <td style={{ padding: '12px', textAlign: 'right', fontWeight: '500' }}>{formatCurrency(grupo.valor_total_estoque)}</td>
                     </tr>
                     {grupoExpandidoId === grupo.grupo_id && (
