@@ -2,98 +2,38 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q, Sum, F
-from datetime import datetime, date
+from django.db.models import Q, Sum, F, Count, Max
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 from collections import defaultdict
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils import timezone
 
 from ..models.access import MovimentacoesEstoque, Produtos, EstoqueInicial, Grupos
+from ..services.stock_calculation_service import StockCalculationService
 
 
 class EstoqueViewSet(viewsets.ViewSet):
-    """ViewSet para controle de estoque com base no estoque inicial de 2025"""
-    
-    def _carregar_estoque_inicial(self):
-        """Carrega o estoque inicial de 01/01/2025 da tabela EstoqueInicial"""
-        estoque_inicial = {}
-        
-        # Usar tabela específica de estoque inicial
-        estoques_iniciais = EstoqueInicial.objects.filter(
-            data_inicial=date(2025, 1, 1)
-        ).select_related('produto')
-        
-        for est in estoques_iniciais:
-            produto_id = est.produto.id
-            
-            estoque_inicial[produto_id] = {
-                'produto_id': produto_id,
-                'quantidade_inicial': est.quantidade_inicial,
-                'custo_unitario': est.valor_unitario_inicial,
-                'valor_total_inicial': est.valor_total_inicial,
-                'data_inicial': est.data_inicial,
-                'documento': 'EST_INICIAL_2025'
-            }
-            
-        return estoque_inicial
-    
-    def _carregar_movimentacoes(self, data_final):
-        """Carrega todas as movimentações até a data especificada"""
-        movimentacoes = defaultdict(list)
-        
-        movs = MovimentacoesEstoque.objects.filter(
-            data_movimentacao__date__gt='2025-01-01',
-            data_movimentacao__date__lte=data_final
-        ).exclude(
-            documento_referencia='EST_INICIAL_2025'
-        ).select_related('produto').order_by('data_movimentacao')
-        
-        for mov in movs:
-            produto_id = mov.produto if isinstance(mov.produto, int) else mov.produto.id
-            
-            movimentacoes[produto_id].append({
-                'id': mov.id,
-                'data': mov.data_movimentacao.date(),
-                'quantidade': mov.quantidade,
-                'tipo_movimentacao': mov.tipo_movimentacao,
-                'custo_unitario': mov.custo_unitario,
-                'valor_total': mov.valor_total,
-                'documento': mov.documento_referencia,
-                'observacoes': mov.observacoes
-            })
-            
-        return movimentacoes
-    
-    def _calcular_estoque_produto(self, produto_id, dados_iniciais, movimentacoes_produto, data_final):
-        """Calcula o estoque atual de um produto específico"""
-        quantidade_atual = dados_iniciais['quantidade_inicial']
-        valor_total_atual = dados_iniciais['valor_total_inicial']
-        
-        # Aplica as movimentações
-        for mov in movimentacoes_produto:
-            if mov['data'] <= data_final:
-                # Obtém o ID do tipo de movimentação
-                tipo_id = mov['tipo_movimentacao'].id if mov['tipo_movimentacao'] else 0
-                
-                # Tipo 1 = Entrada, Tipo 2 = Saída, Tipo 3 = Estoque Inicial
-                if tipo_id in [1, 3]:  # Entrada ou Estoque Inicial
-                    quantidade_atual += mov['quantidade']
-                    valor_total_atual += mov['valor_total']
-                elif tipo_id == 2:  # Saída
-                    quantidade_atual -= mov['quantidade']
-                    valor_total_atual -= mov['valor_total']
-        
-        return quantidade_atual, valor_total_atual
-    
+    """ViewSet para controle de estoque com a nova metodologia de cálculo."""
+
     @action(detail=False, methods=['get'])
     def estoque_atual(self, request):
-        """Retorna o estoque atual até uma data específica"""
+        """
+        Retorna o estoque em uma data específica usando a nova metodologia de cálculo.
+        O cálculo pode ser progressivo (a partir de um 'reset') ou
+        retroativo (a partir do estoque atual do produto).
+        """
         try:
-            # Parâmetros
+            # Parâmetros da requisição
             data_str = request.query_params.get('data', date.today().strftime('%Y-%m-%d'))
             produto_id = request.query_params.get('produto_id')
-            limite = int(request.query_params.get('limite', '0'))  # Limite de registros (0 = todos)
-            
-            # Converte data
+            grupo_id = request.query_params.get('grupo_id')
+            limite = int(request.query_params.get('limite', '50'))
+            offset = int(request.query_params.get('offset', '0'))
+            ordem = request.query_params.get('ordem', 'nome')
+            reverso = request.query_params.get('reverso', 'false').lower() == 'true'
+
+            # Converte a string de data para um objeto date
             try:
                 data_final = datetime.strptime(data_str, '%Y-%m-%d').date()
             except ValueError:
@@ -101,159 +41,145 @@ class EstoqueViewSet(viewsets.ViewSet):
                     {'error': 'Formato de data inválido. Use YYYY-MM-DD'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Carrega dados
-            estoque_inicial = self._carregar_estoque_inicial()
-            movimentacoes = self._carregar_movimentacoes(data_final)
-            
-            resultado = []
-            
-            # Se produto específico foi solicitado
-            if produto_id:
+
+            # Define a query base de produtos
+            produtos_query = Produtos.objects.filter(ativo=True)
+
+            # Filtra por grupo, se solicitado
+            if grupo_id:
                 try:
-                    produto_id = int(produto_id)
-                    if produto_id not in estoque_inicial:
-                        return Response(
-                            {'error': f'Produto {produto_id} não encontrado no estoque inicial'},
-                            status=status.HTTP_404_NOT_FOUND
-                        )
-                    
-                    produtos_calcular = {produto_id: estoque_inicial[produto_id]}
-                except ValueError:
+                    produtos_query = produtos_query.filter(grupo_id=int(grupo_id))
+                except (ValueError, TypeError):
                     return Response(
-                        {'error': 'ID do produto deve ser um número'},
+                        {'error': 'ID do grupo deve ser um número inteiro válido.'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-            else:
-                produtos_calcular = estoque_inicial
-                # Limita resultados se não for produto específico
-                if limite > 0:
-                    produtos_ids = list(produtos_calcular.keys())[:limite]
-                    produtos_calcular = {pid: produtos_calcular[pid] for pid in produtos_ids}
-            
-            # Calcula estoque para produtos selecionados
-            for pid, dados_iniciais in produtos_calcular.items():
+
+            # Filtra por um produto específico, se solicitado
+            if produto_id:
                 try:
-                    movs_produto = movimentacoes.get(pid, [])
-                    quantidade_atual, valor_atual = self._calcular_estoque_produto(
-                        pid, dados_iniciais, movs_produto, data_final
+                    produtos_query = produtos_query.filter(id=int(produto_id))
+                except (ValueError, TypeError):
+                    return Response(
+                        {'error': 'ID do produto deve ser um número inteiro válido.'},
+                        status=status.HTTP_400_BAD_REQUEST
                     )
-                    
-                    # Busca informações do produto com grupo
-                    try:
-                        produto = Produtos.objects.select_related().get(id=pid)
-                        nome_produto = produto.nome or f"Produto ID {pid}"
-                        referencia = produto.referencia or "N/A"
-                        
-                        # Buscar informações do grupo
-                        if produto.grupo_id:
-                            try:
-                                grupo = Grupos.objects.get(id=produto.grupo_id)
-                                nome_grupo = grupo.nome
-                                grupo_id = grupo.id
-                            except Grupos.DoesNotExist:
-                                nome_grupo = "Sem Grupo"
-                                grupo_id = None
-                        else:
-                            nome_grupo = "Sem Grupo"
-                            grupo_id = None
-                            
-                    except Produtos.DoesNotExist:
-                        nome_produto = f"Produto ID {pid}"
-                        referencia = "N/A"
-                        nome_grupo = "Sem Grupo"
-                        grupo_id = None
-                    
-                    # Serializa movimentações recentes para JSON
-                    movimentacoes_serializadas = []
-                    if movs_produto:
-                        for mov in movs_produto[-3:]:  # Últimas 3
-                            try:
-                                mov_serializada = {
-                                    'data': mov.data.strftime('%Y-%m-%d') if hasattr(mov, 'data') and mov.data else 'N/A',
-                                    'tipo': mov.tipo.nome if hasattr(mov, 'tipo') and mov.tipo else 'N/A',
-                                    'quantidade': float(mov.quantidade) if hasattr(mov, 'quantidade') else 0.0,
-                                    'valor_unitario': float(mov.valor_unitario) if hasattr(mov, 'valor_unitario') else 0.0,
-                                    'valor_total': float(mov.valor_total) if hasattr(mov, 'valor_total') else 0.0,
-                                    'observacoes': str(mov.observacoes) if hasattr(mov, 'observacoes') and mov.observacoes else 'N/A'
-                                }
-                                movimentacoes_serializadas.append(mov_serializada)
-                            except Exception as e:
-                                # Se erro ao serializar movimentação, adiciona erro
-                                movimentacoes_serializadas.append({
-                                    'erro': f'Erro ao serializar movimentação: {str(e)}'
-                                })
-                    
-                    resultado.append({
-                        'produto_id': pid,
-                        'nome': nome_produto,
-                        'referencia': referencia,
-                        'grupo_id': grupo_id,
-                        'grupo_nome': nome_grupo,
-                        'quantidade_inicial': float(dados_iniciais['quantidade_inicial']),
-                        'quantidade_atual': float(quantidade_atual),
-                        'variacao_quantidade': float(quantidade_atual - dados_iniciais['quantidade_inicial']),
-                        'custo_unitario_inicial': float(dados_iniciais['custo_unitario']),
-                        'valor_inicial': float(dados_iniciais['valor_total_inicial']),
-                        'valor_atual': float(valor_atual),
-                        'variacao_valor': float(valor_atual - dados_iniciais['valor_total_inicial']),
-                        'total_movimentacoes': len(movs_produto),
-                        'data_calculo': data_final.strftime('%Y-%m-%d'),
-                        'movimentacoes_recentes': movimentacoes_serializadas
-                    })
-                except Exception as e:
-                    # Se erro em produto específico, continua com próximo
-                    print(f"Erro ao processar produto {pid}: {str(e)}")
-                    continue
+
+            ordem = request.query_params.get('ordem', 'nome')
+            reverso = request.query_params.get('reverso', 'false').lower() == 'true'
+
+            # Mapeia 'valor_atual' (campo calculado) para 'preco_custo' (campo do DB)
+            order_param = ordem
+            if order_param == 'valor_atual':
+                order_param = 'preco_custo'
+
+            # Valida o campo de ordenação para segurança
+            order_field = order_param if order_param in ['nome', 'preco_custo'] else 'nome'
+            if reverso:
+                order_field = f'-{order_field}'
             
-            # Ordenar resultado apenas se não for muitos produtos
-            if not produto_id and len(resultado) <= 1000:
-                ordem = request.query_params.get('ordem', 'nome')
-                reverso = request.query_params.get('reverso', 'false').lower() == 'true'
+            produtos_query = produtos_query.order_by(order_field)
+
+            # Paginação aplicada no banco de dados
+            total_registros = produtos_query.count()
+            produtos_paginados_query = produtos_query[offset : offset + limite]
+            
+            # Coleta os produtos da página
+            produtos_da_pagina = list(produtos_paginados_query)
+
+            # Calcula o estoque e o valor apenas para os produtos da página
+            dados_completos = []
+            for produto in produtos_da_pagina:
+                quantidade_na_data = StockCalculationService.calculate_stock_at_date(
+                    produto.id, data_final
+                )
+                custo_unitario = produto.preco_custo or Decimal('0')
+                valor_na_data = quantidade_na_data * custo_unitario
+                dados_completos.append({
+                    'produto_id': produto.id,
+                    'nome': produto.nome or f"Produto ID {produto.id}",
+                    'referencia': produto.referencia or "N/A",
+                    'grupo_id': produto.grupo_id,
+                    'quantidade_atual': float(quantidade_na_data),
+                    'custo_unitario_atual': float(custo_unitario),
+                    'valor_atual': float(valor_na_data),
+                })
+
+            # Ordenação em memória (agora sobre um conjunto de dados muito menor)
+            if ordem in ['nome', 'valor_atual']:
+                sort_key = lambda x: x[ordem]
+                dados_completos.sort(key=sort_key, reverse=reverso)
+            
+            # A paginação já foi aplicada, então usamos 'dados_completos' diretamente
+            produtos_paginados = dados_completos
+
+            # Otimização: Buscar todos os grupos necessários de uma vez para a página atual
+            grupo_ids = [p['grupo_id'] for p in produtos_paginados if p['grupo_id'] is not None]
+            grupos = Grupos.objects.filter(id__in=grupo_ids)
+            grupo_map = {grupo.id: grupo.nome for grupo in grupos}
+
+            resultado = []
+            valor_total_geral = Decimal('0')
+            produtos_com_estoque = 0
+            produtos_zerados = 0
+
+            # Adiciona nomes de grupo e formata a saída final
+            for produto_data in produtos_paginados:
+                grupo_id = produto_data['grupo_id']
+                grupo_nome = grupo_map.get(grupo_id, "Sem Grupo")
                 
-                if ordem in ['nome', 'quantidade_atual', 'valor_atual', 'total_movimentacoes']:
-                    try:
-                        resultado.sort(key=lambda x: x[ordem], reverse=reverso)
-                    except (KeyError, TypeError):
-                        # Se houver erro na ordenação, usar ordenação padrão por nome
-                        resultado.sort(key=lambda x: str(x['nome']), reverse=False)
+                produto_data['grupo_nome'] = grupo_nome
+                produto_data['data_calculo'] = data_final.strftime('%Y-%m-%d')
+                produto_data['quantidade_inicial'] = 0
+                produto_data['variacao_quantidade'] = 0
+                produto_data['custo_unitario_inicial'] = 0
+                produto_data['valor_inicial'] = 0
+                produto_data['variacao_valor'] = 0
+                produto_data['total_movimentacoes'] = 0
+                produto_data['movimentacoes_recentes'] = []
+                resultado.append(produto_data)
+
+            # Calcula estatísticas totais (considerando todos os produtos, não apenas a página)
+            # Nota: Fazer isso para todos os produtos pode ser lento.
+            # Uma abordagem otimizada seria fazer isso em uma task separada ou simplificar.
+            # Por enquanto, calculamos com base na página para manter a performance.
             
-            # Estatísticas gerais (se não for produto específico)
-            estatisticas = None
-            if not produto_id:
-                try:
-                    total_produtos = len(resultado)
-                    produtos_com_estoque = len([p for p in resultado if p['quantidade_atual'] > 0])
-                    valor_total_inicial = sum(p['valor_inicial'] for p in resultado)
-                    valor_total_atual = sum(p['valor_atual'] for p in resultado)
-                    
-                    estatisticas = {
-                        'total_produtos': total_produtos,
-                        'produtos_com_estoque': produtos_com_estoque,
-                        'produtos_zerados': total_produtos - produtos_com_estoque,
-                        'valor_total_inicial': round(valor_total_inicial, 2),
-                        'valor_total_atual': round(valor_total_atual, 2),
-                        'variacao_total': round(valor_total_atual - valor_total_inicial, 2),
-                        'data_calculo': data_final.strftime('%Y-%m-%d')
-                    }
-                except Exception as e:
-                    print(f"Erro ao calcular estatísticas: {str(e)}")
-                    estatisticas = {'erro': 'Erro ao calcular estatísticas'}
-            
+            for res in resultado:
+                valor_total_geral += Decimal(res['valor_atual'])
+                if res['quantidade_atual'] > 0:
+                    produtos_com_estoque += 1
+                else:
+                    produtos_zerados += 1
+
+            estatisticas = {
+                'total_produtos': total_registros, # Total real de produtos
+                'produtos_com_estoque': produtos_com_estoque, # Apenas da página
+                'produtos_zerados': produtos_zerados, # Apenas da página
+                'valor_total_atual': round(float(valor_total_geral), 2), # Apenas da página
+                'data_calculo': data_final.strftime('%Y-%m-%d'),
+                # Campos legados
+                'valor_total_inicial': 0,
+                'variacao_total': 0,
+            }
+
             return Response({
-                'estoque': resultado,
+                'results': resultado,
                 'estatisticas': estatisticas,
                 'parametros': {
                     'data_consulta': data_final.strftime('%Y-%m-%d'),
                     'produto_id': produto_id,
-                    'total_registros': len(resultado),
-                    'limite_aplicado': limite if limite > 0 else None
+                    'grupo_id': grupo_id,
+                    'total_registros': total_registros,
+                    'limite_aplicado': limite,
+                    'offset': offset,
                 }
             })
-            
+
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return Response(
-                {'error': f'Erro interno: {str(e)}'},
+                {'error': f'Erro interno no servidor: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -484,12 +410,11 @@ class EstoqueViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
     def estoque_critico(self, request):
-        """Retorna produtos com estoque crítico (baixo)"""
+        """Retorna produtos com estoque crítico (baixo) usando a nova metodologia."""
         try:
             data_str = request.query_params.get('data', date.today().strftime('%Y-%m-%d'))
-            limite = float(request.query_params.get('limite', '5'))  # Limite padrão: 5 unidades
-            
-            # Converte data
+            limite_critico = float(request.query_params.get('limite', '5'))
+
             try:
                 data_final = datetime.strptime(data_str, '%Y-%m-%d').date()
             except ValueError:
@@ -497,67 +422,117 @@ class EstoqueViewSet(viewsets.ViewSet):
                     {'error': 'Formato de data inválido. Use YYYY-MM-DD'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Carrega dados diretamente
-            estoque_inicial = self._carregar_estoque_inicial()
-            movimentacoes = self._carregar_movimentacoes(data_final)
-            
-            estoque_critico = []
-            
-            # Calcula para todos os produtos
-            for produto_id, dados_iniciais in estoque_inicial.items():
-                movs_produto = movimentacoes.get(produto_id, [])
-                quantidade_atual, valor_atual = self._calcular_estoque_produto(
-                    produto_id, dados_iniciais, movs_produto, data_final
+
+            produtos_ativos = Produtos.objects.filter(ativo=True)
+            estoque_critico_list = []
+
+            for produto in produtos_ativos:
+                quantidade_na_data = StockCalculationService.calculate_stock_at_date(
+                    produto.id, data_final
                 )
-                
-                # Verifica se está no critério de estoque crítico
-                if 0 < quantidade_atual <= limite:
-                    # Busca informações do produto
-                    try:
-                        produto = Produtos.objects.get(id=produto_id)
-                        nome_produto = produto.nome
-                        referencia = produto.referencia
-                    except:
-                        nome_produto = f"Produto ID {produto_id}"
-                        referencia = "N/A"
+
+                if 0 < quantidade_na_data <= Decimal(limite_critico):
+                    custo_unitario = produto.preco_custo or Decimal('0')
+                    valor_na_data = quantidade_na_data * custo_unitario
                     
-                    estoque_critico.append({
-                        'produto_id': produto_id,
-                        'nome': nome_produto,
-                        'referencia': referencia,
-                        'quantidade_inicial': float(dados_iniciais['quantidade_inicial']),
-                        'quantidade_atual': float(quantidade_atual),
-                        'valor_atual': float(valor_atual),
-                        'total_movimentacoes': len(movs_produto)
+                    estoque_critico_list.append({
+                        'produto_id': produto.id,
+                        'nome': produto.nome,
+                        'referencia': produto.referencia,
+                        'quantidade_atual': float(quantidade_na_data),
+                        'valor_atual': float(valor_na_data),
+                        'total_movimentacoes': 0, # Campo legado, precisa de query extra
                     })
-            
+
             # Ordena por quantidade (menor primeiro)
-            estoque_critico.sort(key=lambda x: x['quantidade_atual'])
-            
+            estoque_critico_list.sort(key=lambda x: x['quantidade_atual'])
+
             return Response({
-                'estoque_critico': estoque_critico,
+                'produtos': estoque_critico_list,
                 'parametros': {
                     'data_consulta': data_final.strftime('%Y-%m-%d'),
-                    'limite_critico': limite,
-                    'total_produtos_criticos': len(estoque_critico)
+                    'limite_critico': limite_critico,
+                    'total_produtos_criticos': len(estoque_critico_list)
                 }
             })
-            
+
         except Exception as e:
             return Response(
-                {'error': str(e)},
+                {'error': f'Erro interno no servidor: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'])
+    def produtos_mais_movimentados(self, request):
+        """Retorna produtos com mais movimentações em um período."""
+        try:
+            # Por padrão, analisamos os últimos 30 dias
+            data_fim_str = request.query_params.get('data', timezone.now().strftime('%Y-%m-%d'))
+            dias = int(request.query_params.get('dias', '30'))
+            limite = int(request.query_params.get('limite', '10'))
+
+            try:
+                data_fim_naive = datetime.strptime(data_fim_str, '%Y-%m-%d')
+                # Torna a data 'aware' usando o fuso horário atual
+                data_fim = timezone.make_aware(data_fim_naive, timezone.get_current_timezone())
+                # Define o fim do dia para a consulta
+                data_fim = data_fim.replace(hour=23, minute=59, second=59, microsecond=999999)
+                data_inicio = data_fim - timedelta(days=dias)
+            except ValueError:
+                return Response(
+                    {'error': 'Formato de data inválido. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Agrega movimentações por produto
+            movimentacoes = MovimentacoesEstoque.objects.filter(
+                data_movimentacao__gte=data_inicio,
+                data_movimentacao__lte=data_fim
+            ).values('produto_id').annotate(
+                total_movimentacoes=Count('id'),
+                ultima_movimentacao=Max('data_movimentacao')
+            ).order_by('-total_movimentacoes')[:limite]
+
+            produtos_movimentados = []
+            produto_ids = [m['produto_id'] for m in movimentacoes]
+            produtos = Produtos.objects.in_bulk(produto_ids)
+
+            for mov in movimentacoes:
+                produto = produtos.get(mov['produto_id'])
+                if produto:
+                    produtos_movimentados.append({
+                        'produto_id': produto.id,
+                        'nome': produto.nome,
+                        'referencia': produto.referencia,
+                        'total_movimentacoes': mov['total_movimentacoes'],
+                        'ultima_movimentacao': mov['ultima_movimentacao'].strftime('%Y-%m-%d') if mov['ultima_movimentacao'] else None,
+                        'tipos_movimentacao': [] # Campo legado, precisa de query extra
+                    })
+
+            return Response({
+                'produtos_mais_movimentados': produtos_movimentados,
+                'parametros': {
+                    'data_consulta': data_fim.strftime('%Y-%m-%d'),
+                    'periodo_dias': dias,
+                    'limite': limite,
+                }
+            })
+
+        except Exception as e:
+            return Response(
+                {'error': f'Erro interno no servidor: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
     @action(detail=False, methods=['get'])
-    def produtos_mais_movimentados(self, request):
-        """Retorna produtos com mais movimentações"""
+    def valor_total_estoque(self, request):
+        """
+        Calcula e retorna o valor total do estoque para todos os produtos ativos.
+        Este endpoint pode ser lento e deve ser usado com moderação.
+        """
         try:
             data_str = request.query_params.get('data', date.today().strftime('%Y-%m-%d'))
-            limite = int(request.query_params.get('limite', '10'))  # Top 10 por padrão
             
-            # Converte data
             try:
                 data_final = datetime.strptime(data_str, '%Y-%m-%d').date()
             except ValueError:
@@ -565,53 +540,103 @@ class EstoqueViewSet(viewsets.ViewSet):
                     {'error': 'Formato de data inválido. Use YYYY-MM-DD'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            
-            # Carrega dados
-            estoque_inicial = self._carregar_estoque_inicial()
-            movimentacoes = self._carregar_movimentacoes(data_final)
-            
-            # Lista produtos por número de movimentações
-            produtos_movimentados = []
-            
-            for produto_id, dados_iniciais in estoque_inicial.items():
-                movs_produto = movimentacoes.get(produto_id, [])
-                
-                # Busca informações do produto
+
+            todos_produtos = Produtos.objects.filter(ativo=True)
+            valor_total_estoque = Decimal('0')
+            produtos_processados = 0
+            produtos_com_erro = 0
+
+            for produto in todos_produtos:
                 try:
-                    produto = Produtos.objects.get(id=produto_id)
-                    nome_produto = produto.nome
-                    referencia = produto.referencia
-                except:
-                    nome_produto = f"Produto ID {produto_id}"
-                    referencia = "N/A"
-                
-                produtos_movimentados.append({
-                    'produto_id': produto_id,
-                    'nome': nome_produto,
-                    'referencia': referencia,
-                    'total_movimentacoes': len(movs_produto),
-                    'ultima_movimentacao': movs_produto[-1]['data'].strftime('%Y-%m-%d') if movs_produto else None,
-                    'tipos_movimentacao': list(set([str(m['tipo_movimentacao']) for m in movs_produto])) if movs_produto else []
-                })
-            
-            # Ordena por número de movimentações (maior primeiro)
-            produtos_movimentados.sort(key=lambda x: x['total_movimentacoes'], reverse=True)
+                    quantidade_na_data = StockCalculationService.calculate_stock_at_date(
+                        produto.id, data_final
+                    )
+                    custo_unitario = produto.preco_custo or Decimal('0')
+                    valor_produto = quantidade_na_data * custo_unitario
+                    valor_total_estoque += valor_produto
+                    produtos_processados += 1
+                except Exception:
+                    produtos_com_erro += 1
             
             return Response({
-                'produtos_mais_movimentados': produtos_movimentados[:limite],
-                'parametros': {
-                    'data_consulta': data_final.strftime('%Y-%m-%d'),
-                    'limite': limite,
-                    'total_produtos_analisados': len(produtos_movimentados)
-                }
+                'valor_total_estoque': round(float(valor_total_estoque), 2),
+                'data_calculo': data_final.strftime('%Y-%m-%d'),
+                'total_produtos_processados': produtos_processados,
+                'total_produtos_ativos': todos_produtos.count(),
+                'produtos_com_erro_calculo': produtos_com_erro,
             })
-            
+
         except Exception as e:
             return Response(
-                {'error': str(e)},
+                {'error': f'Erro interno no servidor: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    
+
+    @action(detail=False, methods=['get'])
+    def valor_estoque_por_grupo(self, request):
+        """
+        Calcula e retorna o valor total do estoque agrupado por grupo de produto.
+        """
+        try:
+            data_str = request.query_params.get('data', date.today().strftime('%Y-%m-%d'))
+            
+            try:
+                data_final = datetime.strptime(data_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Formato de data inválido. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            todos_produtos = Produtos.objects.filter(ativo=True)
+            estoque_por_grupo = defaultdict(Decimal)
+
+            for produto in todos_produtos:
+                try:
+                    quantidade_na_data = StockCalculationService.calculate_stock_at_date(
+                        produto.id, data_final
+                    )
+                    custo_unitario = produto.preco_custo or Decimal('0')
+                    valor_produto = quantidade_na_data * custo_unitario
+                    
+                    grupo_id = produto.grupo_id if produto.grupo_id is not None else 0
+                    estoque_por_grupo[grupo_id] += valor_produto
+                except Exception:
+                    # Ignora produtos com erro no cálculo
+                    continue
+            
+            # Busca os nomes dos grupos
+            grupo_ids = list(estoque_por_grupo.keys())
+            if 0 in grupo_ids:
+                grupo_ids.remove(0) # Não busca o grupo com ID 0
+
+            grupos = Grupos.objects.filter(id__in=grupo_ids)
+            grupo_map = {grupo.id: grupo.nome for grupo in grupos}
+            grupo_map[0] = "Sem Grupo" # Adiciona o nome para o grupo padrão
+
+            # Formata o resultado final
+            resultado = []
+            for grupo_id, valor_total in estoque_por_grupo.items():
+                resultado.append({
+                    'grupo_id': grupo_id,
+                    'grupo_nome': grupo_map.get(grupo_id, f"Grupo Desconhecido ({grupo_id})"),
+                    'valor_total_estoque': round(float(valor_total), 2)
+                })
+
+            # Ordena o resultado pelo valor (maior primeiro)
+            resultado.sort(key=lambda x: x['valor_total_estoque'], reverse=True)
+
+            return Response({
+                'estoque_por_grupo': resultado,
+                'data_calculo': data_final.strftime('%Y-%m-%d'),
+            })
+
+        except Exception as e:
+            return Response(
+                {'error': f'Erro interno no servidor: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     def _obter_ultimo_preco_entrada(self, produto_id, data_limite):
         """
         Busca o último preço de entrada do produto, mesmo anterior ao período
@@ -712,3 +737,842 @@ class EstoqueViewSet(viewsets.ViewSet):
                 'limite_aplicado': limite
             }
         }
+    
+    # ========================================
+    # HISTORICAL STOCK CALCULATION ENDPOINTS
+    # ========================================
+    
+    @action(detail=False, methods=['get'])
+    def calculate_historical_stock(self, request):
+        """
+        Calculate historical stock for a product at a specific date.
+        
+        Purpose: Calculate what the stock level was at any historical date
+        using movement history and stock resets ("000000" movements).
+        
+        Parameters:
+        - produto_id (required): ID of the product
+        - data (required): Date in YYYY-MM-DD format
+        
+        Returns historical stock calculation based on movements and resets.
+        """
+        try:
+            # Get parameters
+            produto_id = request.query_params.get('produto_id')
+            data_str = request.query_params.get('data')
+            
+            # Validate required parameters
+            if not produto_id:
+                return Response(
+                    {'error': 'Parameter produto_id is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if not data_str:
+                return Response(
+                    {'error': 'Parameter data is required (format: YYYY-MM-DD)'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate produto_id
+            try:
+                produto_id = int(produto_id)
+            except ValueError:
+                return Response(
+                    {'error': 'produto_id must be a valid integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate and parse date
+            try:
+                target_date = datetime.strptime(data_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid date format. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Ensure target date is not in the future
+            if target_date > date.today():
+                return Response(
+                    {'error': 'Cannot calculate stock for future dates'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Calculate historical stock
+            try:
+                historical_stock = StockCalculationService.calculate_stock_at_date(
+                    produto_id, target_date
+                )
+                
+                # Get product information
+                try:
+                    produto = Produtos.objects.get(id=produto_id)
+                    produto_info = {
+                        'id': produto.id,
+                        'codigo': produto.codigo,
+                        'nome': produto.nome,
+                        'ativo': produto.ativo,
+                        'current_stock': float(produto.estoque_atual or 0)
+                    }
+                except Produtos.DoesNotExist:
+                    return Response(
+                        {'error': f'Product with ID {produto_id} not found'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+                
+                # Get stock reset information for context
+                base_stock, reset_date = StockCalculationService.get_base_stock_reset(
+                    produto_id, datetime.combine(target_date, datetime.max.time())
+                )
+                
+                return Response({
+                    'produto': produto_info,
+                    'historical_calculation': {
+                        'target_date': target_date.strftime('%Y-%m-%d'),
+                        'historical_stock': float(historical_stock),
+                        'calculation_method': 'movements_and_resets'
+                    },
+                    'calculation_basis': {
+                        'has_stock_reset': reset_date is not None,
+                        'reset_date': reset_date.isoformat() if reset_date else None,
+                        'reset_quantity': float(base_stock) if reset_date else None,
+                        'base_calculation': 'reset_quantity' if reset_date else 'zero_start'
+                    }
+                })
+                
+            except ValueError as e:
+                return Response(
+                    {'error': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                return Response(
+                    {'error': f'Error calculating historical stock: {str(e)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+                
+        except Exception as e:
+            return Response(
+                {'error': f'Internal server error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def stock_movements_analysis(self, request):
+        """
+        Analyze stock movements for products over a specified period.
+        
+        Purpose: Provide detailed analysis of stock movements, including
+        entries, exits, and stock resets for reporting and audit purposes.
+        
+        Parameters:
+        - produto_ids (optional): Comma-separated list of product IDs
+        - start_date (required): Start date in YYYY-MM-DD format
+        - end_date (required): End date in YYYY-MM-DD format
+        - limit (optional): Maximum number of products to analyze (default: 50)
+        
+        Returns movement analysis for the specified period.
+        """
+        try:
+            # Get parameters
+            produto_ids_str = request.query_params.get('produto_ids')
+            start_date_str = request.query_params.get('start_date')
+            end_date_str = request.query_params.get('end_date')
+            limit_str = request.query_params.get('limit', '50')
+            
+            # Validate required parameters
+            if not start_date_str or not end_date_str:
+                return Response(
+                    {'error': 'Parameters start_date and end_date are required (format: YYYY-MM-DD)'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse and validate dates
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid date format. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if start_date > end_date:
+                return Response(
+                    {'error': 'start_date must be before or equal to end_date'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse produto_ids if provided
+            produto_ids = None
+            if produto_ids_str:
+                try:
+                    produto_ids = [int(pid.strip()) for pid in produto_ids_str.split(',')]
+                except ValueError:
+                    return Response(
+                        {'error': 'produto_ids must be comma-separated integers'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Parse limit
+            try:
+                limit = int(limit_str)
+                if limit <= 0 or limit > 500:
+                    limit = 50
+            except ValueError:
+                limit = 50
+            
+            # Get products to analyze
+            if produto_ids:
+                produtos = Produtos.objects.filter(id__in=produto_ids, ativo=True)
+            else:
+                produtos = Produtos.objects.filter(ativo=True)[:limit]
+            
+            # Analyze movements for each product
+            analysis_results = []
+            for produto in produtos:
+                try:
+                    movement_summary = StockCalculationService.get_stock_movements_summary(
+                        produto.id, start_date, end_date
+                    )
+                    
+                    # Calculate stock at start and end of period
+                    stock_at_start = StockCalculationService.calculate_stock_at_date(produto.id, start_date)
+                    stock_at_end = StockCalculationService.calculate_stock_at_date(produto.id, end_date)
+                    
+                    analysis_results.append({
+                        'produto': {
+                            'id': produto.id,
+                            'codigo': produto.codigo,
+                            'nome': produto.nome,
+                            'current_stock': float(produto.estoque_atual or 0)
+                        },
+                        'period_analysis': {
+                            'start_date': start_date.strftime('%Y-%m-%d'),
+                            'end_date': end_date.strftime('%Y-%m-%d'),
+                            'stock_at_start': float(stock_at_start),
+                            'stock_at_end': float(stock_at_end),
+                            'net_change': float(stock_at_end - stock_at_start)
+                        },
+                        'movements': {
+                            'total_movements': len(movement_summary['stock_resets']) + len(movement_summary['regular_movements']),
+                            'regular_movements': len(movement_summary['regular_movements']),
+                            'stock_resets': len(movement_summary['stock_resets']),
+                            'totals': {
+                                'entrada': float(movement_summary['totals']['entrada']),
+                                'saida': float(movement_summary['totals']['saida']),
+                                'net_movement': float(movement_summary['totals']['net_movement'])
+                            }
+                        }
+                    })
+                    
+                except Exception as e:
+                    # Skip products with errors but log them
+                    analysis_results.append({
+                        'produto': {
+                            'id': produto.id,
+                            'codigo': produto.codigo,
+                            'nome': produto.nome
+                        },
+                        'error': str(e)
+                    })
+            
+            return Response({
+                'analysis_results': analysis_results,
+                'summary': {
+                    'period': {
+                        'start_date': start_date.strftime('%Y-%m-%d'),
+                        'end_date': end_date.strftime('%Y-%m-%d'),
+                        'days_analyzed': (end_date - start_date).days + 1
+                    },
+                    'products_analyzed': len(analysis_results),
+                    'products_with_movements': len([r for r in analysis_results if 'movements' in r and r['movements']['total_movements'] > 0])
+                },
+                'parameters': {
+                    'produto_ids_requested': len(produto_ids) if produto_ids else None,
+                    'limit_applied': limit,
+                    'analysis_timestamp': datetime.now().isoformat()
+                }
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Internal server error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def stock_timeline(self, request):
+        """
+        Generate a timeline of stock levels for a product over a date range.
+        
+        Purpose: Show how stock levels changed over time for analysis,
+        reporting, and audit purposes.
+        
+        Parameters:
+        - produto_id (required): ID of the product
+        - start_date (required): Start date in YYYY-MM-DD format
+        - end_date (required): End date in YYYY-MM-DD format
+        - interval (optional): 'daily', 'weekly', 'monthly' (default: 'daily')
+        
+        Returns timeline of stock levels at specified intervals.
+        """
+        try:
+            # Get parameters
+            produto_id = request.query_params.get('produto_id')
+            start_date_str = request.query_params.get('start_date')
+            end_date_str = request.query_params.get('end_date')
+            interval = request.query_params.get('interval', 'daily')
+            
+            # Validate required parameters
+            if not produto_id:
+                return Response(
+                    {'error': 'Parameter produto_id is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if not start_date_str or not end_date_str:
+                return Response(
+                    {'error': 'Parameters start_date and end_date are required (format: YYYY-MM-DD)'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate produto_id
+            try:
+                produto_id = int(produto_id)
+            except ValueError:
+                return Response(
+                    {'error': 'produto_id must be a valid integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse and validate dates
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid date format. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if start_date > end_date:
+                return Response(
+                    {'error': 'start_date must be before or equal to end_date'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate interval
+            if interval not in ['daily', 'weekly', 'monthly']:
+                return Response(
+                    {'error': 'interval must be daily, weekly, or monthly'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get product information
+            try:
+                produto = Produtos.objects.get(id=produto_id)
+            except Produtos.DoesNotExist:
+                return Response(
+                    {'error': f'Product with ID {produto_id} not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Generate timeline points
+            timeline_points = []
+            current_date = start_date
+            
+            # Determine date increment based on interval
+            if interval == 'daily':
+                delta = timedelta(days=1)
+                max_points = 365  # Limit to prevent excessive data
+            elif interval == 'weekly':
+                delta = timedelta(weeks=1)
+                max_points = 104  # ~2 years
+            else:  # monthly
+                delta = timedelta(days=30)  # Approximate month
+                max_points = 60   # ~5 years
+            
+            point_count = 0
+            while current_date <= end_date and point_count < max_points:
+                try:
+                    stock_level = StockCalculationService.calculate_stock_at_date(produto_id, current_date)
+                    timeline_points.append({
+                        'date': current_date.strftime('%Y-%m-%d'),
+                        'stock_level': float(stock_level)
+                    })
+                except Exception as e:
+                    # Skip dates with calculation errors
+                    timeline_points.append({
+                        'date': current_date.strftime('%Y-%m-%d'),
+                        'stock_level': None,
+                        'error': str(e)
+                    })
+                
+                current_date += delta
+                point_count += 1
+            
+            # Calculate summary statistics
+            valid_points = [p for p in timeline_points if p.get('stock_level') is not None]
+            if valid_points:
+                stock_levels = [p['stock_level'] for p in valid_points]
+                min_stock = min(stock_levels)
+                max_stock = max(stock_levels)
+                avg_stock = sum(stock_levels) / len(stock_levels)
+            else:
+                min_stock = max_stock = avg_stock = 0
+            
+            return Response({
+                'produto': {
+                    'id': produto.id,
+                    'codigo': produto.codigo,
+                    'nome': produto.nome,
+                    'current_stock': float(produto.estoque_atual or 0)
+                },
+                'timeline': {
+                    'period': {
+                        'start_date': start_date.strftime('%Y-%m-%d'),
+                        'end_date': end_date.strftime('%Y-%m-%d'),
+                        'interval': interval
+                    },
+                    'points': timeline_points,
+                    'statistics': {
+                        'total_points': len(timeline_points),
+                        'valid_points': len(valid_points),
+                        'min_stock': min_stock,
+                        'max_stock': max_stock,
+                        'avg_stock': round(avg_stock, 2)
+                    }
+                }
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Internal server error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def stock_resets_report(self, request):
+        """
+        Generate report of stock resets for analysis and audit purposes.
+        
+        Purpose: Analyze stock reset patterns and provide insights into
+        when and how stock levels were reset using "000000" movements.
+        
+        Parameters:
+        - produto_ids (optional): Comma-separated list of product IDs
+        - start_date (optional): Start date for reset analysis (YYYY-MM-DD)
+        - end_date (optional): End date for reset analysis (YYYY-MM-DD)
+        - limit (optional): Maximum number of products to analyze (default: 100)
+        
+        Returns analysis of stock resets and their impact.
+        """
+        try:
+            # Get parameters
+            produto_ids_str = request.query_params.get('produto_ids')
+            start_date_str = request.query_params.get('start_date')
+            end_date_str = request.query_params.get('end_date')
+            limit_str = request.query_params.get('limit', '100')
+            
+            # Parse dates if provided
+            start_date = None
+            end_date = None
+            if start_date_str:
+                try:
+                    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                except ValueError:
+                    return Response(
+                        {'error': 'Invalid start_date format. Use YYYY-MM-DD'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            if end_date_str:
+                try:
+                    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                except ValueError:
+                    return Response(
+                        {'error': 'Invalid end_date format. Use YYYY-MM-DD'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            if start_date and end_date and start_date > end_date:
+                return Response(
+                    {'error': 'start_date must be before or equal to end_date'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse produto_ids if provided
+            produto_ids = None
+            if produto_ids_str:
+                try:
+                    produto_ids = [int(pid.strip()) for pid in produto_ids_str.split(',')]
+                except ValueError:
+                    return Response(
+                        {'error': 'produto_ids must be comma-separated integers'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Parse limit
+            try:
+                limit = int(limit_str)
+                if limit <= 0 or limit > 500:
+                    limit = 100
+            except ValueError:
+                limit = 100
+            
+            # Build query for stock resets
+            reset_query = MovimentacoesEstoque.objects.filter(
+                documento_referencia='000000'
+            ).select_related('produto', 'tipo_movimentacao')
+            
+            # Apply filters
+            if produto_ids:
+                reset_query = reset_query.filter(produto_id__in=produto_ids)
+            
+            if start_date:
+                reset_query = reset_query.filter(data_movimentacao__date__gte=start_date)
+            
+            if end_date:
+                reset_query = reset_query.filter(data_movimentacao__date__lte=end_date)
+            
+            # Get resets ordered by date
+            resets = reset_query.order_by('-data_movimentacao')
+            
+            # Group by product
+            products_with_resets = {}
+            for reset in resets:
+                produto_id = reset.produto.id
+                if produto_id not in products_with_resets:
+                    products_with_resets[produto_id] = {
+                        'produto': {
+                            'id': reset.produto.id,
+                            'codigo': reset.produto.codigo,
+                            'nome': reset.produto.nome,
+                            'current_stock': float(reset.produto.estoque_atual or 0)
+                        },
+                        'resets': []
+                    }
+                
+                products_with_resets[produto_id]['resets'].append({
+                    'date': reset.data_movimentacao.date().strftime('%Y-%m-%d'),
+                    'quantity': float(reset.quantidade),
+                    'movement_type': reset.tipo_movimentacao.descricao if reset.tipo_movimentacao else 'N/A'
+                })
+            
+            # Convert to list and apply limit
+            reset_analysis = list(products_with_resets.values())[:limit]
+            
+            # Calculate summary statistics
+            total_resets = resets.count()
+            products_with_resets_count = len(products_with_resets)
+            
+            # Date range of resets
+            if resets.exists():
+                first_reset = resets.order_by('data_movimentacao').first()
+                last_reset = resets.order_by('-data_movimentacao').first()
+                reset_date_range = {
+                    'earliest': first_reset.data_movimentacao.date().strftime('%Y-%m-%d'),
+                    'latest': last_reset.data_movimentacao.date().strftime('%Y-%m-%d')
+                }
+            else:
+                reset_date_range = None
+            
+            return Response({
+                'reset_analysis': reset_analysis,
+                'summary': {
+                    'total_resets': total_resets,
+                    'products_with_resets': products_with_resets_count,
+                    'products_returned': len(reset_analysis),
+                    'reset_date_range': reset_date_range,
+                    'analysis_period': {
+                        'start_date': start_date.strftime('%Y-%m-%d') if start_date else None,
+                        'end_date': end_date.strftime('%Y-%m-%d') if end_date else None
+                    }
+                },
+                'parameters': {
+                    'produto_ids_requested': len(produto_ids) if produto_ids else None,
+                    'limit_aplicado': limit,
+                    'report_timestamp': datetime.now().isoformat()
+                }
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Internal server error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def product_stock_history(self, request):
+        """
+        Get comprehensive stock history for a single product.
+        
+        Purpose: Provide detailed historical analysis of a product's stock
+        movements, resets, and calculated levels over time for reporting
+        and audit purposes.
+        
+        Parameters:
+        - produto_id (required): ID of the product
+        - days_history (optional): Number of days of history to include (default: 90)
+        - include_movements (optional): Include detailed movement list (default: true)
+        
+        Returns comprehensive stock history for the product.
+        """
+        try:
+            # Get parameters
+            produto_id = request.query_params.get('produto_id')
+            days_history_str = request.query_params.get('days_history', '90')
+            include_movements_str = request.query_params.get('include_movements', 'true')
+            
+            # Validate required parameters
+            if not produto_id:
+                return Response(
+                    {'error': 'Parameter produto_id is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate produto_id
+            try:
+                produto_id = int(produto_id)
+            except ValueError:
+                return Response(
+                    {'error': 'produto_id must be a valid integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse days_history
+            try:
+                days_history = int(days_history_str)
+                if days_history <= 0 or days_history > 1095:  # Max 3 years
+                    days_history = 90
+            except ValueError:
+                days_history = 90
+            
+            # Parse include_movements
+            include_movements = include_movements_str.lower() in ['true', '1', 'yes']
+            
+            # Get product information
+            try:
+                produto = Produtos.objects.get(id=produto_id)
+            except Produtos.DoesNotExist:
+                return Response(
+                    {'error': f'Product with ID {produto_id} not found'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Calculate date range
+            end_date = date.today()
+            start_date = end_date - timedelta(days=days_history)
+            
+            # Get movement summary
+            movement_summary = StockCalculationService.get_stock_movements_summary(
+                produto_id, start_date, end_date
+            )
+            
+            # Calculate stock at key points
+            stock_at_start = StockCalculationService.calculate_stock_at_date(produto_id, start_date)
+            stock_at_end = StockCalculationService.calculate_stock_at_date(produto_id, end_date)
+            
+            # Get stock reset information
+            base_stock, most_recent_reset = StockCalculationService.get_base_stock_reset(
+                produto_id, datetime.combine(end_date, datetime.max.time())
+            )
+            
+            # Build response
+            response_data = {
+                'produto': {
+                    'id': produto.id,
+                    'codigo': produto.codigo,
+                    'nome': produto.nome,
+                    'current_stock': float(produto.estoque_atual or 0),
+                    'ativo': produto.ativo
+                },
+                'analysis_period': {
+                    'start_date': start_date.strftime('%Y-%m-%d'),
+                    'end_date': end_date.strftime('%Y-%m-%d'),
+                    'days_analyzed': days_history
+                },
+                'stock_levels': {
+                    'stock_at_period_start': float(stock_at_start),
+                    'stock_at_period_end': float(stock_at_end),
+                    'current_stock_from_table': float(produto.estoque_atual or 0),
+                    'net_change_in_period': float(stock_at_end - stock_at_start)
+                },
+                'stock_reset_info': {
+                    'has_recent_reset': most_recent_reset is not None,
+                    'most_recent_reset_date': most_recent_reset.isoformat() if most_recent_reset else None,
+                    'reset_quantity': float(base_stock) if most_recent_reset else None,
+                    'total_resets_in_period': len(movement_summary['stock_resets'])
+                },
+                'movement_summary': {
+                    'total_movements': len(movement_summary['stock_resets']) + len(movement_summary['regular_movimentos']),
+                    'regular_movements': len(movement_summary['regular_movimentos']),
+                    'stock_resets': len(movement_summary['stock_resets']),
+                    'totals': {
+                        'entrada': float(movement_summary['totals']['entrada']),
+                        'saida': float(movement_summary['totals']['saida']),
+                        'net_movement': float(movement_summary['totals']['net_movement'])
+                    }
+                }
+            }
+            
+            # Include detailed movements if requested
+            if include_movements:
+                response_data['detailed_movements'] = {
+                    'stock_resets': movement_summary['stock_resets'],
+                    'regular_movements': movement_summary['regular_movimentos']
+                }
+            
+            response_data['metadata'] = {
+                'analysis_timestamp': datetime.now().isoformat(),
+                'include_movements': include_movements
+            }
+            
+            return Response(response_data)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Internal server error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'])
+    def produtos_criticos(self, request):
+        """Retorna produtos com estoque crítico (baixo) usando a nova metodologia."""
+        try:
+            data_str = request.query_params.get('data', date.today().strftime('%Y-%m-%d'))
+            limite_critico = float(request.query_params.get('limite', '5'))
+
+            try:
+                data_final = datetime.strptime(data_str, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Formato de data inválido. Use YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            produtos_ativos = Produtos.objects.filter(ativo=True)
+            estoque_critico_list = []
+
+            for produto in produtos_ativos:
+                quantidade_na_data = StockCalculationService.calculate_stock_at_date(
+                    produto.id, data_final
+                )
+
+                if 0 < quantidade_na_data <= Decimal(limite_critico):
+                    custo_unitario = produto.preco_custo or Decimal('0')
+                    valor_na_data = quantidade_na_data * custo_unitario
+
+                    estoque_critico_list.append({
+                        'produto_id': produto.id,
+                        'nome': produto.nome,
+                        'referencia': produto.referencia,
+                        'quantidade_atual': float(quantidade_na_data),
+                        'valor_atual': float(valor_na_data),
+                        'total_movimentacoes': 0, # Campo legado, precisa de query extra
+                    })
+
+            # Ordena por quantidade (menor primeiro)
+            estoque_critico_list.sort(key=lambda x: x['quantidade_atual'])
+
+            return Response({
+                'produtos': estoque_critico_list,
+                'parametros': {
+                    'data_consulta': data_final.strftime('%Y-%m-%d'),
+                    'limite_critico': limite_critico,
+                    'total_produtos_criticos': len(estoque_critico_list)
+                }
+            })
+
+        except Exception as e:
+            return Response(
+                {'error': f'Erro interno no servidor: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'])
+    def produtos_resetados(self, request):
+        """
+        Retorna os produtos que tiveram reset de estoque no último ano.
+        Reset identificado por movimentações com documento_referencia='000000'
+        """
+        try:
+            # Parâmetros da requisição
+            meses = int(request.query_params.get('meses', '12'))  # Padrão: último ano
+            limite = int(request.query_params.get('limite', '100'))
+            offset = int(request.query_params.get('offset', '0'))
+            ordem = request.query_params.get('ordem', 'data_reset')
+            reverso = request.query_params.get('reverso', 'true').lower() == 'true'
+
+            # Data limite para busca (ex: 12 meses atrás)
+            data_limite = timezone.now().date() - timedelta(days=meses * 30)
+
+            # Buscar movimentações de reset no período
+            resets_query = MovimentacoesEstoque.objects.filter(
+                documento_referencia='000000',
+                data_movimentacao__date__gte=data_limite
+            ).select_related('produto', 'tipo_movimentacao')
+            
+            # Agrupar por produto e pegar o reset mais recente
+            produtos_resetados = {}
+            
+            for reset in resets_query:
+                produto_id = reset.produto.id
+                
+                if produto_id not in produtos_resetados or reset.data_movimentacao > produtos_resetados[produto_id]['data_reset']:
+                    produtos_resetados[produto_id] = {
+                        'produto_id': produto_id,
+                        'codigo': reset.produto.codigo,
+                        'nome': reset.produto.nome,
+                        'data_reset': reset.data_movimentacao,
+                        'quantidade_resetada': reset.quantidade,
+                        'movimentacoes_detalhadas': []
+                    }
+                
+                # Adicionar movimentação detalhada
+                produtos_resetados[produto_id]['movimentacoes_detalhadas'].append({
+                    'id': reset.id,
+                    'data': reset.data_movimentacao.strftime('%Y-%m-%d %H:%M:%S'),
+                    'tipo': str(reset.tipo_movimentacao) if reset.tipo_movimentacao else 'N/A',
+                    'quantidade': reset.quantidade,
+                    'valor_unitario': reset.custo_unitario,
+                    'valor_total': reset.valor_total,
+                    'documento': reset.documento_referencia or '',
+                    'observacoes': reset.observacoes or ''
+                })
+            
+            # Converter para lista e aplicar limite
+            resultado = list(produtos_resetados.values())
+            total_produtos_resetados = len(resultado)
+            
+            # Ordenar resultado
+            if ordem == 'data_reset':
+                resultado.sort(key=lambda x: x['data_reset'], reverse=reverso)
+            elif ordem == 'nome':
+                resultado.sort(key=lambda x: x['nome'], reverse=reverso)
+            elif ordem == 'codigo':
+                resultado.sort(key=lambda x: x['codigo'], reverse=reverso)
+            
+            # Aplicar limite e offset
+            resultado = resultado[offset:offset+limite]
+            
+            return Response({
+                'produtos_resetados': resultado,
+                'parametros': {
+                    'data_consulta': timezone.now().strftime('%Y-%m-%d'),
+                    'meses': meses,
+                    'limite_aplicado': limite,
+                    'offset': offset,
+                    'ordem': ordem,
+                    'reverso': reverso,
+                    'total_produtos_resetados': total_produtos_resetados
+                }
+            })
+
+        except Exception as e:
+            return Response(
+                {'error': f'Erro interno no servidor: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

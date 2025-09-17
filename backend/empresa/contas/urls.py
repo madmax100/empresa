@@ -6,19 +6,52 @@ from .views.fluxo_caixa2 import FluxoCaixaViewSet as FluxoCaixaLucroViewSet
 from .views.fluxo_caixa_realizado import FluxoCaixaRealizadoViewSet
 from .views.analise_fluxo_caixa import AnaliseFluxoCaixaViewSet
 from .views.estoque_views import EstoqueViewSet
+from .views.produtos_resetados_view import ProdutosResetadosViewSet
 from .views.relatorios_views import RelatorioCustosFixosView, RelatorioCustosVariaveisView, RelatorioFaturamentoView
 from .views.access import *
 from .views.access import suprimentos_por_contrato
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
-# ... (outros registros do router)
+router.register(r'categorias_produtos', CategoriasProdutosViewSet)
+router.register(r'clientes', ClientesViewSet)
+router.register(r'contagens_inventario', ContagensInventarioViewSet)
+router.register(r'contas_pagar', ContasPagarViewSet)
+router.register(r'contas_receber', ContasReceberViewSet)
+router.register(r'contratos_locacao', ContratosLocacaoViewSet)
+router.register(r'custos_adicionais_frete', CustosAdicionaisFreteViewSet)
+router.register(r'despesas', DespesasViewSet)
+router.register(r'empresas', EmpresasViewSet)
+router.register(r'fornecedores', FornecedoresViewSet)
+router.register(r'fretes', FretesViewSet)
+router.register(r'funcionarios', FuncionariosViewSet)
+router.register(r'grupos', GruposViewSet)
+router.register(r'historico_rastreamento', HistoricoRastreamentoViewSet)
+router.register(r'inventarios', InventariosViewSet)
+router.register(r'itens_contrato_locacao', ItensContratoLocacaoViewSet)
+router.register(r'itens_nf_entrada', ItensNfEntradaViewSet)
+router.register(r'itens_nf_saida', ItensNfSaidaViewSet)
+router.register(r'locais_estoque', LocaisEstoqueViewSet)
+router.register(r'lotes', LotesViewSet)
+router.register(r'marcas', MarcasViewSet)
+router.register(r'movimentacoes_estoque', MovimentacoesEstoqueViewSet)
+router.register(r'notas_fiscais_entrada', NotasFiscaisEntradaViewSet)
+router.register(r'notas_fiscais_saida', NotasFiscaisSaidaViewSet)
+router.register(r'ocorrencias_frete', OcorrenciasFreteViewSet)
+router.register(r'pagamentos_funcionarios', PagamentosFuncionariosViewSet)
+router.register(r'posicoes_estoque', PosicoesEstoqueViewSet)
+router.register(r'produtos', ProdutosViewSet)
+router.register(r'regioes_entrega', RegioesEntregaViewSet)
+router.register(r'saldos_estoque', SaldosEstoqueViewSet)
+router.register(r'tabelas_frete', TabelasFreteViewSet)
+router.register(r'tipos_movimentacao_estoque', TiposMovimentacaoEstoqueViewSet)
 router.register(r'transportadoras', TransportadorasViewSet)
 router.register(r'fluxo-caixa', FluxoCaixaViewSet, basename='fluxo-caixa')
 router.register(r'fluxo-caixa-lucro', FluxoCaixaLucroViewSet, basename='fluxo-caixa-lucro')
 router.register(r'fluxo-caixa-realizado', FluxoCaixaRealizadoViewSet, basename='fluxo-caixa-realizado')
 router.register(r'analise-fluxo-caixa', AnaliseFluxoCaixaViewSet, basename='analise-fluxo-caixa')
 router.register(r'estoque-controle', EstoqueViewSet, basename='estoque-controle')
+router.register(r'produtos-resetados', ProdutosResetadosViewSet, basename='produtos-resetados')
 
 
 urlpatterns = [

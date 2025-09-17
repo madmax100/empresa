@@ -1,0 +1,7 @@
+2025-09-15 18:52:15,300 - INFO - Iniciando a sincronização do estoque atual.
+2025-09-15 18:52:15,910 - INFO - Buscando dados de estoque do MS Access...
+2025-09-15 18:52:15,962 - INFO - Encontrados 5522 produtos válidos no MS Access.
+2025-09-15 18:52:15,963 - INFO - Iniciando a atualização no PostgreSQL...
+2025-09-15 18:52:15,977 - INFO - Serão atualizados 5503 produtos no PostgreSQL.
+2025-09-15 18:52:17,633 - INFO - Atualização em lote concluída. 5503 registros foram afetados.
+2025-09-15 18:52:17,742 - INFO - Processo de sincronização finalizado.
