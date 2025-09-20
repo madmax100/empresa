@@ -1685,19 +1685,16 @@ def contas_nao_pagas_por_data_corte(request):
         
         # 2. Processar Contas a Pagar
         if tipo_filtro in ['pagar', 'ambos']:
-            # Base query para contas não pagas
-            base_query = ContasPagar.objects.filter(status='A').select_related('fornecedor')
-            
+            # Base query para considerar contas que estavam não pagas na data de corte
+            # Critério: registro anterior à data de corte (data de emissão) e pagamento posterior à data de corte (ou sem pagamento)
+            base_query = ContasPagar.objects.all().select_related('fornecedor')
+
             if not incluir_canceladas:
                 base_query = base_query.exclude(status='C')
-            
-            # Adicionar filtro por data de emissão se solicitado
-            if filtrar_por_data_emissao:
-                base_query = base_query.filter(data__lt=data_corte, data__isnull=False)
-            
-            # Contas antes da data de corte
+
+            # Contas não pagas NA DATA DE CORTE (emissão < data_corte e (sem pagamento ou pagamento > data_corte))
             contas_antes = base_query.filter(
-                vencimento__lt=data_corte
+                Q(data__lt=data_corte) & (Q(data_pagamento__isnull=True) | Q(data_pagamento__gt=data_corte))
             ).values(
                 'fornecedor__id',
                 'fornecedor__nome',
@@ -1709,10 +1706,10 @@ def contas_nao_pagas_por_data_corte(request):
                 menor_vencimento=Min('vencimento'),
                 maior_vencimento=Max('vencimento')
             ).order_by('fornecedor__especificacao', 'fornecedor__nome')
-            
-            # Contas depois da data de corte
+
+            # Contas originadas após a data de corte e ainda não pagas após a data
             contas_depois = base_query.filter(
-                vencimento__gte=data_corte
+                Q(data__gte=data_corte) & (Q(data_pagamento__isnull=True) | Q(data_pagamento__gt=data_corte))
             ).values(
                 'fornecedor__id',
                 'fornecedor__nome',
@@ -1780,19 +1777,15 @@ def contas_nao_pagas_por_data_corte(request):
         
         # 3. Processar Contas a Receber
         if tipo_filtro in ['receber', 'ambos']:
-            # Base query para contas não recebidas
-            base_query = ContasReceber.objects.filter(status='A').select_related('cliente')
-            
+            # Base query para considerar contas que estavam não recebidas na data de corte
+            base_query = ContasReceber.objects.all().select_related('cliente')
+
             if not incluir_canceladas:
                 base_query = base_query.exclude(status='C')
-            
-            # Adicionar filtro por data de emissão se solicitado
-            if filtrar_por_data_emissao:
-                base_query = base_query.filter(data__lt=data_corte, data__isnull=False)
-            
-            # Contas antes da data de corte
+
+            # Contas não recebidas NA DATA DE CORTE (emissão < data_corte e (sem pagamento ou pagamento > data_corte))
             contas_antes = base_query.filter(
-                vencimento__lt=data_corte
+                Q(data__lt=data_corte) & (Q(data_pagamento__isnull=True) | Q(data_pagamento__gt=data_corte))
             ).values(
                 'cliente__id',
                 'cliente__nome',
@@ -1803,10 +1796,10 @@ def contas_nao_pagas_por_data_corte(request):
                 menor_vencimento=Min('vencimento'),
                 maior_vencimento=Max('vencimento')
             ).order_by('cliente__nome')
-            
-            # Contas depois da data de corte
+
+            # Contas originadas após a data de corte ainda não recebidas
             contas_depois = base_query.filter(
-                vencimento__gte=data_corte
+                Q(data__gte=data_corte) & (Q(data_pagamento__isnull=True) | Q(data_pagamento__gt=data_corte))
             ).values(
                 'cliente__id',
                 'cliente__nome',

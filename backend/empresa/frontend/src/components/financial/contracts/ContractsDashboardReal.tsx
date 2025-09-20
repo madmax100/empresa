@@ -144,14 +144,54 @@ const ContractsDashboardReal: React.FC = () => {
   const [clientesExpandidos, setClientesExpandidos] = useState<Set<number>>(new Set());
 
   const formatCurrency = (value: number) => {
+    // Validação robusta para evitar NaN
+    const numValue = Number(value);
+    if (isNaN(numValue) || !isFinite(numValue)) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(0);
+    }
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value);
+    }).format(numValue);
   };
 
   const formatPercent = (value: number) => {
-    return `${value.toFixed(1)}%`;
+    // Validação robusta para evitar NaN
+    const numValue = Number(value);
+    if (isNaN(numValue) || !isFinite(numValue)) {
+      return '0.0%';
+    }
+    return `${numValue.toFixed(1)}%`;
+  };
+
+  // Função helper para garantir valores numéricos válidos (versão mais permissiva)
+  const safeMath = {
+    toNumber: (value: unknown): number => {
+      if (value === null || value === undefined || value === '') {
+        return 0;
+      }
+      const num = Number(value);
+      return isNaN(num) || !isFinite(num) ? 0 : num;
+    },
+    add: (a: unknown, b: unknown): number => {
+      const numA = safeMath.toNumber(a);
+      const numB = safeMath.toNumber(b);
+      return numA + numB;
+    },
+    subtract: (a: unknown, b: unknown): number => {
+      const numA = safeMath.toNumber(a);
+      const numB = safeMath.toNumber(b);
+      return numA - numB;
+    },
+    percentage: (part: unknown, total: unknown): number => {
+      const numPart = safeMath.toNumber(part);
+      const numTotal = safeMath.toNumber(total);
+      if (numTotal === 0) return 0;
+      return (numPart / numTotal) * 100;
+    }
   };
 
   const toggleClienteExpansao = (clienteId: number) => {
@@ -190,41 +230,55 @@ const ContractsDashboardReal: React.FC = () => {
         const clienteId = contrato.cliente.id;
         const clienteNome = contrato.cliente.nome;
 
+        // Calcular margem líquida se não estiver disponível na API ou for zero
+        let margemLiquidaFinal = safeMath.toNumber(contrato.analise_financeira.margem_liquida);
+        
+        if (margemLiquidaFinal === 0) {
+          // Recalcular manualmente: faturamento - suprimentos
+          const faturamento = safeMath.toNumber(contrato.valores_contratuais.faturamento_proporcional);
+          const suprimentos = safeMath.toNumber(contrato.analise_financeira.custo_suprimentos);
+          margemLiquidaFinal = safeMath.subtract(faturamento, suprimentos);
+        }
+
         const contratoProcessado: ContratoCompleto = {
           ...contrato,
-          valor_mensal: contrato.valores_contratuais.valor_mensal,
-          faturamento_periodo: contrato.valores_contratuais.faturamento_proporcional,
-          suprimentos_valor: contrato.analise_financeira.custo_suprimentos,
-          margem_liquida: contrato.analise_financeira.margem_liquida,
-          percentual_margem: contrato.analise_financeira.percentual_margem
+          valor_mensal: safeMath.toNumber(contrato.valores_contratuais.valor_mensal),
+          faturamento_periodo: safeMath.toNumber(contrato.valores_contratuais.faturamento_proporcional),
+          suprimentos_valor: safeMath.toNumber(contrato.analise_financeira.custo_suprimentos),
+          margem_liquida: margemLiquidaFinal,
+          percentual_margem: safeMath.toNumber(contrato.analise_financeira.percentual_margem)
         };
 
         if (clienteMap.has(clienteId)) {
           const clienteExistente = clienteMap.get(clienteId)!;
           clienteExistente.contratos.push(contratoProcessado);
           clienteExistente.totalContratos++;
-          clienteExistente.faturamentoTotal += contrato.valores_contratuais.faturamento_proporcional;
-          clienteExistente.despesasSuprimentos += contrato.analise_financeira.custo_suprimentos;
-          clienteExistente.margemLiquida += contrato.analise_financeira.margem_liquida;
+          clienteExistente.faturamentoTotal = safeMath.add(clienteExistente.faturamentoTotal, contrato.valores_contratuais.faturamento_proporcional);
+          clienteExistente.despesasSuprimentos = safeMath.add(clienteExistente.despesasSuprimentos, contrato.analise_financeira.custo_suprimentos);
+          clienteExistente.margemLiquida = safeMath.add(clienteExistente.margemLiquida, margemLiquidaFinal);
         } else {
           clienteMap.set(clienteId, {
             clienteId,
             clienteNome,
             contratos: [contratoProcessado],
             totalContratos: 1,
-            faturamentoTotal: contrato.valores_contratuais.faturamento_proporcional,
-            despesasSuprimentos: contrato.analise_financeira.custo_suprimentos,
-            margemLiquida: contrato.analise_financeira.margem_liquida,
+            faturamentoTotal: safeMath.toNumber(contrato.valores_contratuais.faturamento_proporcional),
+            despesasSuprimentos: safeMath.toNumber(contrato.analise_financeira.custo_suprimentos),
+            margemLiquida: margemLiquidaFinal,
             percentualMargem: 0 // Será calculado abaixo
           });
         }
       });
 
       // Calcular percentual de margem para cada cliente
+      // E recalcular margem líquida se necessário
       clienteMap.forEach((cliente) => {
-        if (cliente.faturamentoTotal > 0) {
-          cliente.percentualMargem = (cliente.margemLiquida / cliente.faturamentoTotal) * 100;
+        // Recalcular margem se estiver zerada mas há faturamento
+        if (cliente.margemLiquida === 0 && cliente.faturamentoTotal > 0) {
+          cliente.margemLiquida = safeMath.subtract(cliente.faturamentoTotal, cliente.despesasSuprimentos);
         }
+        
+        cliente.percentualMargem = safeMath.percentage(cliente.margemLiquida, cliente.faturamentoTotal);
       });
 
       const clientesArray = Array.from(clienteMap.values()).sort((a, b) => b.faturamentoTotal - a.faturamentoTotal);
@@ -547,13 +601,13 @@ const ContractsDashboardReal: React.FC = () => {
                         {cliente.totalContratos}
                       </td>
                       <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#059669' }}>
-                        {formatCurrency(cliente.faturamentoTotal)}
+                        {formatCurrency(safeMath.toNumber(cliente.faturamentoTotal))}
                       </td>
                       <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#dc2626' }}>
-                        {formatCurrency(cliente.despesasSuprimentos)}
+                        {formatCurrency(safeMath.toNumber(cliente.despesasSuprimentos))}
                       </td>
-                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: '700', color: cliente.margemLiquida >= 0 ? '#059669' : '#dc2626' }}>
-                        {formatCurrency(cliente.margemLiquida)}
+                      <td style={{ padding: '12px', textAlign: 'right', fontWeight: '700', color: safeMath.toNumber(cliente.margemLiquida) >= 0 ? '#059669' : '#dc2626' }}>
+                        {formatCurrency(safeMath.toNumber(cliente.margemLiquida))}
                       </td>
                       <td style={{ padding: '12px', textAlign: 'center' }}>
                         <span style={{
@@ -561,12 +615,12 @@ const ContractsDashboardReal: React.FC = () => {
                           borderRadius: '4px',
                           fontSize: '0.75rem',
                           fontWeight: '600',
-                          backgroundColor: cliente.percentualMargem >= 70 ? '#dcfce7' : 
-                                          cliente.percentualMargem >= 50 ? '#fef3c7' : '#fecaca',
-                          color: cliente.percentualMargem >= 70 ? '#166534' : 
-                                 cliente.percentualMargem >= 50 ? '#92400e' : '#991b1b'
+                          backgroundColor: safeMath.toNumber(cliente.percentualMargem) >= 70 ? '#dcfce7' : 
+                                          safeMath.toNumber(cliente.percentualMargem) >= 50 ? '#fef3c7' : '#fecaca',
+                          color: safeMath.toNumber(cliente.percentualMargem) >= 70 ? '#166534' : 
+                                 safeMath.toNumber(cliente.percentualMargem) >= 50 ? '#92400e' : '#991b1b'
                         }}>
-                          {formatPercent(cliente.percentualMargem)}
+                          {formatPercent(safeMath.toNumber(cliente.percentualMargem))}
                         </span>
                       </td>
                     </tr>

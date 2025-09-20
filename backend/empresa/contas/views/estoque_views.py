@@ -9,7 +9,15 @@ from collections import defaultdict
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils import timezone
 
-from ..models.access import MovimentacoesEstoque, Produtos, EstoqueInicial, Grupos
+from ..models.access import (
+    MovimentacoesEstoque,
+    Produtos,
+    EstoqueInicial,
+    Grupos,
+    Lotes,
+    NotasFiscaisEntrada,
+    NotasFiscaisSaida,
+)
 from ..services.stock_calculation_service import StockCalculationService
 
 
@@ -232,7 +240,17 @@ class EstoqueViewSet(viewsets.ViewSet):
                 data_movimentacao__date__lte=data_fim
             ).exclude(
                 documento_referencia='EST_INICIAL_2025'
-            ).select_related('produto', 'tipo_movimentacao')
+            ).select_related(
+                'produto',
+                'tipo_movimentacao',
+                'nota_fiscal_entrada',
+                'nota_fiscal_entrada__fornecedor',
+                'nota_fiscal_saida',
+                'nota_fiscal_saida__cliente',
+                'lote_id',
+                'lote_id__nota_fiscal_entrada_id',
+                'lote_id__fornecedor_id',
+            )
             
             # Filtro por produto específico se solicitado
             if produto_id:
@@ -309,6 +327,86 @@ class EstoqueViewSet(viewsets.ViewSet):
                 
                 # Adiciona aos detalhes (sempre coletamos para análise)
                 is_entrada = tipo_id in tipos_entrada
+                # Monta informações de nota fiscal (entrada/saída)
+                nf_info = None
+                if mov.nota_fiscal_entrada:
+                    try:
+                        fornecedor_nome = None
+                        if getattr(mov.nota_fiscal_entrada, 'fornecedor', None):
+                            fornecedor_nome = str(mov.nota_fiscal_entrada.fornecedor)
+                        else:
+                            # Fallback: tentar via lote
+                            lote = getattr(mov, 'lote_id', None)
+                            if lote and getattr(lote, 'fornecedor_id', None):
+                                fornecedor_nome = str(lote.fornecedor_id)
+
+                        numero_nf = ''
+                        if getattr(mov.nota_fiscal_entrada, 'numero_nota', None):
+                            numero_nf = str(mov.nota_fiscal_entrada.numero_nota)
+                        elif mov.documento_referencia:
+                            numero_nf = str(mov.documento_referencia)
+
+                        nf_info = {
+                            'numero': numero_nf,
+                            'tipo': 'entrada',
+                            'fornecedor': fornecedor_nome,
+                            'fornecedor_id': getattr(mov.nota_fiscal_entrada, 'fornecedor_id', None) or (getattr(getattr(mov, 'lote_id', None), 'fornecedor_id_id', None)),
+                        }
+                    except Exception:
+                        nf_info = {'tipo': 'entrada'}
+                elif mov.nota_fiscal_saida:
+                    try:
+                        cliente_nome = None
+                        if getattr(mov.nota_fiscal_saida, 'cliente', None):
+                            # __str__ de Clientes retorna nome
+                            cliente_nome = str(mov.nota_fiscal_saida.cliente)
+                        nf_info = {
+                            'numero': str(mov.nota_fiscal_saida.numero_nota) if mov.nota_fiscal_saida.numero_nota else '',
+                            'tipo': 'saida',
+                            'cliente': cliente_nome,
+                        }
+                    except Exception:
+                        nf_info = {'tipo': 'saida'}
+                else:
+                    # Fallbacks quando não há vínculo direto de NF
+                    if is_entrada:
+                        # Tentar via lote -> nota_fiscal_entrada
+                        try:
+                            lote = getattr(mov, 'lote_id', None)
+                            if lote and getattr(lote, 'nota_fiscal_entrada_id', None):
+                                nf_ent = lote.nota_fiscal_entrada_id
+                                nf_info = {
+                                    'numero': str(getattr(nf_ent, 'numero_nota', '') or ''),
+                                    'tipo': 'entrada',
+                                    'fornecedor': str(getattr(nf_ent, 'fornecedor', '') or '') or None,
+                                    'fornecedor_id': getattr(nf_ent, 'fornecedor_id', None),
+                                }
+                            elif lote and getattr(lote, 'fornecedor_id', None):
+                                # Sem NF, mas ao menos fornecedor do lote
+                                nf_info = {
+                                    'numero': str(mov.documento_referencia or ''),
+                                    'tipo': 'entrada',
+                                    'fornecedor': str(lote.fornecedor_id) if lote.fornecedor_id else None,
+                                    'fornecedor_id': getattr(lote, 'fornecedor_id_id', None),
+                                }
+                        except Exception:
+                            pass
+                    else:
+                        # Saída: tentar encontrar NF por número no documento_referencia
+                        try:
+                            doc = (mov.documento_referencia or '').strip()
+                            if doc:
+                                nf_saida = NotasFiscaisSaida.objects.filter(numero_nota=doc).select_related('cliente').first()
+                                if nf_saida:
+                                    nf_info = {
+                                        'numero': str(nf_saida.numero_nota),
+                                        'tipo': 'saida',
+                                        'cliente': str(nf_saida.cliente) if nf_saida.cliente else None,
+                                        'cliente_id': getattr(nf_saida, 'cliente_id', None),
+                                    }
+                        except Exception:
+                            pass
+
                 mov_detalhada = {
                     'id': mov.id,
                     'data': data_mov_str,
@@ -321,7 +419,8 @@ class EstoqueViewSet(viewsets.ViewSet):
                     'operador': mov.observacoes or '',  # Adaptar conforme estrutura
                     'observacoes': mov.observacoes or '',
                     'is_entrada': is_entrada,
-                    'is_saida': not is_entrada
+                    'is_saida': not is_entrada,
+                    'nota_fiscal': nf_info
                 }
                 
                 produto_data['movimentacoes_detalhadas'].append(mov_detalhada)

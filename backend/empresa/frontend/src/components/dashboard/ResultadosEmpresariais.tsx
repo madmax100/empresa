@@ -35,8 +35,12 @@ if (typeof document !== 'undefined' && !document.getElementById('resultados-anim
 interface MovimentacaoEstoque {
   valor_entrada: number;
   valor_saida: number;
+  valor_saida_preco_entrada: number;
+  saldo_periodo: number;
   lucro_operacional: number;
   margem_percentual: number;
+  // Variação calculada por snapshots (valor_total_estoque fim - início)
+  variacao_snapshot?: number;
 }
 
 interface FaturamentoContratos {
@@ -95,7 +99,7 @@ const ResultadosEmpresariais: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [tipoCalculoLucro, setTipoCalculoLucro] = useState<'estoque' | 'vendas'>('estoque');
+  // Removido: tipoCalculoLucro (não é mais necessário)
 
   // Estados para os dados
   const [movimentacaoEstoque, setMovimentacaoEstoque] = useState<MovimentacaoEstoque | null>(null);
@@ -141,35 +145,37 @@ const ResultadosEmpresariais: React.FC = () => {
 
   // Função para calcular resultados com base nas especificações selecionadas
   const calcularResultados = useCallback(() => {
-    if (!custosFixos || !custosVariaveis || !faturamentoContratos || !movimentacaoEstoque) return;
-    
-    // Calcula custos fixos apenas das especificações incluídas
-    const custoFixoCalculado = custosFixos.especificacoes
+    if (!custosFixos || !custosVariaveis || !faturamentoContratos || !movimentacaoEstoque || !margemVendas) return;
+
+    // Totais na 1ª linha
+    const movEstoqueValor = (typeof movimentacaoEstoque.variacao_snapshot === 'number')
+      ? movimentacaoEstoque.variacao_snapshot || 0
+      : (movimentacaoEstoque.saldo_periodo || 0);
+    const faturamentoContratosValor = faturamentoContratos.faturamento_total_proporcional || 0;
+    const notasVendasValor = margemVendas.valor_vendas || 0;
+    const totalPrimeiraLinha = movEstoqueValor + faturamentoContratosValor + notasVendasValor;
+
+    // Totais na 2ª linha (respeitando seleção de especificações)
+    const custoFixoCalculado = (custosFixos.especificacoes || [])
       .filter(spec => spec.incluir_no_calculo)
-      .reduce((total, spec) => total + spec.valor_pago_total, 0);
-    
-    // Calcula custos variáveis apenas das especificações incluídas
-    const custoVariavelCalculado = custosVariaveis.especificacoes
+      .reduce((total, spec) => total + (spec.valor_pago_total || 0), 0);
+    const custoVariavelCalculado = (custosVariaveis.especificacoes || [])
       .filter(spec => spec.incluir_no_calculo)
-      .reduce((total, spec) => total + spec.valor_pago_total, 0);
-    
-    // Calcula resultado líquido
-    const receita = faturamentoContratos.faturamento_total_proporcional || 0;
-    const custoSuprimentos = faturamentoContratos.custo_total_suprimentos || 0;
-    const lucroEstoque = movimentacaoEstoque.lucro_operacional || 0;
-    
-    const resultadoLiquido = receita + lucroEstoque - custoSuprimentos - custoFixoCalculado - custoVariavelCalculado;
-    const margemLiquida = receita > 0 ? (resultadoLiquido / receita) * 100 : 0;
-    
+      .reduce((total, spec) => total + (spec.valor_pago_total || 0), 0);
+    const totalSegundaLinha = custoFixoCalculado + custoVariavelCalculado;
+
+    const resultadoLiquido = totalPrimeiraLinha - totalSegundaLinha;
+    const margemLiquida = totalPrimeiraLinha > 0 ? (resultadoLiquido / totalPrimeiraLinha) * 100 : 0;
+
     setResultadoFinal({
-      lucro_operacional_estoque: lucroEstoque,
-      faturamento_contratos: receita,
+      lucro_operacional_estoque: movEstoqueValor,
+      faturamento_contratos: faturamentoContratosValor,
       custos_fixos: custoFixoCalculado,
       custos_variaveis: custoVariavelCalculado,
       resultado_liquido: resultadoLiquido,
       margem_liquida_percentual: margemLiquida
     });
-  }, [custosFixos, custosVariaveis, faturamentoContratos, movimentacaoEstoque]);
+  }, [custosFixos, custosVariaveis, faturamentoContratos, movimentacaoEstoque, margemVendas]);
 
   // Funções de formatação
   const formatCurrency = (value: number) => {
@@ -186,7 +192,7 @@ const ResultadosEmpresariais: React.FC = () => {
   // Função para buscar movimentação de estoque
   const buscarMovimentacaoEstoque = async (dataInicial: string, dataFinal: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/estoque-controle/movimentacoes_periodo/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
+  const response = await fetch(`http://localhost:8000/contas/estoque-controle/movimentacoes_periodo/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
       if (!response.ok) {
         throw new Error(`Erro na requisição: ${response.status}`);
       }
@@ -197,6 +203,8 @@ const ResultadosEmpresariais: React.FC = () => {
         return {
           valor_entrada: 0,
           valor_saida: 0,
+          valor_saida_preco_entrada: 0,
+          saldo_periodo: 0,
           lucro_operacional: 0,
           margem_percentual: 0
         };
@@ -207,6 +215,8 @@ const ResultadosEmpresariais: React.FC = () => {
       return {
         valor_entrada: resumo.valor_total_entradas || 0,
         valor_saida: resumo.valor_total_saidas || 0,
+        valor_saida_preco_entrada: resumo.valor_total_saidas_preco_entrada || 0,
+        saldo_periodo: resumo.saldo_periodo || 0,
         lucro_operacional: resumo.diferenca_total_precos || 0,
         margem_percentual: resumo.margem_total || 0
       };
@@ -215,9 +225,24 @@ const ResultadosEmpresariais: React.FC = () => {
       return {
         valor_entrada: 0,
         valor_saida: 0,
+        valor_saida_preco_entrada: 0,
+        saldo_periodo: 0,
         lucro_operacional: 0,
         margem_percentual: 0
       };
+    }
+  };
+
+  // Buscar valor total de estoque por data (mesmo endpoint do Controle de Estoque)
+  const buscarValorTotalEstoque = async (data: string): Promise<number> => {
+    try {
+      const resp = await fetch(`http://localhost:8000/contas/estoque-controle/valor_total_estoque/?data=${data}`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const json = await resp.json();
+      return Number(json?.valor_total_estoque) || 0;
+    } catch (e) {
+      console.warn('Falha ao buscar valor_total_estoque para', data, e);
+      return 0;
     }
   };
 
@@ -477,12 +502,21 @@ const ResultadosEmpresariais: React.FC = () => {
       console.log('📊 Dados custos variáveis processados:', dadosCustosVariaveis);
       console.log('💰 Dados faturamento processados:', dadosFaturamento);
 
-      // Processar dados de estoque
+      // Processar dados de estoque + variação por snapshot (alinhado ao Controle)
+      const [valorIniSnap, valorFimSnap] = await Promise.all([
+        buscarValorTotalEstoque(dataInicial),
+        buscarValorTotalEstoque(dataFinal)
+      ]);
+      const variacaoSnapshot = (valorFimSnap - valorIniSnap) || 0;
+
       const movEstoque: MovimentacaoEstoque = {
         valor_entrada: dadosEstoque.valor_entrada || 0,
         valor_saida: dadosEstoque.valor_saida || 0,
+        valor_saida_preco_entrada: dadosEstoque.valor_saida_preco_entrada || 0,
+        saldo_periodo: dadosEstoque.saldo_periodo || 0,
         lucro_operacional: dadosEstoque.lucro_operacional || 0,
-        margem_percentual: dadosEstoque.margem_percentual || 0
+        margem_percentual: dadosEstoque.margem_percentual || 0,
+        variacao_snapshot: variacaoSnapshot
       };
 
       // Processar dados de contratos
@@ -527,44 +561,27 @@ const ResultadosEmpresariais: React.FC = () => {
       console.log('- Custos Variáveis:', custVariaveis);
       console.log('- Margem Vendas:', margVendas);
 
-      // Calcular resultado final
-      const lucroOperacionalEstoque = movEstoque.lucro_operacional;
-      const lucroMargemVendas = margVendas.margem_bruta;
-      const lucroSelecionado = tipoCalculoLucro === 'estoque' ? lucroOperacionalEstoque : lucroMargemVendas;
-      
-      const faturamentoContratosValor = fatContratos.margem_bruta_total; // Margem já descontando suprimentos
-      const custosFixosValor = custFixos.valor_total;
+      // Calcular resultado final conforme regra: (Linha 1) - (Linha 2)
+      const movEstoqueValor = (typeof movEstoque.variacao_snapshot === 'number')
+        ? (movEstoque.variacao_snapshot || 0)
+        : (movEstoque.saldo_periodo || 0);
+      const faturamentoContratosValor = fatContratos.faturamento_total_proporcional || 0;
+      const notasVendasValor = margVendas.valor_vendas || 0;
+      const totalPrimeiraLinha = movEstoqueValor + faturamentoContratosValor + notasVendasValor;
+
+      const custosFixosValor = custFixos.especificacoes
+        .filter(spec => spec.incluir_no_calculo)
+        .reduce((total, spec) => total + (spec.valor_pago_total || 0), 0);
       const custosVariaveisValor = custVariaveis.especificacoes
         .filter(spec => spec.incluir_no_calculo)
-        .reduce((total, spec) => total + spec.valor_pago_total, 0);
-      
-      // 🔍 DEBUG: Logs detalhados para identificar valores zerados
-      console.log('💡 ANÁLISE DO FLUXO DE CAIXA REALIZADO:');
-      console.log('📊 Tipo de cálculo selecionado:', tipoCalculoLucro);
-      console.log('💰 Lucro Operacional Estoque:', lucroOperacionalEstoque);
-      console.log('💰 Lucro Margem Vendas:', lucroMargemVendas);
-      console.log('✅ Lucro Selecionado:', lucroSelecionado);
-      console.log('📋 Faturamento Contratos (margem):', faturamentoContratosValor);
-      console.log('🏭 Custos Fixos:', custosFixosValor);
-      console.log('⚙️ Custos Variáveis:', custosVariaveisValor);
-      console.log('📊 Dados brutos movimentação estoque:', movEstoque);
-      console.log('📊 Dados brutos faturamento contratos:', fatContratos);
-      console.log('📊 Dados brutos custos fixos:', custFixos);
-      console.log('📊 Dados brutos margem vendas:', margVendas);
-      
-      const resultadoLiquido = lucroSelecionado + faturamentoContratosValor - custosFixosValor - custosVariaveisValor;
-      
-      // 🎯 RESULTADO FINAL DO CÁLCULO
-      console.log('🧮 FÓRMULA: ', lucroSelecionado, '+', faturamentoContratosValor, '-', custosFixosValor, '-', custosVariaveisValor);
-      console.log('🎯 RESULTADO LÍQUIDO CALCULADO:', resultadoLiquido);
-      
-      const receitaTotalEstoque = movEstoque.valor_saida + fatContratos.faturamento_total_proporcional;
-      const receitaTotalVendas = margVendas.valor_vendas + fatContratos.faturamento_total_proporcional;
-      const receitaTotal = tipoCalculoLucro === 'estoque' ? receitaTotalEstoque : receitaTotalVendas;
-      const margemLiquidaPercentual = receitaTotal > 0 ? (resultadoLiquido / receitaTotal) * 100 : 0;
+        .reduce((total, spec) => total + (spec.valor_pago_total || 0), 0);
+      const totalSegundaLinha = custosFixosValor + custosVariaveisValor;
+
+      const resultadoLiquido = totalPrimeiraLinha - totalSegundaLinha;
+      const margemLiquidaPercentual = totalPrimeiraLinha > 0 ? (resultadoLiquido / totalPrimeiraLinha) * 100 : 0;
 
       const resultado: ResultadoFinal = {
-        lucro_operacional_estoque: lucroSelecionado,
+        lucro_operacional_estoque: movEstoqueValor,
         faturamento_contratos: faturamentoContratosValor,
         custos_fixos: custosFixosValor,
         custos_variaveis: custosVariaveisValor,
@@ -588,7 +605,7 @@ const ResultadosEmpresariais: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [dateRange, tipoCalculoLucro, buscarFaturamentoContratos]);
+  }, [dateRange, buscarFaturamentoContratos]);
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -628,26 +645,6 @@ const ResultadosEmpresariais: React.FC = () => {
               date={dateRange}
               onDateChange={(newRange) => newRange && setDateRange(newRange)}
             />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>
-              📊 Tipo de Cálculo para Lucro
-            </label>
-            <select
-              value={tipoCalculoLucro}
-              onChange={(e) => setTipoCalculoLucro(e.target.value as 'estoque' | 'vendas')}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                backgroundColor: 'white',
-                fontSize: '0.875rem',
-                minWidth: '180px'
-              }}
-            >
-              <option value="estoque">💼 Movimentação Estoque</option>
-              <option value="vendas">🏪 Margem de Vendas</option>
-            </select>
           </div>
           <button
             onClick={carregarDados}
@@ -703,9 +700,9 @@ const ResultadosEmpresariais: React.FC = () => {
         </div>
       )}
 
-      {/* Cards de Métricas */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-        {/* Movimentação de Estoque */}
+      {/* Linha 1: Mov. Estoque, Faturamento Contratos, NFs de Venda */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+          {/* Movimentação de Estoque */}
         <div style={{
           backgroundColor: 'white',
           borderRadius: '8px',
@@ -722,7 +719,11 @@ const ResultadosEmpresariais: React.FC = () => {
           {movimentacaoEstoque ? (
             <>
               <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '4px' }}>
-                {formatCurrency(movimentacaoEstoque.lucro_operacional)}
+                {formatCurrency(
+                  (typeof movimentacaoEstoque.variacao_snapshot === 'number')
+                    ? movimentacaoEstoque.variacao_snapshot
+                    : movimentacaoEstoque.saldo_periodo
+                )}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <TrendingUp style={{ width: '12px', height: '12px' }} />
@@ -731,6 +732,12 @@ const ResultadosEmpresariais: React.FC = () => {
               <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px' }}>
                 Entrada: {formatCurrency(movimentacaoEstoque.valor_entrada)}<br />
                 Saída: {formatCurrency(movimentacaoEstoque.valor_saida)}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>
+                Saldo do Período (movtos): {formatCurrency(movimentacaoEstoque.saldo_periodo)}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '4px' }}>
+                Lucro Operacional: {formatCurrency(movimentacaoEstoque.lucro_operacional)}
               </div>
             </>
           ) : (
@@ -755,15 +762,15 @@ const ResultadosEmpresariais: React.FC = () => {
           {faturamentoContratos ? (
             <>
               <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '4px' }}>
-                {formatCurrency(faturamentoContratos.margem_bruta_total)}
+                {formatCurrency(faturamentoContratos.faturamento_total_proporcional)}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <TrendingUp style={{ width: '12px', height: '12px' }} />
                 {formatPercent(faturamentoContratos.percentual_margem_total)}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px' }}>
-                Faturamento: {formatCurrency(faturamentoContratos.faturamento_total_proporcional)}<br />
-                Custos: {formatCurrency(faturamentoContratos.custo_total_suprimentos)}
+                Margem: {formatCurrency(faturamentoContratos.margem_bruta_total)}<br />
+                Custo suprimentos: {formatCurrency(faturamentoContratos.custo_total_suprimentos)}
               </div>
             </>
           ) : (
@@ -771,6 +778,42 @@ const ResultadosEmpresariais: React.FC = () => {
           )}
         </div>
 
+        {/* Notas Fiscais de Venda */}
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          padding: '20px',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#6b7280', margin: 0 }}>
+              🧾 Notas Fiscais de Venda
+            </h3>
+            <DollarSign style={{ width: '20px', height: '20px', color: '#0ea5e9' }} />
+          </div>
+          {margemVendas ? (
+            <>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '4px' }}>
+                {formatCurrency(margemVendas.valor_vendas)}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <TrendingUp style={{ width: '12px', height: '12px' }} />
+                {formatPercent(margemVendas.percentual_margem)}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px' }}>
+                Margem bruta: {formatCurrency(margemVendas.margem_bruta)}
+              </div>
+            </>
+          ) : (
+            <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Carregando...</div>
+          )}
+        </div>
+
+      </div>
+
+      {/* Linha 2: Custos Fixos e Variáveis */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
         {/* Custos Fixos */}
         <div style={{
           backgroundColor: 'white',
@@ -788,7 +831,9 @@ const ResultadosEmpresariais: React.FC = () => {
           {custosFixos ? (
             <>
               <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#dc2626', marginBottom: '4px' }}>
-                -{formatCurrency(custosFixos.valor_total)}
+                -{formatCurrency(custosFixos.especificacoes
+                  .filter(spec => spec.incluir_no_calculo)
+                  .reduce((total, spec) => total + spec.valor_pago_total, 0))}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px' }}>
                 {custosFixos.especificacoes.length} especificações
@@ -829,40 +874,10 @@ const ResultadosEmpresariais: React.FC = () => {
           )}
         </div>
 
-        {/* Margem de Vendas */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          padding: '20px',
-          border: '1px solid #e5e7eb'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#6b7280', margin: 0 }}>
-              🏪 Margem de Vendas
-            </h3>
-            <DollarSign style={{ width: '20px', height: '20px', color: '#059669' }} />
-          </div>
-          {margemVendas ? (
-            <>
-              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '4px' }}>
-                {formatCurrency(margemVendas.margem_bruta)}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <TrendingUp style={{ width: '12px', height: '12px' }} />
-                {formatPercent(margemVendas.percentual_margem)}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px' }}>
-                Vendas: {formatCurrency(margemVendas.valor_vendas)}<br />
-                {margemVendas.itens_analisados} itens analisados
-              </div>
-            </>
-          ) : (
-            <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Carregando...</div>
-          )}
-        </div>
+      </div>
 
-        {/* Resultado Final */}
+      {/* Resultado Líquido */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
         <div style={{
           backgroundColor: resultadoFinal && resultadoFinal.resultado_liquido >= 0 ? '#f0fdf4' : '#fef2f2',
           borderRadius: '8px',
@@ -903,49 +918,6 @@ const ResultadosEmpresariais: React.FC = () => {
             <div style={{ color: '#9ca3af', fontSize: '0.875rem' }}>Carregando...</div>
           )}
         </div>
-      </div>
-
-      {/* Debug do Faturamento de Contratos */}
-      <div style={{
-        backgroundColor: '#fef3c7',
-        borderRadius: '8px',
-        border: '1px solid #f59e0b',
-        padding: '16px',
-        marginBottom: '24px'
-      }}>
-        <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#92400e', marginBottom: '12px' }}>
-          🔍 Debug - Faturamento de Contratos
-        </h4>
-        {faturamentoContratos ? (
-          <div style={{ fontSize: '0.875rem', color: '#92400e' }}>
-            <p><strong>Status:</strong> {faturamentoContratos.faturamento_total_proporcional > 0 ? '✅ Dados encontrados' : '⚠️ Faturamento zero'}</p>
-            <p><strong>Faturamento Total:</strong> {formatCurrency(faturamentoContratos.faturamento_total_proporcional)}</p>
-            <p><strong>Custo Suprimentos:</strong> {formatCurrency(faturamentoContratos.custo_total_suprimentos)}</p>
-            <p><strong>Margem Bruta:</strong> {formatCurrency(faturamentoContratos.margem_bruta_total)}</p>
-            <p><strong>Percentual Margem:</strong> {formatPercent(faturamentoContratos.percentual_margem_total)}</p>
-            {faturamentoContratos.faturamento_total_proporcional === 0 && (
-              <div style={{ 
-                marginTop: '8px', 
-                padding: '8px', 
-                backgroundColor: '#fecaca', 
-                borderRadius: '4px',
-                border: '1px solid #ef4444'
-              }}>
-                ⚠️ <strong>Possíveis causas:</strong>
-                <br />• Endpoint api/contratos_locacao/suprimentos/ não retornou dados válidos
-                <br />• Período selecionado sem contratos ativos ou faturamento
-                <br />• Campo resumo_financeiro.faturamento_total_proporcional está vazio
-                <br />• Diferença nos parâmetros de data (data_inicial vs data_inicio)
-                <br />• ✅ Agora usa a mesma fonte da página contratos de locação
-                <br />• Verifique o console do navegador (F12) para logs detalhados
-              </div>
-            )}
-          </div>
-        ) : (
-          <div style={{ color: '#92400e', fontSize: '0.875rem' }}>
-            ⏳ Carregando dados do faturamento...
-          </div>
-        )}
       </div>
 
       {/* Seções de Configuração dos Custos */}
@@ -1079,29 +1051,7 @@ const ResultadosEmpresariais: React.FC = () => {
         
       </div>
 
-      {/* Seção de Debug - URLs testadas */}
-      <div style={{
-        backgroundColor: '#f8fafc',
-        borderRadius: '8px',
-        border: '1px solid #e2e8f0',
-        padding: '16px',
-        marginTop: '16px',
-        fontSize: '0.875rem'
-      }}>
-        <h4 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
-          🔍 Debug - APIs Testadas
-        </h4>
-        <div style={{ color: '#6b7280' }}>
-          <p><strong>� Faturamento Contratos:</strong> api/contratos_locacao/suprimentos/ [name='suprimentos-por-contrato']</p>
-          <p><strong>💳 Custos Fixos:</strong> api/relatorios/custos-fixos/ [name='relatorio-custos-fixos']</p>
-          <p><strong>📈 Custos Variáveis:</strong> api/relatorios/custos-variaveis/ [name='relatorio-custos-variaveis']</p>
-          <p><strong>💰 Margem de Vendas:</strong> contas/relatorios/faturamento/ [name='relatorio-faturamento']</p>
-          <p><strong>📦 Movimentação Estoque:</strong> api/relatorios/movimentacao-estoque/ [name='relatorio-movimentacao-estoque']</p>
-          <p style={{ fontSize: '0.75rem', marginTop: '8px', color: '#9ca3af' }}>
-            Verifique o console do navegador (F12) para ver os logs detalhados das tentativas de conexão com as APIs.
-          </p>
-        </div>
-      </div>
+      {/* Debug removido conforme solicitado */}
 
     </div>
   );

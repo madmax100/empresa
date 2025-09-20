@@ -55,11 +55,13 @@ class ContasReceberSerializer(serializers.ModelSerializer):
 
 class ContasPagarSerializer(serializers.ModelSerializer):
     fornecedor_nome = serializers.CharField(source='fornecedor.nome', read_only=True)
+    fornecedor_tipo = serializers.CharField(source='fornecedor.tipo', read_only=True)
+    fornecedor_especificacao = serializers.CharField(source='fornecedor.especificacao', read_only=True)
 
     class Meta:
         model = ContasPagar
         fields = [
-            'id', 'data', 'vencimento', 'fornecedor_nome', 'historico', 
+            'id', 'data', 'vencimento', 'fornecedor_nome', 'fornecedor_tipo', 'fornecedor_especificacao', 'historico', 
             'valor', 'status', 'data_pagamento', 'valor_pago'
         ]
         depth = 1

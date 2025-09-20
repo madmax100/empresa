@@ -81,7 +81,7 @@ export class CustosFixosService {
         _t: new Date().getTime().toString()
       });
 
-      const url = `${API_BASE_URL}/api/relatorios/custos-fixos/?${params}`;
+  const url = `${API_BASE_URL}/contas/relatorios/custos-fixos/?${params}`;
       console.log('📡 Chamando API:', url);
       console.log('📅 Parâmetros de data enviados:', { data_inicio: dataInicio, data_fim: dataFim });
 

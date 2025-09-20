@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { formatCurrency, formatDate } from '../../services/dashboard-service';
 
 // Interfaces para os diferentes endpoints
@@ -11,6 +11,9 @@ interface MovimentacaoRealizada {
   historico: string;
   forma_pagamento: string;
   origem: 'contas_receber' | 'contas_pagar';
+  // Novos campos (opcionais)
+  cliente_id?: number;
+  tipo_custo?: 'FIXO' | 'VARIÁVEL' | 'NÃO CLASSIFICADO' | string;
 }
 
 interface MovimentacaoAberta {
@@ -99,6 +102,73 @@ const FluxoCaixaDashboard: React.FC = () => {
   const [resumoMensal, setResumoMensal] = useState<ResumoMensal | null>(null);
   const [resumoRealizadas, setResumoRealizadas] = useState<ResumoFluxo | null>(null);
   const [resumoAbertas, setResumoAbertas] = useState<ResumoAberto | null>(null);
+  // IDs de clientes com contrato para classificar entradas em Contratos vs Vendas
+  const [clientesContrato, setClientesContrato] = useState<Set<number>>(new Set());
+
+  // Quebras por dia e por mês calculadas a partir das movimentações realizadas
+  const breakdownDiario = useMemo(() => {
+    const map = new Map<string, { ec: number; ev: number; sf: number; sv: number }>();
+    for (const m of movimentacoesRealizadas) {
+      const d = new Date(m.data_pagamento);
+      if (isNaN(d.getTime())) continue;
+      const key = d.toISOString().split('T')[0];
+      if (!map.has(key)) map.set(key, { ec: 0, ev: 0, sf: 0, sv: 0 });
+      const agg = map.get(key)!;
+      if (m.tipo === 'entrada') {
+        const isContrato = m.cliente_id && clientesContrato.has(Number(m.cliente_id));
+        if (isContrato) agg.ec += m.valor; else agg.ev += m.valor;
+      } else if (m.tipo === 'saida') {
+        const tipo = (m.tipo_custo || '').toUpperCase();
+        if (tipo === 'FIXO') agg.sf += m.valor; else if (tipo === 'VARIÁVEL' || tipo === 'VARIAVEL') agg.sv += m.valor;
+      }
+    }
+    return map;
+  }, [movimentacoesRealizadas, clientesContrato]);
+
+  const breakdownMensal = useMemo(() => {
+    const map = new Map<string, { ec: number; ev: number; sf: number; sv: number }>();
+    for (const m of movimentacoesRealizadas) {
+      const d = new Date(m.data_pagamento);
+      if (isNaN(d.getTime())) continue;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!map.has(key)) map.set(key, { ec: 0, ev: 0, sf: 0, sv: 0 });
+      const agg = map.get(key)!;
+      if (m.tipo === 'entrada') {
+        const isContrato = m.cliente_id && clientesContrato.has(Number(m.cliente_id));
+        if (isContrato) agg.ec += m.valor; else agg.ev += m.valor;
+      } else if (m.tipo === 'saida') {
+        const tipo = (m.tipo_custo || '').toUpperCase();
+        if (tipo === 'FIXO') agg.sf += m.valor; else if (tipo === 'VARIÁVEL' || tipo === 'VARIAVEL') agg.sv += m.valor;
+      }
+    }
+    return map;
+  }, [movimentacoesRealizadas, clientesContrato]);
+
+  // Fallback: agrega resumo mensal localmente caso o endpoint mensal falhe ou não retorne meses
+  const resumoMensalFallback = useMemo(() => {
+    const map = new Map<string, { entradas: number; saidas: number }>();
+    for (const m of movimentacoesRealizadas) {
+      const d = new Date(m.data_pagamento);
+      if (isNaN(d.getTime())) continue;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!map.has(key)) map.set(key, { entradas: 0, saidas: 0 });
+      const agg = map.get(key)!;
+      if (m.tipo === 'entrada') agg.entradas += m.valor; else if (m.tipo === 'saida') agg.saidas += m.valor;
+    }
+
+    const meses = Array.from(map.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, v]) => ({ mes: key, entradas: v.entradas, saidas: v.saidas, saldo_mes: v.entradas - v.saidas }));
+
+    const totais = meses.reduce((acc, m) => {
+      acc.total_entradas += m.entradas;
+      acc.total_saidas += m.saidas;
+      acc.saldo_liquido += (m.entradas - m.saidas);
+      return acc;
+    }, { total_entradas: 0, total_saidas: 0, saldo_liquido: 0 });
+
+    return { meses, totais };
+  }, [movimentacoesRealizadas]);
 
   // Estados para controle
   const [loading, setLoading] = useState(true);
@@ -128,7 +198,7 @@ const FluxoCaixaDashboard: React.FC = () => {
         throw new Error('Erro ao carregar dados dos endpoints');
       }
 
-      const realizadasData = await realizadasRes.json();
+  const realizadasData = await realizadasRes.json();
       const abertasData = await abertasRes.json();
       const diarioData = await diarioRes.json();
 
@@ -153,6 +223,31 @@ const FluxoCaixaDashboard: React.FC = () => {
         }
       } catch (err) {
         console.warn('Erro ao carregar dados mensais:', err);
+      }
+
+      // Buscar clientes com contrato (para classificar entradas)
+      try {
+        const resp = await fetch('http://localhost:8000/contas/contratos_locacao/');
+        if (resp.ok) {
+          const data = await resp.json();
+          const ids = new Set<number>();
+          const pushFrom = (arr: unknown[]) => {
+            for (const itRaw of arr) {
+              const it = itRaw as { cliente_id?: number; cliente?: { id?: number } };
+              const id = Number(it?.cliente_id ?? it?.cliente?.id ?? 0);
+              if (id) ids.add(id);
+            }
+          };
+          if (Array.isArray(data)) {
+            pushFrom(data);
+          } else if (data && Array.isArray(data.results)) {
+            pushFrom(data.results);
+            // Ignora paginação adicional por simplicidade aqui; o conjunto principal já cobre a maioria
+          }
+          setClientesContrato(ids);
+        }
+      } catch (e) {
+        console.warn('Falha ao buscar clientes com contrato para Fluxo:', e);
       }
 
     } catch (error) {
@@ -364,6 +459,47 @@ const FluxoCaixaDashboard: React.FC = () => {
       {/* Conteúdo das Abas */}
       {activeTab === 'realizadas' && (
         <div>
+          {/* Cards detalhando Entradas (Contratos/Vendas) e Saídas (Fixas/Variáveis) */}
+          {resumoRealizadas && (
+            (() => {
+              let entradasContratos = 0;
+              let entradasVendas = 0;
+              let saidasFixas = 0;
+              let saidasVariaveis = 0;
+
+              for (const m of movimentacoesRealizadas) {
+                if (m.tipo === 'entrada') {
+                  const isContrato = m.cliente_id && clientesContrato.has(Number(m.cliente_id));
+                  if (isContrato) entradasContratos += m.valor; else entradasVendas += m.valor;
+                } else if (m.tipo === 'saida') {
+                  const tipo = (m.tipo_custo || '').toUpperCase();
+                  if (tipo === 'FIXO') saidasFixas += m.valor;
+                  else if (tipo === 'VARIÁVEL' || tipo === 'VARIAVEL') saidasVariaveis += m.valor;
+                }
+              }
+
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ background: 'white', borderLeft: '4px solid #0ea5e9', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                    <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Entradas - Contratos</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(entradasContratos)}</div>
+                  </div>
+                  <div style={{ background: 'white', borderLeft: '4px solid #22c55e', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                    <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Entradas - Vendas</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(entradasVendas)}</div>
+                  </div>
+                  <div style={{ background: 'white', borderLeft: '4px solid #f59e0b', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                    <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Saídas - Fixas</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(saidasFixas)}</div>
+                  </div>
+                  <div style={{ background: 'white', borderLeft: '4px solid #ef4444', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                    <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Saídas - Variáveis</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(saidasVariaveis)}</div>
+                  </div>
+                </div>
+              );
+            })()
+          )}
           {/* Resumo das Movimentações Realizadas */}
           {resumoRealizadas && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -523,7 +659,7 @@ const FluxoCaixaDashboard: React.FC = () => {
         <div>
           {/* Resumo das Movimentações Abertas */}
           {resumoAbertas && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
               <div style={{
                 backgroundColor: 'white',
                 padding: '20px',
@@ -589,6 +725,49 @@ const FluxoCaixaDashboard: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Novos cards de detalhamento para Abertas */}
+              {movimentacoesAbertas.length > 0 && (() => {
+                let entradasContratos = 0;
+                let entradasVendas = 0;
+                let saidasFixas = 0;
+                let saidasVariaveis = 0;
+
+                for (const m of movimentacoesAbertas) {
+                  if (m.tipo === 'entrada_pendente') {
+                    // Tentamos inferir cliente_id do campo id textual (ex.: cr_123) não traz; por isso usamos concessão do backend que adicionou cliente_id
+                    const anyM = m as unknown as { cliente_id?: number };
+                    const isContrato = anyM.cliente_id && clientesContrato.has(Number(anyM.cliente_id));
+                    if (isContrato) entradasContratos += m.valor; else entradasVendas += m.valor;
+                  } else if (m.tipo === 'saida_pendente') {
+                    const anyM = m as unknown as { tipo_custo?: string };
+                    const tipo = (anyM.tipo_custo || '').toUpperCase();
+                    if (tipo === 'FIXO') saidasFixas += m.valor;
+                    else if (tipo === 'VARIÁVEL' || tipo === 'VARIAVEL') saidasVariaveis += m.valor;
+                  }
+                }
+
+                return (
+                  <>
+                    <div style={{ background: 'white', borderLeft: '4px solid #0ea5e9', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                      <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Entradas Pendentes - Contratos</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(entradasContratos)}</div>
+                    </div>
+                    <div style={{ background: 'white', borderLeft: '4px solid #22c55e', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                      <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Entradas Pendentes - Vendas</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(entradasVendas)}</div>
+                    </div>
+                    <div style={{ background: 'white', borderLeft: '4px solid #f59e0b', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                      <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Saídas Pendentes - Fixas</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(saidasFixas)}</div>
+                    </div>
+                    <div style={{ background: 'white', borderLeft: '4px solid #ef4444', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: 16 }}>
+                      <div style={{ fontSize: 12, color: '#475569', fontWeight: 600, marginBottom: 6 }}>Saídas Pendentes - Variáveis</div>
+                      <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{formatCurrency(saidasVariaveis)}</div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
 
@@ -1214,6 +1393,10 @@ const FluxoCaixaDashboard: React.FC = () => {
                   <thead style={{ backgroundColor: '#f9fafb' }}>
                     <tr>
                       <th style={{ padding: '12px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Data</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#0369a1', textTransform: 'uppercase' }}>Entradas Contratos</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#16a34a', textTransform: 'uppercase' }}>Entradas Vendas</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#d97706', textTransform: 'uppercase' }}>Saídas Fixas</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#dc2626', textTransform: 'uppercase' }}>Saídas Variáveis</th>
                       <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Entradas</th>
                       <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Saídas</th>
                       <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Saldo do Dia</th>
@@ -1223,6 +1406,8 @@ const FluxoCaixaDashboard: React.FC = () => {
                   </thead>
                   <tbody>
                     {resumoDiario.dias.map((dia, index) => {
+                      const key = new Date(dia.data).toISOString().split('T')[0];
+                      const b = breakdownDiario.get(key) || { ec: 0, ev: 0, sf: 0, sv: 0 };
                       const isPositive = dia.saldo_dia >= 0;
                       const isWeekend = new Date(dia.data).getDay() === 0 || new Date(dia.data).getDay() === 6;
                       const hasMovement = dia.entradas > 0 || dia.saidas > 0;
@@ -1261,6 +1446,18 @@ const FluxoCaixaDashboard: React.FC = () => {
                                 </span>
                               )}
                             </div>
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '0.8rem', color: b.ec > 0 ? '#0369a1' : '#9ca3af', fontWeight: 600 }}>
+                            {b.ec > 0 ? formatCurrency(b.ec) : '—'}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '0.8rem', color: b.ev > 0 ? '#16a34a' : '#9ca3af', fontWeight: 600 }}>
+                            {b.ev > 0 ? formatCurrency(b.ev) : '—'}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '0.8rem', color: b.sf > 0 ? '#d97706' : '#9ca3af', fontWeight: 600 }}>
+                            {b.sf > 0 ? formatCurrency(b.sf) : '—'}
+                          </td>
+                          <td style={{ padding: '12px', textAlign: 'right', fontSize: '0.8rem', color: b.sv > 0 ? '#dc2626' : '#9ca3af', fontWeight: 600 }}>
+                            {b.sv > 0 ? formatCurrency(b.sv) : '—'}
                           </td>
                           <td style={{ 
                             padding: '12px', 
@@ -1350,7 +1547,27 @@ const FluxoCaixaDashboard: React.FC = () => {
 
       {activeTab === 'mensal' && (
         <div>
-          {resumoMensal ? (
+          {(() => {
+            const hasApiMeses = !!(resumoMensal && Array.isArray(resumoMensal.meses) && resumoMensal.meses.length > 0);
+            const mesesSource = hasApiMeses ? resumoMensal!.meses : resumoMensalFallback.meses;
+            const totaisSource = hasApiMeses ? resumoMensal!.totais : resumoMensalFallback.totais;
+            if (!mesesSource || mesesSource.length === 0) {
+              return (
+                <div style={{
+                  backgroundColor: '#fff3cd',
+                  border: '1px solid #ffeaa7',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  textAlign: 'center'
+                }}>
+                  <h3 style={{ color: '#856404', marginBottom: '8px' }}>Dados Mensais Indisponíveis</h3>
+                  <p style={{ color: '#6c5400', margin: 0 }}>
+                    Não foi possível obter dados mensais do período selecionado.
+                  </p>
+                </div>
+              );
+            }
+            return (
             <>
               {/* Resumo Geral do Período */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -1365,7 +1582,7 @@ const FluxoCaixaDashboard: React.FC = () => {
                     Total de Entradas
                   </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>
-                    {formatCurrency(resumoMensal.totais.total_entradas)}
+                    {formatCurrency(totaisSource.total_entradas)}
                   </div>
                 </div>
 
@@ -1380,7 +1597,7 @@ const FluxoCaixaDashboard: React.FC = () => {
                     Total de Saídas
                   </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>
-                    {formatCurrency(resumoMensal.totais.total_saidas)}
+                    {formatCurrency(totaisSource.total_saidas)}
                   </div>
                 </div>
 
@@ -1388,7 +1605,7 @@ const FluxoCaixaDashboard: React.FC = () => {
                   backgroundColor: 'white',
                   padding: '20px',
                   borderRadius: '8px',
-                  borderLeft: `4px solid ${resumoMensal.totais.saldo_liquido >= 0 ? '#10b981' : '#ef4444'}`,
+                  borderLeft: `4px solid ${totaisSource.saldo_liquido >= 0 ? '#10b981' : '#ef4444'}`,
                   boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                 }}>
                   <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', marginBottom: '5px' }}>
@@ -1397,15 +1614,15 @@ const FluxoCaixaDashboard: React.FC = () => {
                   <div style={{ 
                     fontSize: '1.5rem', 
                     fontWeight: '700', 
-                    color: resumoMensal.totais.saldo_liquido >= 0 ? '#10b981' : '#ef4444'
+                    color: totaisSource.saldo_liquido >= 0 ? '#10b981' : '#ef4444'
                   }}>
-                    {formatCurrency(resumoMensal.totais.saldo_liquido)}
+                    {formatCurrency(totaisSource.saldo_liquido)}
                   </div>
                 </div>
               </div>
 
               {/* Tabela de Resumo Mensal */}
-              {resumoMensal.meses && resumoMensal.meses.length > 0 && (
+              {mesesSource && mesesSource.length > 0 && (
                 <div style={{
                   backgroundColor: 'white',
                   borderRadius: '8px',
@@ -1417,7 +1634,7 @@ const FluxoCaixaDashboard: React.FC = () => {
                     borderBottom: '1px solid #e5e7eb'
                   }}>
                     <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827' }}>
-                      Movimento Mensal ({resumoMensal.meses.length} meses)
+                      Movimento Mensal ({mesesSource.length} meses)
                     </h3>
                   </div>
 
@@ -1426,16 +1643,67 @@ const FluxoCaixaDashboard: React.FC = () => {
                       <thead style={{ backgroundColor: '#f9fafb' }}>
                         <tr>
                           <th style={{ padding: '12px', textAlign: 'left', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Mês</th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Entradas</th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Saídas</th>
-                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Saldo do Mês</th>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#0369a1', textTransform: 'uppercase' }}>Entradas Contratos</th>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#16a34a', textTransform: 'uppercase' }}>Entradas Vendas</th>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#d97706', textTransform: 'uppercase' }}>Saídas Fixas</th>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#dc2626', textTransform: 'uppercase' }}>Saídas Variáveis</th>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Total Entradas</th>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: '#6b7280', textTransform: 'uppercase' }}>Total Saídas</th>
+                          <th style={{ padding: '12px', textAlign: 'right', fontSize: '0.75rem', fontWeight: '700', color: '#111827', textTransform: 'uppercase' }}>Saldo do Mês</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {resumoMensal.meses.map((mes, index) => (
+                        {mesesSource.map((mes: { mes: string; entradas: number; saidas: number; saldo_mes: number }, index: number) => {
+                          // Normaliza chave AAAA-MM
+                          let chave = '';
+                          try {
+                            const d = new Date(mes.mes);
+                            chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                          } catch {
+                            const s = String(mes.mes);
+                            chave = s.length >= 7 ? s.substring(0, 7) : s;
+                          }
+                          const b = breakdownMensal.get(chave) || { ec: 0, ev: 0, sf: 0, sv: 0 };
+                          return (
                           <tr key={index} style={{ borderBottom: '1px solid #f3f4f6' }}>
                             <td style={{ padding: '12px', fontSize: '0.875rem', color: '#111827' }}>
-                              {mes.mes}
+                              {chave}
+                            </td>
+                            <td style={{ 
+                              padding: '12px', 
+                              textAlign: 'right',
+                              fontSize: '0.875rem', 
+                              fontWeight: '600',
+                              color: b.ec > 0 ? '#0369a1' : '#9ca3af'
+                            }}>
+                              {b.ec > 0 ? formatCurrency(b.ec) : '—'}
+                            </td>
+                            <td style={{ 
+                              padding: '12px', 
+                              textAlign: 'right',
+                              fontSize: '0.875rem', 
+                              fontWeight: '600',
+                              color: b.ev > 0 ? '#16a34a' : '#9ca3af'
+                            }}>
+                              {b.ev > 0 ? formatCurrency(b.ev) : '—'}
+                            </td>
+                            <td style={{ 
+                              padding: '12px', 
+                              textAlign: 'right',
+                              fontSize: '0.875rem', 
+                              fontWeight: '600',
+                              color: b.sf > 0 ? '#d97706' : '#9ca3af'
+                            }}>
+                              {b.sf > 0 ? formatCurrency(b.sf) : '—'}
+                            </td>
+                            <td style={{ 
+                              padding: '12px', 
+                              textAlign: 'right',
+                              fontSize: '0.875rem', 
+                              fontWeight: '600',
+                              color: b.sv > 0 ? '#dc2626' : '#9ca3af'
+                            }}>
+                              {b.sv > 0 ? formatCurrency(b.sv) : '—'}
                             </td>
                             <td style={{ 
                               padding: '12px', 
@@ -1465,28 +1733,15 @@ const FluxoCaixaDashboard: React.FC = () => {
                               {formatCurrency(mes.saldo_mes)}
                             </td>
                           </tr>
-                        ))}
+                        )})}
                       </tbody>
                     </table>
                   </div>
                 </div>
               )}
             </>
-          ) : (
-            <div style={{
-              backgroundColor: '#fff3cd',
-              border: '1px solid #ffeaa7',
-              borderRadius: '8px',
-              padding: '20px',
-              textAlign: 'center'
-            }}>
-              <h3 style={{ color: '#856404', marginBottom: '8px' }}>Dados Mensais Indisponíveis</h3>
-              <p style={{ color: '#6c5400', margin: 0 }}>
-                O endpoint de resumo mensal apresenta problemas técnicos no backend. 
-                Por favor, utilize as outras abas para visualizar os dados.
-              </p>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
     </div>

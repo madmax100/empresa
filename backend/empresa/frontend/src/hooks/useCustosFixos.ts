@@ -13,13 +13,20 @@ export function useCustosFixos() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const formatDateLocal = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
   const fetchCustosFixos = async (dateRange: DateRange) => {
     setLoading(true);
     setError(null);
     
     try {
-      const dataInicio = dateRange.from.toISOString().split('T')[0];
-      const dataFim = dateRange.to.toISOString().split('T')[0];
+      const dataInicio = formatDateLocal(dateRange.from);
+      const dataFim = formatDateLocal(dateRange.to);
       
       console.log('🎯 Hook - Chamando API com datas:', { dataInicio, dataFim, dateRange });
       

@@ -42,6 +42,25 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Helper classificação de custo (FIXO/VARIÁVEL)
+        def classificar_tipo_custo(especificacao: str | None):
+            custos_fixos = {
+                'SALARIOS', 'PRO-LABORE', 'HONOR. CONTABEIS', 'LUZ', 'AGUA', 'TELEFONE',
+                'IMPOSTOS', 'ENCARGOS', 'REFEICAO', 'BENEFICIOS', 'OUTRAS DESPESAS',
+                'MAT. DE ESCRITORIO', 'PAGTO SERVICOS', 'EMPRESTIMO', 'DESP. FINANCEIRAS'
+            }
+            custos_variaveis = {
+                'FORNECEDORES', 'FRETE', 'COMISSOES', 'DESP. VEICULOS'
+            }
+            if not especificacao:
+                return 'NÃO CLASSIFICADO'
+            e = especificacao.upper()
+            if e in custos_fixos:
+                return 'FIXO'
+            if e in custos_variaveis:
+                return 'VARIÁVEL'
+            return 'NÃO CLASSIFICADO'
+
         # Buscar contas a pagar realizadas
         contas_pagar = ContasPagar.objects.filter(
             data_pagamento__isnull=False,
@@ -53,6 +72,7 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             'data_pagamento',
             'valor_pago',
             'fornecedor__nome',
+            'fornecedor__especificacao',
             'historico',
             'forma_pagamento'
         )
@@ -67,6 +87,7 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             'id',
             'data_pagamento',
             'recebido',
+            'cliente__id',
             'cliente__nome',
             'historico',
             'forma_pagamento'
@@ -77,6 +98,7 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
         
         # Adicionar saídas (contas a pagar)
         for conta in contas_pagar:
+            tipo_custo = classificar_tipo_custo(conta.get('fornecedor__especificacao'))
             movimentacoes.append({
                 'id': f"cp_{conta['id']}",
                 'tipo': 'saida',
@@ -85,7 +107,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 'contraparte': conta['fornecedor__nome'] or 'Fornecedor não informado',
                 'historico': conta['historico'] or '',
                 'forma_pagamento': conta['forma_pagamento'] or '',
-                'origem': 'contas_pagar'
+                'origem': 'contas_pagar',
+                'tipo_custo': tipo_custo
             })
 
         # Adicionar entradas (contas a receber)
@@ -98,7 +121,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 'contraparte': conta['cliente__nome'] or 'Cliente não informado',
                 'historico': conta['historico'] or '',
                 'forma_pagamento': conta['forma_pagamento'] or '',
-                'origem': 'contas_receber'
+                'origem': 'contas_receber',
+                'cliente_id': conta.get('cliente__id')
             })
 
         # Ordenar por data
@@ -331,6 +355,25 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Helper classificação de custo (FIXO/VARIÁVEL)
+        def classificar_tipo_custo(especificacao: str | None):
+            custos_fixos = {
+                'SALARIOS', 'PRO-LABORE', 'HONOR. CONTABEIS', 'LUZ', 'AGUA', 'TELEFONE',
+                'IMPOSTOS', 'ENCARGOS', 'REFEICAO', 'BENEFICIOS', 'OUTRAS DESPESAS',
+                'MAT. DE ESCRITORIO', 'PAGTO SERVICOS', 'EMPRESTIMO', 'DESP. FINANCEIRAS'
+            }
+            custos_variaveis = {
+                'FORNECEDORES', 'FRETE', 'COMISSOES', 'DESP. VEICULOS'
+            }
+            if not especificacao:
+                return 'NÃO CLASSIFICADO'
+            e = especificacao.upper()
+            if e in custos_fixos:
+                return 'FIXO'
+            if e in custos_variaveis:
+                return 'VARIÁVEL'
+            return 'NÃO CLASSIFICADO'
+
         # Buscar contas a pagar com vencimento no período e status aberto
         contas_pagar_aberto = ContasPagar.objects.filter(
             vencimento__date__gte=data_inicio,
@@ -342,6 +385,7 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             'vencimento',
             'valor',
             'fornecedor__nome',
+            'fornecedor__especificacao',
             'historico',
             'forma_pagamento',
             'data'
@@ -357,6 +401,7 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             'id',
             'vencimento',
             'valor',
+            'cliente__id',
             'cliente__nome',
             'historico',
             'forma_pagamento',
@@ -382,6 +427,7 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 elif diferenca <= 3:
                     status_vencimento = 'vence_em_breve'
             
+            tipo_custo = classificar_tipo_custo(conta.get('fornecedor__especificacao'))
             movimentacoes_abertas.append({
                 'id': f"cp_{conta['id']}",
                 'tipo': 'saida_pendente',
@@ -393,7 +439,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 'forma_pagamento': conta['forma_pagamento'] or '',
                 'origem': 'contas_pagar',
                 'dias_vencimento': dias_vencimento,
-                'status_vencimento': status_vencimento
+                'status_vencimento': status_vencimento,
+                'tipo_custo': tipo_custo
             })
 
         # Adicionar entradas pendentes (contas a receber)
@@ -423,7 +470,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 'forma_pagamento': conta['forma_pagamento'] or '',
                 'origem': 'contas_receber',
                 'dias_vencimento': dias_vencimento,
-                'status_vencimento': status_vencimento
+                'status_vencimento': status_vencimento,
+                'cliente_id': conta.get('cliente__id')
             })
 
         # Ordenar por data de vencimento

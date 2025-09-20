@@ -111,11 +111,13 @@ const ContractsDashboardGrouped: React.FC = () => {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [suprimentosDetalhados, setSuprimentosDetalhados] = useState<Map<number, SuprimentoDetalhado[]>>(new Map());
   const [loadingSuprimentos, setLoadingSuprimentos] = useState<Set<number>>(new Set());
+  const [debugSuprimentos, setDebugSuprimentos] = useState<string | null>(null);
 
   const loadClientesAgrupados = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      setDebugSuprimentos(null); // Limpa o debug a cada recarga
       const toYmd = (d: Date) => d.toISOString().split('T')[0];
       
       // 1. Carregar contratos básicos
@@ -135,6 +137,9 @@ const ContractsDashboardGrouped: React.FC = () => {
       };
       
       const suprimentosResponse = await contratosService.buscarSuprimentos(filtrosSuprimentos);
+      
+      // DEBUG: Exibir os dados brutos na tela
+      setDebugSuprimentos(JSON.stringify(suprimentosResponse, null, 2));
       
       console.log(`📋 Resposta de suprimentos:`, suprimentosResponse);
       console.log(`📋 Total de resultados: ${suprimentosResponse.resultados?.length || 0}`);
@@ -159,8 +164,11 @@ const ContractsDashboardGrouped: React.FC = () => {
           const notas = resultado.suprimentos?.notas || [];
           notas.forEach((nota: SuprimentoNota) => {
             const notaId = nota.id;
-            const valorNota = Number(nota.valor_total_nota || 0);
-            
+            const valorNotaOriginal = nota.valor_total_nota;
+            const valorNota = Number(valorNotaOriginal || 0);
+
+            console.log(`  - [NOTA] ID: ${notaId}, Num: ${nota.numero_nota}, Valor Original: '${valorNotaOriginal}', Valor Convertido: ${valorNota}`);
+
             // Verificar se a nota já foi processada (evita duplicação entre contratos)
             if (!notasProcessadas.has(notaId)) {
               notasProcessadas.add(notaId);
@@ -168,9 +176,9 @@ const ContractsDashboardGrouped: React.FC = () => {
               const valorExistente = suprimentosPorCliente.get(clienteId) || 0;
               suprimentosPorCliente.set(clienteId, valorExistente + valorNota);
               
-              console.log(`💰 Nota ${nota.numero_nota} (ID: ${notaId}): R$ ${valorNota} - Cliente: ${clienteNome}`);
+              console.log(`    -> Adicionando R$ ${valorNota.toFixed(2)} ao cliente ${clienteNome}. Total agora: R$ ${(valorExistente + valorNota).toFixed(2)}`);
             } else {
-              console.log(`⚠️ Nota ${nota.numero_nota} (ID: ${notaId}) já processada - evitando duplicação`);
+              console.log(`    -> [AVISO] Nota ${nota.numero_nota} (ID: ${notaId}) já processada. Ignorando.`);
             }
           });
         }
@@ -254,14 +262,26 @@ const ContractsDashboardGrouped: React.FC = () => {
           clienteExistente.quantidadeContratos += 1;
         } else {
           const despesasSuprimentos = suprimentosPorCliente.get(clienteId) || 0;
+          
+          // ✅ USAR SAFEMMATH PARA GARANTIR VALORES VÁLIDOS
+          const faturamentoValidado = safeMath.toNumber(faturamentoPeriodo);
+          const despesasValidadas = safeMath.toNumber(despesasSuprimentos);
+          const margemCalculada = safeMath.subtract(faturamentoValidado, despesasValidadas);
+          
+          console.log(`🧮 CÁLCULO SEGURO - Cliente: ${clienteNome}`);
+          console.log(`  📊 Faturamento: ${faturamentoPeriodo} → ${faturamentoValidado}`);
+          console.log(`  💸 Despesas: ${despesasSuprimentos} → ${despesasValidadas}`);
+          console.log(`  💰 Margem: ${faturamentoValidado} - ${despesasValidadas} = ${margemCalculada}`);
+          console.log(`  ✅ É válido? ${!isNaN(margemCalculada) && isFinite(margemCalculada)}`);
+          
           clientesMap.set(clienteId, {
             clienteId,
             cliente: clienteNome,
             contratos: [contratoData],
-            faturamentoTotal: faturamentoPeriodo,
-            despesasSuprimentos,
+            faturamentoTotal: faturamentoValidado,
+            despesasSuprimentos: despesasValidadas,
             quantidadeContratos: 1,
-            margemLiquida: faturamentoPeriodo - despesasSuprimentos
+            margemLiquida: margemCalculada
           });
         }
       });
@@ -278,8 +298,18 @@ const ContractsDashboardGrouped: React.FC = () => {
           }
         });
         
-        // Atualizar margem líquida
-        clienteAgrupado.margemLiquida = clienteAgrupado.faturamentoTotal - clienteAgrupado.despesasSuprimentos;
+        // ✅ ATUALIZAR MARGEM LÍQUIDA COM CÁLCULO SEGURO
+        const faturamentoFinal = safeMath.toNumber(clienteAgrupado.faturamentoTotal);
+        const despesasFinal = safeMath.toNumber(clienteAgrupado.despesasSuprimentos);
+        const margemFinal = safeMath.subtract(faturamentoFinal, despesasFinal);
+        
+        console.log(`💎 MARGEM FINAL SEGURA - Cliente: ${clienteAgrupado.cliente}`);
+        console.log(`  📊 Faturamento: ${faturamentoFinal}`);
+        console.log(`  💸 Despesas: ${despesasFinal}`);
+        console.log(`  💰 Margem: ${margemFinal}`);
+        console.log(`  ✅ Não é NaN? ${!isNaN(margemFinal)}`);
+        
+        clienteAgrupado.margemLiquida = margemFinal;
       });
       
       const clientesArray = Array.from(clientesMap.values())
@@ -325,6 +355,27 @@ const ContractsDashboardGrouped: React.FC = () => {
 
   useEffect(() => { loadClientesAgrupados(); }, [loadClientesAgrupados]);
 
+  // Função helper para garantir valores numéricos válidos
+  const safeMath = {
+    toNumber: (value: any): number => {
+      const num = Number(value);
+      return isNaN(num) || !isFinite(num) ? 0 : num;
+    },
+    subtract: (a: any, b: any): number => {
+      const numA = safeMath.toNumber(a);
+      const numB = safeMath.toNumber(b);
+      const result = numA - numB;
+      return isNaN(result) || !isFinite(result) ? 0 : result;
+    },
+    percentage: (part: any, total: any): number => {
+      const numPart = safeMath.toNumber(part);
+      const numTotal = safeMath.toNumber(total);
+      if (numTotal === 0) return 0;
+      const result = (numPart / numTotal) * 100;
+      return isNaN(result) || !isFinite(result) ? 0 : result;
+    }
+  };
+
   const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   const formatNumber = (value: number) => new Intl.NumberFormat('pt-BR').format(value);
   const formatPercent = (value: number) => {
@@ -342,14 +393,16 @@ const ContractsDashboardGrouped: React.FC = () => {
     try {
       const headers = ['Cliente', 'Contratos', 'Faturamento', 'Suprimentos', 'Margem', 'Margem%'];
       const rows = clientesAgrupados.map((c) => {
-        const margemPerc = c.faturamentoTotal > 0 ? (c.margemLiquida / c.faturamentoTotal) * 100 : 0;
+        const faturamento = Number(c.faturamentoTotal) || 0;
+        const margem = Number(c.margemLiquida) || 0;
+        const margemPerc = faturamento > 0 ? (margem / faturamento) * 100 : 0;
         return [
           c.cliente,
           String(c.quantidadeContratos),
-          String(c.faturamentoTotal.toFixed(2)).replace('.', ','),
-          String(c.despesasSuprimentos.toFixed(2)).replace('.', ','),
-          String(c.margemLiquida.toFixed(2)).replace('.', ','),
-          String(margemPerc.toFixed(1)).replace('.', ',')
+          String(faturamento.toFixed(2)).replace('.', ','),
+          String((Number(c.despesasSuprimentos) || 0).toFixed(2)).replace('.', ','),
+          String(margem.toFixed(2)).replace('.', ','),
+          String((Number(margemPerc) || 0).toFixed(1)).replace('.', ',')
         ];
       });
       const csv = [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
@@ -470,7 +523,7 @@ const ContractsDashboardGrouped: React.FC = () => {
     cliente: cliente.cliente.length > 20 ? cliente.cliente.substring(0, 20) + '...' : cliente.cliente,
     faturamento: cliente.faturamentoTotal,
     despesas: cliente.despesasSuprimentos,
-    margem: cliente.margemLiquida
+    margem: Number(cliente.margemLiquida) || 0
   })).slice(0, 10); // Top 10 clientes
 
   const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1', '#d084d0', '#ffb347'];
@@ -662,6 +715,29 @@ const ContractsDashboardGrouped: React.FC = () => {
         </Alert>
       )}
 
+      {/* Área de Debug para Suprimentos - SEMPRE VISÍVEL */}
+      <div style={{
+        backgroundColor: '#1e293b',
+        color: '#e2e8f0',
+        padding: '16px',
+        borderRadius: '8px',
+        marginBottom: '24px',
+        fontFamily: 'monospace',
+        maxHeight: '400px',
+        overflowY: 'auto',
+        border: '2px solid #ef4444'
+      }}>
+        <h3 style={{ color: '#fbbf24', borderBottom: '1px solid #475569', paddingBottom: '8px', marginBottom: '8px' }}>
+          🚨 DEBUG: Resposta da API /suprimentos/ | Loading: {loading ? 'SIM' : 'NÃO'} | Clientes: {clientesAgrupados.length}
+        </h3>
+        <div style={{ marginBottom: '12px', color: '#fbbf24' }}>
+          <strong>Status atual:</strong> {error ? 'ERRO' : resumoFinanceiro ? 'DADOS CARREGADOS' : 'SEM DADOS'}
+        </div>
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: '12px' }}>
+          {debugSuprimentos ? debugSuprimentos.substring(0, 2000) + (debugSuprimentos.length > 2000 ? '\n... (truncado)' : '') : 'Aguardando dados da API...'}
+        </pre>
+      </div>
+
       {/* Cards de Resumo */}
       {resumoFinanceiro && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -818,18 +894,18 @@ const ContractsDashboardGrouped: React.FC = () => {
                           fontSize: '0.875rem', 
                           textAlign: 'right',
                           fontWeight: '600',
-                          color: cliente.margemLiquida >= 0 ? '#059669' : '#dc2626'
+                          color: safeMath.toNumber(cliente.margemLiquida) >= 0 ? '#059669' : '#dc2626'
                         }}>
-                          {formatCurrency(cliente.margemLiquida)}
+                          {formatCurrency(safeMath.toNumber(cliente.margemLiquida))}
                         </td>
                         <td style={{ 
                           padding: '12px', 
                           fontSize: '0.875rem', 
                           textAlign: 'center',
                           fontWeight: '600',
-                          color: cliente.margemLiquida >= 0 ? '#059669' : '#dc2626'
+                          color: safeMath.toNumber(cliente.margemLiquida) >= 0 ? '#059669' : '#dc2626'
                         }}>
-                          {cliente.faturamentoTotal > 0 ? formatPercent((cliente.margemLiquida / cliente.faturamentoTotal) * 100) : '0.0%'}
+                          {formatPercent(safeMath.percentage(cliente.margemLiquida, cliente.faturamentoTotal))}
                         </td>
                       </tr>
 

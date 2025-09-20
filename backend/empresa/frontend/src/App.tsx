@@ -2,6 +2,7 @@ import { useState } from 'react';
 import FluxoCaixaDashboard from './components/dashboard/FluxoCaixaDashboard';
 import FluxoLucroDashboard from './components/dashboard/FluxoLucroDashboard';
 import EstoqueDashboard from './components/dashboard/EstoqueDashboard';
+import GerenciaDashboard from './components/dashboard/GerenciaDashboard';
 import ContratosPage from './pages/ContratosPage';
 import ResultadosPage from './pages/ResultadosPage';
 import CustosFixosPage from './pages/CustosFixosPage';
@@ -11,7 +12,7 @@ import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api'>('fluxo-realizado');
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
@@ -102,6 +103,26 @@ function App() {
               }}
             >
               📦 Controle de Estoque
+            </button>
+
+            <button
+              onClick={() => setActivePanel('gerencia')}
+              style={{
+                padding: '10px 20px',
+                border: 'none',
+                backgroundColor: activePanel === 'gerencia' ? '#3b82f6' : 'transparent',
+                color: activePanel === 'gerencia' ? 'white' : '#6b7280',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              🏢 Painel de Gerência
             </button>
 
             <button
@@ -232,6 +253,7 @@ function App() {
         {activePanel === 'fluxo-realizado' && <FluxoCaixaDashboard />}
         {activePanel === 'fluxo-lucro' && <FluxoLucroDashboard />}
         {activePanel === 'estoque' && <EstoqueDashboard />}
+        {activePanel === 'gerencia' && <GerenciaDashboard />}
         {activePanel === 'contratos' && <ContratosPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}

@@ -110,8 +110,8 @@ interface MovimentacaoDetalhada {
   nota_fiscal?: {
     numero: string;
     tipo: string;
-    fornecedor?: string;
-    cliente?: string;
+    fornecedor?: string | null;
+    cliente?: string | null;
   };
   is_entrada: boolean;
   is_saida: boolean;
@@ -175,10 +175,7 @@ interface EstoquePorGrupo {
 }
 
 // Interface para a lista de grupos
-interface Grupo {
-  id: number;
-  nome: string;
-}
+// (removido interface Grupo não utilizada)
 
 // Interface para as opções do react-select
 interface GrupoOption {
@@ -221,9 +218,7 @@ interface ProdutosResetadosData {
   };
 }
 
-interface EstoquePorGrupoData {
-  estoque_por_grupo: EstoquePorGrupo[];
-}
+// (removido interface EstoquePorGrupoData não utilizada)
 
 const EstoqueDashboard: React.FC = () => {
   const [estoqueAtual, setEstoqueAtual] = useState<EstoqueAtualData | null>(null);
@@ -234,11 +229,11 @@ const EstoqueDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [dataSelecionada, setDataSelecionada] = useState(new Date().toISOString().split('T')[0]);
-  const [grupos, setGrupos] = useState<GrupoOption[]>([]);
+  const grupos: GrupoOption[] = [];
   const [gruposSelecionados, setGruposSelecionados] = useState<GrupoOption[]>([]);
-  const [expandedGrupos, setExpandedGrupos] = useState<Set<number>>(new Set());
+  // (removido estado expandedGrupos não utilizado)
   const [selectedGrupos, setSelectedGrupos] = useState<Set<number>>(new Set());
-  const [produtosPorGrupo, setProdutosPorGrupo] = useState<Record<number, ProdutoEstoque>>({});
+  const [produtosPorGrupo, setProdutosPorGrupo] = useState<Record<number, ProdutoEstoque[]>>({});
   const [valorTotalSelecionado, setValorTotalSelecionado] = useState<number>(0);
   const [totalItens, setTotalItens] = useState<number>(0);
   const [grupoExpandidoId, setGrupoExpandidoId] = useState<number | null>(null);
@@ -248,37 +243,35 @@ const EstoqueDashboard: React.FC = () => {
   const [loadingResetados, setLoadingResetados] = useState<boolean>(false);
   const [movimentacoesPeriodoData, setMovimentacoesPeriodoData] = useState<MovimentacoesPeriodoData | null>(null);
   const [produtosExpandidos, setProdutosExpandidos] = useState<Set<number>>(new Set());
+  const [loadingDetalhesProdutos, setLoadingDetalhesProdutos] = useState<Set<number>>(new Set());
 
-  const toggleProdutoExpansaoMovimentacoes = (produtoId: number) => {
+  const toggleProdutoExpansaoMovimentacoes = async (produtoId: number) => {
     const newExpanded = new Set(produtosExpandidos);
-    if (newExpanded.has(produtoId)) {
-      newExpanded.delete(produtoId);
-    } else {
+    const willExpand = !newExpanded.has(produtoId);
+    if (willExpand) {
       newExpanded.add(produtoId);
-    }
-    setProdutosExpandidos(newExpanded);
-  };
-
-
-  const toggleGrupoExpansion = async (grupoId: number) => {
-    const newExpanded = new Set(expandedGrupos);
-    if (newExpanded.has(grupoId)) {
-      newExpanded.delete(grupoId);
-    } else {
-      newExpanded.add(grupoId);
-      // Carregar produtos para o grupo se ainda não foram carregados
-      if (!produtosPorGrupo[grupoId]) {
-        try {
-          const response = await api.get(`/contas/estoque-controle/estoque_atual/?grupo_id=${grupoId}`);
-          setProdutosPorGrupo(prev => ({ ...prev, [grupoId]: response.data.results }));
-        } catch (err) {
-          console.error(`Falha ao carregar produtos para o grupo ${grupoId}`, err);
-          // Opcional: Tratar erro na UI
-        }
+      setProdutosExpandidos(newExpanded);
+      // Sempre carregar detalhes ao expandir para evitar cache vazio/stale
+      const newLoading = new Set(loadingDetalhesProdutos);
+      newLoading.add(produtoId);
+      setLoadingDetalhesProdutos(newLoading);
+      try {
+        await carregarMovimentacoesPeriodo(true, produtoId);
+      } finally {
+        setLoadingDetalhesProdutos(prev => {
+          const s = new Set(prev);
+          s.delete(produtoId);
+          return s;
+        });
       }
+    } else {
+      newExpanded.delete(produtoId);
+      setProdutosExpandidos(newExpanded);
     }
-    setExpandedGrupos(newExpanded);
   };
+
+
+  // (removido toggleGrupoExpansion não utilizado)
 
   const handleGrupoSelection = (grupoId: number) => {
     const newSelected = new Set(selectedGrupos);
@@ -439,7 +432,7 @@ const EstoqueDashboard: React.FC = () => {
     }
   };
 
-  const carregarMovimentacoesPeriodo = useCallback(async (incluirDetalhes: boolean = false) => {
+  const carregarMovimentacoesPeriodo = useCallback(async (incluirDetalhes: boolean = false, produtoId?: number) => {
     try {
       const dataFim = dataSelecionada || new Date().toISOString().split('T')[0];
       const dataInicio = new Date(dataFim);
@@ -453,9 +446,62 @@ const EstoqueDashboard: React.FC = () => {
       if (incluirDetalhes) {
         params.append('incluir_detalhes', 'true');
       }
+      if (produtoId !== undefined) {
+        params.append('produto_id', String(produtoId));
+      }
 
       const response = await api.get(`/contas/estoque-controle/movimentacoes_periodo/?${params.toString()}`);
-      setMovimentacoesPeriodoData(response.data);
+      const data = response.data as MovimentacoesPeriodoData;
+      if (produtoId !== undefined) {
+        // Merge detalhes do produto na lista existente (encontra pelo id)
+        const detalhesProduto = data.produtos_movimentados?.find(p => p.produto_id === produtoId);
+        if (detalhesProduto) {
+          setMovimentacoesPeriodoData(prev => {
+            if (!prev) return data;
+            const atualizados = prev.produtos_movimentados.map(p =>
+              p.produto_id === produtoId
+                ? { ...p, movimentacoes_detalhadas: detalhesProduto.movimentacoes_detalhadas || [] }
+                : p
+            );
+            return { ...prev, produtos_movimentados: atualizados };
+          });
+        } else {
+          // Fallback: logar para debug e evitar estado sem merge
+          console.warn('Detalhes do produto não encontrados no retorno da API.', {
+            produtoId,
+            idsRetornados: (data.produtos_movimentados || []).map(p => p.produto_id)
+          });
+          // Opcionalmente, se por algum motivo o produto não estiver na lista anterior,
+          // podemos adicioná-lo para exibir os detalhes retornados (se existir apenas 1 no payload)
+          if (data.produtos_movimentados && data.produtos_movimentados.length === 1) {
+            const unico = data.produtos_movimentados[0];
+            setMovimentacoesPeriodoData(prev => {
+              if (!prev) return data;
+              const jaExiste = prev.produtos_movimentados.some(p => p.produto_id === unico.produto_id);
+              return {
+                ...prev,
+                produtos_movimentados: jaExiste
+                  ? prev.produtos_movimentados
+                  : [...prev.produtos_movimentados, unico]
+              };
+            });
+          }
+        }
+      } else {
+        // Merge seguro: preserva detalhes já carregados para não perder após resposta do resumo
+        setMovimentacoesPeriodoData(prev => {
+          if (!prev) return data;
+          const prevMap = new Map(prev.produtos_movimentados.map(p => [p.produto_id, p]));
+          const merged = data.produtos_movimentados.map(novo => {
+            const antigo = prevMap.get(novo.produto_id);
+            if (antigo && antigo.movimentacoes_detalhadas && antigo.movimentacoes_detalhadas.length > 0) {
+              return { ...novo, movimentacoes_detalhadas: antigo.movimentacoes_detalhadas };
+            }
+            return novo;
+          });
+          return { ...data, produtos_movimentados: merged };
+        });
+      }
     } catch (err) {
       console.error('Erro ao carregar movimentações do período:', err);
       setError('Erro ao carregar movimentações do período');
@@ -464,7 +510,8 @@ const EstoqueDashboard: React.FC = () => {
 
   useEffect(() => {
     if (activeTab === 'movimentacoes-periodo') {
-      carregarMovimentacoesPeriodo();
+      // Carrega resumo sem detalhes inicialmente; detalhes serão carregados sob demanda ao expandir
+      carregarMovimentacoesPeriodo(false);
     } else if (activeTab === 'resetados') {
       carregarProdutosResetados();
     }
@@ -475,12 +522,12 @@ const EstoqueDashboard: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'geral', label: '📦 Estoque por Grupo', icon: '📊' },
-    { id: 'top-produtos', label: '💎 Top Produtos', icon: '💎' },
-    { id: 'criticos', label: '⚠️ Produtos Críticos', icon: '⚠️' },
-    { id: 'movimentados', label: '🔄 Mais Movimentados', icon: '🔄' },
-    { id: 'movimentacoes-periodo', label: '📅 Movimentações Período', icon: '📅' },
-    { id: 'resetados', label: '🔄 Produtos Resetados', icon: '🔄' },
+    { id: 'geral', label: 'Estoque por Grupo', icon: '�' },
+    { id: 'top-produtos', label: 'Top Produtos', icon: '💎' },
+    { id: 'criticos', label: 'Produtos Críticos', icon: '⚠️' },
+    { id: 'movimentados', label: 'Mais Movimentados', icon: '🔄' },
+    { id: 'movimentacoes-periodo', label: 'Movimentações Período', icon: '📅' },
+    { id: 'resetados', label: 'Produtos Resetados', icon: '�' },
   ];
 
   if (loading) {
@@ -889,31 +936,45 @@ const EstoqueDashboard: React.FC = () => {
                       <td style={{ padding: '12px', textAlign: 'right', color: 'red' }}>{formatCurrency(p.valor_saida)}</td>
                       <td style={{ padding: '12px', textAlign: 'right' }}>{formatCurrency(p.saldo_valor)}</td>
                     </tr>
-                    {produtosExpandidos.has(p.produto_id) && p.movimentacoes_detalhadas && (
+                    {produtosExpandidos.has(p.produto_id) && (
                       <tr>
                         <td colSpan={4} style={{ padding: '16px', backgroundColor: '#f9fafb' }}>
-                          <table style={{ width: '100%' }}>
-                            <thead>
-                              <tr>
-                                <th>Data</th>
-                                <th>Tipo</th>
-                                <th style={{ textAlign: 'right' }}>Qtd</th>
-                                <th style={{ textAlign: 'right' }}>Valor Unit.</th>
-                                <th style={{ textAlign: 'right' }}>Valor Total</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {p.movimentacoes_detalhadas.map(m => (
-                                <tr key={m.id}>
-                                  <td>{formatDate(m.data)}</td>
-                                  <td>{m.tipo}</td>
-                                  <td style={{ textAlign: 'right' }}>{formatNumber(m.quantidade)}</td>
-                                  <td style={{ textAlign: 'right' }}>{formatCurrency(m.valor_unitario)}</td>
-                                  <td style={{ textAlign: 'right' }}>{formatCurrency(m.valor_total)}</td>
+                          {loadingDetalhesProdutos.has(p.produto_id) ? (
+                            <div style={{ color: '#6b7280' }}>Carregando detalhes...</div>
+                          ) : p.movimentacoes_detalhadas && p.movimentacoes_detalhadas.length > 0 ? (
+                            <table style={{ width: '100%' }}>
+                              <thead>
+                                <tr>
+                                  <th>Data</th>
+                                  <th>Tipo</th>
+                                  <th>Nota Fiscal</th>
+                                  <th>Cliente/Fornecedor</th>
+                                  <th style={{ textAlign: 'right' }}>Qtd</th>
+                                  <th style={{ textAlign: 'right' }}>Valor Unit.</th>
+                                  <th style={{ textAlign: 'right' }}>Valor Total</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                              </thead>
+                              <tbody>
+                                {p.movimentacoes_detalhadas.map(m => (
+                                  <tr key={m.id}>
+                                    <td>{formatDate(m.data)}</td>
+                                    <td>{m.tipo}</td>
+                                    <td>{m.nota_fiscal?.numero || m.documento || '-'}</td>
+                                    <td>
+                                      {m.nota_fiscal?.tipo === 'entrada' && (m.nota_fiscal?.fornecedor || '-')}
+                                      {m.nota_fiscal?.tipo === 'saida' && (m.nota_fiscal?.cliente || '-')}
+                                      {!m.nota_fiscal?.tipo && '-'}
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>{formatNumber(m.quantidade)}</td>
+                                    <td style={{ textAlign: 'right' }}>{formatCurrency(m.valor_unitario)}</td>
+                                    <td style={{ textAlign: 'right' }}>{formatCurrency(m.valor_total)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          ) : (
+                            <div style={{ color: '#6b7280' }}>Sem movimentações detalhadas no período.</div>
+                          )}
                         </td>
                       </tr>
                     )}
