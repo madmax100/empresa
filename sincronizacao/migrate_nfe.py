@@ -1,9 +1,9 @@
-import pyodbc
-import psycopg2
+import pyodbc # type: ignore
+import psycopg2 # type: ignore
 from datetime import datetime
 from decimal import Decimal
 import re
-from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB # ou o DB específico
+from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB, MOVIMENTOS_DB # type: ignore
 
 def clean_string(value):
     return str(value).strip() if value else None
@@ -50,7 +50,7 @@ def get_valid_entities(pg_cursor):
 
 def migrar_nfe():
     try:
-        db_path = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos\Movimentos\Movimentos.mdb"
+        db_path = MOVIMENTOS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={db_path};'
@@ -118,7 +118,9 @@ def migrar_nfe():
                     outras_despesas = EXCLUDED.outras_despesas
             """
 
-            insercoes = atualizacoes = erros = 0
+            insercoes: int = 0
+            atualizacoes: int = 0
+            erros: int = 0
 
             for row in access_cursor.fetchall():
                 try:

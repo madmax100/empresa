@@ -93,15 +93,16 @@ class ResultadosService {
     }
   }
 
-  // Buscar valores recebidos dos contratos
+  // Buscar valores de suprimentos dos contratos (usando endpoint correto de suprimentos)
   async buscarContratosRecebidos(filtros: FiltrosPeriodo): Promise<ContratosRecebidos> {
     try {
       const params = new URLSearchParams({
-        data_inicio: filtros.data_inicio,
-        data_fim: filtros.data_fim
+        data_inicial: filtros.data_inicio,
+        data_final: filtros.data_fim
       });
 
-      const response = await fetch(`${this.baseURL}/contratos_locacao/recebimentos/?${params.toString()}`, {
+      // Usar o endpoint de suprimentos que já existe e funciona corretamente
+      const response = await fetch(`${this.baseURL}/contratos_locacao/suprimentos/?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -110,12 +111,22 @@ class ResultadosService {
       });
 
       if (!response.ok) {
-        throw new Error(`Erro ao buscar recebimentos de contratos: ${response.status}`);
+        throw new Error(`Erro ao buscar suprimentos de contratos: ${response.status}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      // Extrair valores do resumo de suprimentos
+      const totalContratos = data.total_contratos || data.resultados?.length || 0;
+      const totalSuprimentos = data.resumo?.total_suprimentos || data.resumo_financeiro?.custo_total_suprimentos || 0;
+
+      return {
+        valorTotal: totalSuprimentos,
+        quantidadeContratos: totalContratos,
+        valorMedio: totalContratos > 0 ? totalSuprimentos / totalContratos : 0
+      };
     } catch (error) {
-      console.error('Erro ao buscar recebimentos de contratos:', error);
+      console.error('Erro ao buscar suprimentos de contratos:', error);
       throw error;
     }
   }
@@ -132,8 +143,8 @@ class ResultadosService {
 
       // Calcular resumo geral
       const resultadoLiquido = variacaoEstoque.diferenca + lucroOperacional.lucro + contratosRecebidos.valorTotal;
-      const margemTotal = contratosRecebidos.valorTotal > 0 
-        ? (resultadoLiquido / contratosRecebidos.valorTotal) * 100 
+      const margemTotal = contratosRecebidos.valorTotal > 0
+        ? (resultadoLiquido / contratosRecebidos.valorTotal) * 100
         : 0;
 
       const resumoGeral: ResumoGeral = {
@@ -150,10 +161,10 @@ class ResultadosService {
 
     } catch (error) {
       console.error('Erro ao buscar resultados do período:', error);
-      
+
       // Retornar dados mockados em caso de erro
       console.log('⚠️ API não disponível, usando dados mockados...');
-      
+
       const mockData: ResultadosPeriodo = {
         variacaoEstoque: {
           valorAnterior: 150000,
@@ -200,19 +211,19 @@ class ResultadosService {
       return await response.json();
     } catch (error) {
       console.error('Erro ao buscar histórico:', error);
-      
+
       // Mock data para histórico
       const mockHistorico = [];
       const now = new Date();
-      
+
       for (let i = meses - 1; i >= 0; i--) {
         const mesAtual = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const periodo = mesAtual.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
         const resultado = Math.random() * 200000 + 100000; // Valores aleatórios entre 100k e 300k
-        
+
         mockHistorico.push({ periodo, resultado });
       }
-      
+
       return mockHistorico;
     }
   }

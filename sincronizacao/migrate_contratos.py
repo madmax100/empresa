@@ -36,7 +36,7 @@ def get_valid_clientes(pg_cursor):
 
 def migrar_contratos():
     try:
-        db_path = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos\cadastros\Cadastros.mdb"
+        db_path = CADASTROS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={db_path};'
@@ -65,7 +65,7 @@ def migrar_contratos():
                 INSERT INTO contratos_locacao (
                     id, contrato, cliente_id, tipocontrato, renovado,
                     totalmaquinas, valorcontrato, numeroparcelas,
-                    valorpacela, referencia, data, incio, fim,
+                    valorpacela, referencia, data, inicio, fim,
                     ultimoatendimento, nmaquinas, clientereal,
                     tipocontratoreal, obs
                 ) VALUES (
@@ -83,7 +83,7 @@ def migrar_contratos():
                     valorpacela = EXCLUDED.valorpacela,
                     referencia = EXCLUDED.referencia,
                     data = EXCLUDED.data,
-                    incio = EXCLUDED.incio,
+                    inicio = EXCLUDED.inicio,
                     fim = EXCLUDED.fim,
                     ultimoatendimento = EXCLUDED.ultimoatendimento,
                     nmaquinas = EXCLUDED.nmaquinas,
@@ -149,3 +149,7 @@ def migrar_contratos():
     except Exception as e:
         print(f"Erro durante a migração: {str(e)}")
         return False
+
+
+if __name__ == '__main__':
+    migrar_contratos()

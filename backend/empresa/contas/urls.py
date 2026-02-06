@@ -8,6 +8,7 @@ from .views.analise_fluxo_caixa import AnaliseFluxoCaixaViewSet
 from .views.estoque_views import EstoqueViewSet
 from .views.produtos_resetados_view import ProdutosResetadosViewSet
 from .views.relatorios_views import RelatorioCustosFixosView, RelatorioCustosVariaveisView, RelatorioFaturamentoView
+from .views.dre_views import DREView
 from .views.access import *
 from .views.access import suprimentos_por_contrato
 
@@ -70,6 +71,9 @@ urlpatterns = [
     
     # Nova rota para o relatório de faturamento
     path('relatorios/faturamento/', RelatorioFaturamentoView.as_view(), name='relatorio-faturamento'),
+    
+    # DRE - Demonstrativo de Resultados
+    path('dre/', DREView.as_view(), name='dre'),
     
     path('', include(router.urls)),
 ]

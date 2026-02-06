@@ -454,3 +454,1640 @@
 2025-09-09 05:00:03,229 - INFO - Registros importados: 111104
 2025-09-09 05:00:03,229 - INFO - Registros pulados (já existiam): 9
 2025-09-09 05:00:03,229 - INFO - Registros com erro: 0
+2026-02-04 20:01:50,434 - ERROR - Tipos de movimentação não encontrados no banco de dados!
+2026-02-04 20:01:50,435 - ERROR - Entrada: None
+2026-02-04 20:01:50,435 - ERROR - Saída: None
+2026-02-04 20:01:50,435 - ERROR - Erro ao carregar tipos de movimentação: Tipos de movimentação obrigatórios não encontrados
+2026-02-04 20:16:40,894 - INFO - Criando tipo de movimentação: Entrada
+2026-02-04 20:16:40,929 - INFO - Criando tipo de movimentação: Saída
+2026-02-04 20:16:40,931 - INFO - Tipos de movimentação carregados:
+2026-02-04 20:16:40,932 - INFO - - Entrada:  - Entrada por Compra
+2026-02-04 20:16:40,932 - INFO - - Saída:  - Saída por Venda
+2026-02-04 20:16:40,933 - INFO - === INICIANDO MIGRAÇÃO DE MOVIMENTAÇÕES (EXTRATOS) ===
+2026-02-04 20:16:43,052 - ERROR - Erro ao conectar ao Access: ('HY024', "[HY024] [Microsoft][Driver ODBC Microsoft Access] '(desconhecido)' não é um caminho válido. Verifique se o nome do caminho foi escrito corretamente e se você está conectado ao servidor no qual o arquivo reside. (-1023) (SQLDriverConnect); [HY024] [Microsoft][Driver ODBC Microsoft Access] '(desconhecido)' não é um caminho válido. Verifique se o nome do caminho foi escrito corretamente e se você está conectado ao servidor no qual o arquivo reside. (-1023)")
+2026-02-04 20:16:43,052 - ERROR - Nenhum dado extraído do Access
+2026-02-04 20:24:48,602 - INFO - Tipos de movimentação carregados:
+2026-02-04 20:24:48,603 - INFO - - Entrada:  - Entrada por Compra
+2026-02-04 20:24:48,604 - INFO - - Saída:  - Saída por Venda
+2026-02-04 20:24:48,604 - INFO - === INICIANDO MIGRAÇÃO DE MOVIMENTAÇÕES (EXTRATOS) ===
+2026-02-04 20:24:48,943 - INFO - Extraindo dados da tabela NotasFiscais (movimentações)...
+2026-02-04 20:24:51,935 - INFO - Extraídos 111805 registros da tabela NotasFiscais
+2026-02-04 20:24:51,936 - INFO - Colunas: ['Chave', 'Produto', 'Documento', 'Data', 'Horario', 'Unitario', 'Quantidade', 'Movimentacao', 'Historico', 'OPERADOR']
+2026-02-04 20:24:52,032 - INFO - Dados extraídos: 111805 registros
+2026-02-04 20:24:52,032 - INFO - === AMOSTRA DOS DADOS ===
+2026-02-04 20:24:52,032 - INFO - Colunas disponíveis: ['Chave', 'Produto', 'Documento', 'Data', 'Horario', 'Unitario', 'Quantidade', 'Movimentacao', 'Historico', 'OPERADOR']
+2026-02-04 20:24:52,032 - INFO - Primeiros 3 registros:
+2026-02-04 20:24:52,037 - INFO - Registro 1: {'Chave': np.int64(1), 'Produto': np.int64(3051), 'Documento': '000000', 'Data': Timestamp('2006-07-03 00:00:00'), 'Horario': Timestamp('1899-12-30 12:31:49'), 'Unitario': np.float64(260.76), 'Quantidade': np.float64(1.0), 'Movimentacao': 'ENTRADA', 'Historico': 'SALDO INICIAL', 'OPERADOR': 'MURILO'}
+2026-02-04 20:24:52,038 - INFO - Registro 2: {'Chave': np.int64(2), 'Produto': np.int64(3051), 'Documento': '1', 'Data': Timestamp('2006-07-03 00:00:00'), 'Horario': Timestamp('1899-12-30 12:33:57'), 'Unitario': np.float64(400.0), 'Quantidade': np.float64(1.0), 'Movimentacao': 'SAIDA', 'Historico': 'NF VENDA GER.:1', 'OPERADOR': 'MURILO'}
+2026-02-04 20:24:52,039 - INFO - Registro 3: {'Chave': np.int64(3), 'Produto': np.int64(3326), 'Documento': '000000', 'Data': Timestamp('2006-07-04 00:00:00'), 'Horario': Timestamp('1899-12-30 14:42:04'), 'Unitario': np.float64(456.43), 'Quantidade': np.float64(1.0), 'Movimentacao': 'ENTRADA', 'Historico': 'SALDO INICIAL', 'OPERADOR': 'IVONNE'}
+2026-02-04 20:24:52,040 - INFO - Iniciando importação para PostgreSQL...
+2026-02-04 20:24:58,485 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(1) já existe.
+
+2026-02-04 20:24:58,486 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:24:58,654 - INFO - Produto criado: Produto 2190 (código: 2190)
+2026-02-04 20:24:58,678 - WARNING - Erro ao processar produto '2850': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(3) já existe.
+
+2026-02-04 20:24:58,679 - WARNING - Produto não encontrado para código: 2850
+2026-02-04 20:24:58,682 - INFO - Produto criado: Produto 2855 (código: 2855)
+2026-02-04 20:24:58,728 - WARNING - Erro ao processar produto '3183': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(5) já existe.
+
+2026-02-04 20:24:58,728 - WARNING - Produto não encontrado para código: 3183
+2026-02-04 20:24:58,732 - WARNING - Erro ao processar produto '2863': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(6) já existe.
+
+2026-02-04 20:24:58,732 - WARNING - Produto não encontrado para código: 2863
+2026-02-04 20:24:58,735 - WARNING - Erro ao processar produto '3193': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(7) já existe.
+
+2026-02-04 20:24:58,735 - WARNING - Produto não encontrado para código: 3193
+2026-02-04 20:25:00,444 - WARNING - Erro ao processar produto '2007': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(8) já existe.
+
+2026-02-04 20:25:00,445 - WARNING - Produto não encontrado para código: 2007
+2026-02-04 20:25:00,723 - WARNING - Erro ao processar produto '2416': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(9) já existe.
+
+2026-02-04 20:25:00,724 - WARNING - Produto não encontrado para código: 2416
+2026-02-04 20:25:02,473 - WARNING - Erro ao processar produto '3346': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(10) já existe.
+
+2026-02-04 20:25:02,473 - WARNING - Produto não encontrado para código: 3346
+2026-02-04 20:25:06,007 - INFO - Importados 1000 registros...
+2026-02-04 20:25:06,065 - INFO - Produto criado: Produto 3551 (código: 3551)
+2026-02-04 20:25:06,771 - WARNING - Erro ao processar produto '2007': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(12) já existe.
+
+2026-02-04 20:25:06,772 - WARNING - Produto não encontrado para código: 2007
+2026-02-04 20:25:08,154 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(13) já existe.
+
+2026-02-04 20:25:08,155 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:25:08,186 - WARNING - Erro ao processar produto '2850': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(14) já existe.
+
+2026-02-04 20:25:08,187 - WARNING - Produto não encontrado para código: 2850
+2026-02-04 20:25:08,193 - WARNING - Erro ao processar produto '3183': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(15) já existe.
+
+2026-02-04 20:25:08,194 - WARNING - Produto não encontrado para código: 3183
+2026-02-04 20:25:08,200 - WARNING - Erro ao processar produto '2863': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(16) já existe.
+
+2026-02-04 20:25:08,201 - WARNING - Produto não encontrado para código: 2863
+2026-02-04 20:25:08,205 - WARNING - Erro ao processar produto '3193': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(17) já existe.
+
+2026-02-04 20:25:08,205 - WARNING - Produto não encontrado para código: 3193
+2026-02-04 20:25:08,579 - WARNING - Erro ao processar produto '3611': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(18) já existe.
+
+2026-02-04 20:25:08,580 - WARNING - Produto não encontrado para código: 3611
+2026-02-04 20:25:09,016 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(19) já existe.
+
+2026-02-04 20:25:09,016 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:25:12,677 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(20) já existe.
+
+2026-02-04 20:25:12,677 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:13,693 - INFO - Importados 2000 registros...
+2026-02-04 20:25:13,930 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(21) já existe.
+
+2026-02-04 20:25:13,931 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:25:14,087 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(22) já existe.
+
+2026-02-04 20:25:14,087 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:25:14,327 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(23) já existe.
+
+2026-02-04 20:25:14,328 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:25:15,062 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(24) já existe.
+
+2026-02-04 20:25:15,062 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,065 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(25) já existe.
+
+2026-02-04 20:25:15,066 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,069 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(26) já existe.
+
+2026-02-04 20:25:15,070 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,074 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(27) já existe.
+
+2026-02-04 20:25:15,074 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,078 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(28) já existe.
+
+2026-02-04 20:25:15,078 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,081 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(29) já existe.
+
+2026-02-04 20:25:15,082 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,124 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(30) já existe.
+
+2026-02-04 20:25:15,125 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,130 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(31) já existe.
+
+2026-02-04 20:25:15,131 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:15,136 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(32) já existe.
+
+2026-02-04 20:25:15,137 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:16,494 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(33) já existe.
+
+2026-02-04 20:25:16,495 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:25:16,499 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(34) já existe.
+
+2026-02-04 20:25:16,499 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:25:17,163 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(35) já existe.
+
+2026-02-04 20:25:17,164 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:25:19,995 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(36) já existe.
+
+2026-02-04 20:25:19,996 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:25:20,079 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(37) já existe.
+
+2026-02-04 20:25:20,079 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:25:20,146 - WARNING - Erro ao processar produto '3658': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(38) já existe.
+
+2026-02-04 20:25:20,146 - WARNING - Produto não encontrado para código: 3658
+2026-02-04 20:25:20,151 - WARNING - Erro ao processar produto '3657': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(39) já existe.
+
+2026-02-04 20:25:20,151 - WARNING - Produto não encontrado para código: 3657
+2026-02-04 20:25:20,155 - WARNING - Erro ao processar produto '3658': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(40) já existe.
+
+2026-02-04 20:25:20,155 - WARNING - Produto não encontrado para código: 3658
+2026-02-04 20:25:20,158 - WARNING - Erro ao processar produto '3657': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(41) já existe.
+
+2026-02-04 20:25:20,159 - WARNING - Produto não encontrado para código: 3657
+2026-02-04 20:25:21,367 - INFO - Importados 3000 registros...
+2026-02-04 20:25:25,841 - WARNING - Erro ao processar produto '3677': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(42) já existe.
+
+2026-02-04 20:25:25,841 - WARNING - Produto não encontrado para código: 3677
+2026-02-04 20:25:26,130 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(43) já existe.
+
+2026-02-04 20:25:26,131 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:25:27,416 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(44) já existe.
+
+2026-02-04 20:25:27,420 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:25:28,467 - WARNING - Erro ao processar produto '3684': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(45) já existe.
+
+2026-02-04 20:25:28,468 - WARNING - Produto não encontrado para código: 3684
+2026-02-04 20:25:29,199 - INFO - Importados 4000 registros...
+2026-02-04 20:25:29,563 - WARNING - Erro ao processar produto '3686': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(46) já existe.
+
+2026-02-04 20:25:29,564 - WARNING - Produto não encontrado para código: 3686
+2026-02-04 20:25:32,409 - WARNING - Erro ao processar produto '3694': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(47) já existe.
+
+2026-02-04 20:25:32,410 - WARNING - Produto não encontrado para código: 3694
+2026-02-04 20:25:32,430 - INFO - Produto criado: Produto 3695 (código: 3695)
+2026-02-04 20:25:36,635 - INFO - Importados 5000 registros...
+2026-02-04 20:25:39,688 - INFO - Produto criado: Produto 3706 (código: 3706)
+2026-02-04 20:25:41,490 - WARNING - Erro ao processar produto '3677': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(50) já existe.
+
+2026-02-04 20:25:41,491 - WARNING - Produto não encontrado para código: 3677
+2026-02-04 20:25:43,939 - INFO - Importados 6000 registros...
+2026-02-04 20:25:44,229 - WARNING - Erro ao processar produto '3711': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(51) já existe.
+
+2026-02-04 20:25:44,230 - WARNING - Produto não encontrado para código: 3711
+2026-02-04 20:25:48,525 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(52) já existe.
+
+2026-02-04 20:25:48,525 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:25:48,880 - WARNING - Erro ao processar produto '3721': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(53) já existe.
+
+2026-02-04 20:25:48,880 - WARNING - Produto não encontrado para código: 3721
+2026-02-04 20:25:49,085 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(54) já existe.
+
+2026-02-04 20:25:49,086 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:25:51,067 - INFO - Importados 7000 registros...
+2026-02-04 20:25:53,646 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(55) já existe.
+
+2026-02-04 20:25:53,646 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:25:55,517 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(56) já existe.
+
+2026-02-04 20:25:55,518 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:25:55,571 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(57) já existe.
+
+2026-02-04 20:25:55,572 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:25:55,613 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(58) já existe.
+
+2026-02-04 20:25:55,613 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:25:57,776 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(59) já existe.
+
+2026-02-04 20:25:57,777 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:25:58,166 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(60) já existe.
+
+2026-02-04 20:25:58,166 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:25:58,171 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(61) já existe.
+
+2026-02-04 20:25:58,172 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:25:58,343 - INFO - Importados 8000 registros...
+2026-02-04 20:26:06,354 - WARNING - Erro ao processar produto '3721': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(62) já existe.
+
+2026-02-04 20:26:06,355 - WARNING - Produto não encontrado para código: 3721
+2026-02-04 20:26:06,370 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(63) já existe.
+
+2026-02-04 20:26:06,370 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:06,700 - INFO - Importados 9000 registros...
+2026-02-04 20:26:07,987 - WARNING - Erro ao processar produto '3749': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(64) já existe.
+
+2026-02-04 20:26:07,988 - WARNING - Produto não encontrado para código: 3749
+2026-02-04 20:26:08,039 - WARNING - Erro ao processar produto '3749': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(65) já existe.
+
+2026-02-04 20:26:08,039 - WARNING - Produto não encontrado para código: 3749
+2026-02-04 20:26:09,158 - WARNING - Erro ao processar produto '3721': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(66) já existe.
+
+2026-02-04 20:26:09,159 - WARNING - Produto não encontrado para código: 3721
+2026-02-04 20:26:09,173 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(67) já existe.
+
+2026-02-04 20:26:09,174 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:09,752 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(68) já existe.
+
+2026-02-04 20:26:09,753 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:10,329 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(69) já existe.
+
+2026-02-04 20:26:10,330 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:10,605 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(70) já existe.
+
+2026-02-04 20:26:10,605 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:12,108 - WARNING - Erro ao processar produto '3749': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(71) já existe.
+
+2026-02-04 20:26:12,109 - WARNING - Produto não encontrado para código: 3749
+2026-02-04 20:26:12,245 - INFO - Produto criado: Produto 3749 (código: 3749)
+2026-02-04 20:26:12,748 - WARNING - Erro ao processar produto '3721': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(73) já existe.
+
+2026-02-04 20:26:12,749 - WARNING - Produto não encontrado para código: 3721
+2026-02-04 20:26:13,025 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(74) já existe.
+
+2026-02-04 20:26:13,025 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:14,874 - INFO - Importados 10000 registros...
+2026-02-04 20:26:16,282 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(75) já existe.
+
+2026-02-04 20:26:16,283 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:17,356 - WARNING - Erro ao processar produto '3767': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(76) já existe.
+
+2026-02-04 20:26:17,357 - WARNING - Produto não encontrado para código: 3767
+2026-02-04 20:26:17,587 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(77) já existe.
+
+2026-02-04 20:26:17,588 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:26:17,602 - WARNING - Erro ao processar produto '3734': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(78) já existe.
+
+2026-02-04 20:26:17,603 - WARNING - Produto não encontrado para código: 3734
+2026-02-04 20:26:17,619 - INFO - Produto criado: Produto 3734 (código: 3734)
+2026-02-04 20:26:20,368 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(80) já existe.
+
+2026-02-04 20:26:20,369 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:26:23,163 - INFO - Importados 11000 registros...
+2026-02-04 20:26:26,142 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(81) já existe.
+
+2026-02-04 20:26:26,143 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:27,058 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(82) já existe.
+
+2026-02-04 20:26:27,059 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:26:27,706 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(83) já existe.
+
+2026-02-04 20:26:27,706 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:28,999 - WARNING - Erro ao processar produto '3721': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(84) já existe.
+
+2026-02-04 20:26:29,000 - WARNING - Produto não encontrado para código: 3721
+2026-02-04 20:26:30,931 - INFO - Importados 12000 registros...
+2026-02-04 20:26:31,120 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(85) já existe.
+
+2026-02-04 20:26:31,121 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:31,675 - INFO - Produto criado: Produto 3721 (código: 3721)
+2026-02-04 20:26:33,781 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(87) já existe.
+
+2026-02-04 20:26:33,782 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:26:33,795 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(88) já existe.
+
+2026-02-04 20:26:33,796 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:26:33,805 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(89) já existe.
+
+2026-02-04 20:26:33,806 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:26:33,945 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(90) já existe.
+
+2026-02-04 20:26:33,945 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:26:35,502 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(91) já existe.
+
+2026-02-04 20:26:35,502 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:38,714 - INFO - Importados 13000 registros...
+2026-02-04 20:26:42,226 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(92) já existe.
+
+2026-02-04 20:26:42,227 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:45,370 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(93) já existe.
+
+2026-02-04 20:26:45,370 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:46,310 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(94) já existe.
+
+2026-02-04 20:26:46,311 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:26:46,748 - INFO - Importados 14000 registros...
+2026-02-04 20:26:54,919 - INFO - Importados 15000 registros...
+2026-02-04 20:26:55,622 - WARNING - Erro ao processar produto '3828': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(95) já existe.
+
+2026-02-04 20:26:55,622 - WARNING - Produto não encontrado para código: 3828
+2026-02-04 20:27:02,069 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(96) já existe.
+
+2026-02-04 20:27:02,070 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:27:03,046 - INFO - Importados 16000 registros...
+2026-02-04 20:27:07,589 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(97) já existe.
+
+2026-02-04 20:27:07,590 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:27:10,258 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(98) já existe.
+
+2026-02-04 20:27:10,259 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:27:10,653 - INFO - Importados 17000 registros...
+2026-02-04 20:27:11,332 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(99) já existe.
+
+2026-02-04 20:27:11,333 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:27:18,914 - INFO - Importados 18000 registros...
+2026-02-04 20:27:19,530 - WARNING - Erro ao processar produto '3358': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(100) já existe.
+
+2026-02-04 20:27:19,531 - WARNING - Produto não encontrado para código: 3358
+2026-02-04 20:27:22,469 - WARNING - Erro ao processar produto '3767': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(101) já existe.
+
+2026-02-04 20:27:22,470 - WARNING - Produto não encontrado para código: 3767
+2026-02-04 20:27:22,508 - WARNING - Erro ao processar produto '3767': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(102) já existe.
+
+2026-02-04 20:27:22,509 - WARNING - Produto não encontrado para código: 3767
+2026-02-04 20:27:24,595 - INFO - Produto criado: Produto 3358 (código: 3358)
+2026-02-04 20:27:27,100 - INFO - Importados 19000 registros...
+2026-02-04 20:27:29,048 - INFO - Produto criado: Produto 3876 (código: 3876)
+2026-02-04 20:27:33,599 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(105) já existe.
+
+2026-02-04 20:27:33,600 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:27:33,604 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(106) já existe.
+
+2026-02-04 20:27:33,604 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:27:33,609 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(107) já existe.
+
+2026-02-04 20:27:33,609 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:27:33,615 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(108) já existe.
+
+2026-02-04 20:27:33,615 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:27:34,153 - WARNING - Erro ao processar produto '3890': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(109) já existe.
+
+2026-02-04 20:27:34,154 - WARNING - Produto não encontrado para código: 3890
+2026-02-04 20:27:34,158 - WARNING - Erro ao processar produto '3890': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(110) já existe.
+
+2026-02-04 20:27:34,159 - WARNING - Produto não encontrado para código: 3890
+2026-02-04 20:27:35,198 - INFO - Importados 20000 registros...
+2026-02-04 20:27:39,806 - WARNING - Erro ao processar produto '3898': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(111) já existe.
+
+2026-02-04 20:27:39,806 - WARNING - Produto não encontrado para código: 3898
+2026-02-04 20:27:39,913 - WARNING - Erro ao processar produto '3898': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(112) já existe.
+
+2026-02-04 20:27:39,914 - WARNING - Produto não encontrado para código: 3898
+2026-02-04 20:27:42,681 - WARNING - Erro ao processar produto '3898': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(113) já existe.
+
+2026-02-04 20:27:42,682 - WARNING - Produto não encontrado para código: 3898
+2026-02-04 20:27:43,228 - INFO - Importados 21000 registros...
+2026-02-04 20:27:44,805 - WARNING - Erro ao processar produto '3898': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(114) já existe.
+
+2026-02-04 20:27:44,806 - WARNING - Produto não encontrado para código: 3898
+2026-02-04 20:27:47,974 - WARNING - Erro ao processar produto '3898': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(115) já existe.
+
+2026-02-04 20:27:47,974 - WARNING - Produto não encontrado para código: 3898
+2026-02-04 20:27:47,979 - WARNING - Erro ao processar produto '3898': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(116) já existe.
+
+2026-02-04 20:27:47,980 - WARNING - Produto não encontrado para código: 3898
+2026-02-04 20:27:47,985 - WARNING - Erro ao processar produto '3898': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(117) já existe.
+
+2026-02-04 20:27:47,986 - WARNING - Produto não encontrado para código: 3898
+2026-02-04 20:27:48,269 - INFO - Produto criado: Produto 3898 (código: 3898)
+2026-02-04 20:27:50,969 - INFO - Importados 22000 registros...
+2026-02-04 20:27:58,506 - INFO - Importados 23000 registros...
+2026-02-04 20:28:03,223 - WARNING - Erro ao processar produto '3938': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(119) já existe.
+
+2026-02-04 20:28:03,223 - WARNING - Produto não encontrado para código: 3938
+2026-02-04 20:28:04,836 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(120) já existe.
+
+2026-02-04 20:28:04,837 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:28:04,844 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(121) já existe.
+
+2026-02-04 20:28:04,845 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:28:04,850 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(122) já existe.
+
+2026-02-04 20:28:04,851 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:28:04,856 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(123) já existe.
+
+2026-02-04 20:28:04,857 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:28:04,864 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(124) já existe.
+
+2026-02-04 20:28:04,865 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:28:04,871 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(125) já existe.
+
+2026-02-04 20:28:04,871 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:28:04,877 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(126) já existe.
+
+2026-02-04 20:28:04,877 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:28:06,919 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(127) já existe.
+
+2026-02-04 20:28:06,919 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:28:07,128 - INFO - Importados 24000 registros...
+2026-02-04 20:28:09,681 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(128) já existe.
+
+2026-02-04 20:28:09,682 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:28:14,514 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(129) já existe.
+
+2026-02-04 20:28:14,515 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:28:14,523 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(130) já existe.
+
+2026-02-04 20:28:14,524 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:28:15,268 - INFO - Importados 25000 registros...
+2026-02-04 20:28:24,076 - INFO - Importados 26000 registros...
+2026-02-04 20:28:30,465 - WARNING - Erro ao processar produto '3694': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(131) já existe.
+
+2026-02-04 20:28:30,466 - WARNING - Produto não encontrado para código: 3694
+2026-02-04 20:28:31,378 - WARNING - Erro ao processar produto '3694': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(132) já existe.
+
+2026-02-04 20:28:31,378 - WARNING - Produto não encontrado para código: 3694
+2026-02-04 20:28:32,020 - INFO - Importados 27000 registros...
+2026-02-04 20:28:39,866 - INFO - Importados 28000 registros...
+2026-02-04 20:28:44,025 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(133) já existe.
+
+2026-02-04 20:28:44,025 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:28:44,037 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(134) já existe.
+
+2026-02-04 20:28:44,037 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:28:46,202 - INFO - Produto criado: Produto 4038 (código: 4038)
+2026-02-04 20:28:47,624 - INFO - Importados 29000 registros...
+2026-02-04 20:28:54,831 - INFO - Importados 30000 registros...
+2026-02-04 20:29:02,416 - INFO - Importados 31000 registros...
+2026-02-04 20:29:09,119 - INFO - Importados 32000 registros...
+2026-02-04 20:29:10,045 - INFO - Produto criado: Produto 4089 (código: 4089)
+2026-02-04 20:29:16,795 - INFO - Importados 33000 registros...
+2026-02-04 20:29:28,601 - INFO - Importados 34000 registros...
+2026-02-04 20:29:36,412 - WARNING - Erro ao processar produto '4135': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(137) já existe.
+
+2026-02-04 20:29:36,412 - WARNING - Produto não encontrado para código: 4135
+2026-02-04 20:29:36,416 - WARNING - Erro ao processar produto '4135': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(138) já existe.
+
+2026-02-04 20:29:36,417 - WARNING - Produto não encontrado para código: 4135
+2026-02-04 20:29:36,421 - WARNING - Erro ao processar produto '4135': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(139) já existe.
+
+2026-02-04 20:29:36,422 - WARNING - Produto não encontrado para código: 4135
+2026-02-04 20:29:36,426 - WARNING - Erro ao processar produto '4135': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(140) já existe.
+
+2026-02-04 20:29:36,427 - WARNING - Produto não encontrado para código: 4135
+2026-02-04 20:29:36,431 - WARNING - Erro ao processar produto '4135': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(141) já existe.
+
+2026-02-04 20:29:36,432 - WARNING - Produto não encontrado para código: 4135
+2026-02-04 20:29:37,638 - INFO - Importados 35000 registros...
+2026-02-04 20:29:42,261 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(142) já existe.
+
+2026-02-04 20:29:42,262 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:29:42,284 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(143) já existe.
+
+2026-02-04 20:29:42,284 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:29:42,308 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(144) já existe.
+
+2026-02-04 20:29:42,308 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:29:42,316 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(145) já existe.
+
+2026-02-04 20:29:42,316 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:29:45,002 - INFO - Importados 36000 registros...
+2026-02-04 20:29:47,167 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(146) já existe.
+
+2026-02-04 20:29:47,167 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:29:47,181 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(147) já existe.
+
+2026-02-04 20:29:47,182 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:29:47,735 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(148) já existe.
+
+2026-02-04 20:29:47,735 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:29:47,750 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(149) já existe.
+
+2026-02-04 20:29:47,750 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:29:52,389 - INFO - Importados 37000 registros...
+2026-02-04 20:29:57,464 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(150) já existe.
+
+2026-02-04 20:29:57,465 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:29:57,479 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(151) já existe.
+
+2026-02-04 20:29:57,479 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:29:59,136 - INFO - Importados 38000 registros...
+2026-02-04 20:29:59,789 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(152) já existe.
+
+2026-02-04 20:29:59,790 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:29:59,795 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(153) já existe.
+
+2026-02-04 20:29:59,796 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:29:59,802 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(154) já existe.
+
+2026-02-04 20:29:59,802 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:29:59,808 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(155) já existe.
+
+2026-02-04 20:29:59,809 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:29:59,815 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(156) já existe.
+
+2026-02-04 20:29:59,815 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:30:01,582 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(157) já existe.
+
+2026-02-04 20:30:01,583 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:30:06,297 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(158) já existe.
+
+2026-02-04 20:30:06,297 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:30:06,301 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(159) já existe.
+
+2026-02-04 20:30:06,301 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:30:07,823 - INFO - Importados 39000 registros...
+2026-02-04 20:30:15,441 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(160) já existe.
+
+2026-02-04 20:30:15,441 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:30:15,454 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(161) já existe.
+
+2026-02-04 20:30:15,455 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:30:15,762 - INFO - Importados 40000 registros...
+2026-02-04 20:30:25,892 - INFO - Importados 41000 registros...
+2026-02-04 20:30:32,104 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(162) já existe.
+
+2026-02-04 20:30:32,105 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,122 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(163) já existe.
+
+2026-02-04 20:30:32,123 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,140 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(164) já existe.
+
+2026-02-04 20:30:32,141 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,159 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(165) já existe.
+
+2026-02-04 20:30:32,160 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,165 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(166) já existe.
+
+2026-02-04 20:30:32,166 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,183 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(167) já existe.
+
+2026-02-04 20:30:32,183 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,229 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(168) já existe.
+
+2026-02-04 20:30:32,230 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,237 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(169) já existe.
+
+2026-02-04 20:30:32,238 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,253 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(170) já existe.
+
+2026-02-04 20:30:32,254 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:32,289 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(171) já existe.
+
+2026-02-04 20:30:32,290 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:30:34,820 - INFO - Importados 42000 registros...
+2026-02-04 20:30:43,160 - INFO - Importados 43000 registros...
+2026-02-04 20:30:50,099 - WARNING - Erro ao processar produto '4249': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(172) já existe.
+
+2026-02-04 20:30:50,100 - WARNING - Produto não encontrado para código: 4249
+2026-02-04 20:30:51,879 - INFO - Importados 44000 registros...
+2026-02-04 20:30:58,571 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(173) já existe.
+
+2026-02-04 20:30:58,572 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:30:59,029 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(174) já existe.
+
+2026-02-04 20:30:59,029 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:31:02,987 - INFO - Importados 45000 registros...
+2026-02-04 20:31:12,966 - INFO - Importados 46000 registros...
+2026-02-04 20:31:22,993 - INFO - Importados 47000 registros...
+2026-02-04 20:31:24,103 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(175) já existe.
+
+2026-02-04 20:31:24,104 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:31:24,194 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(176) já existe.
+
+2026-02-04 20:31:24,195 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:31:31,720 - INFO - Importados 48000 registros...
+2026-02-04 20:31:41,646 - INFO - Importados 49000 registros...
+2026-02-04 20:31:42,970 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(177) já existe.
+
+2026-02-04 20:31:42,970 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:31:50,952 - WARNING - Erro ao processar produto '3952': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(178) já existe.
+
+2026-02-04 20:31:50,953 - WARNING - Produto não encontrado para código: 3952
+2026-02-04 20:31:51,715 - INFO - Importados 50000 registros...
+2026-02-04 20:31:56,986 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(179) já existe.
+
+2026-02-04 20:31:56,987 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:31:57,047 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(180) já existe.
+
+2026-02-04 20:31:57,048 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:31:57,107 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(181) já existe.
+
+2026-02-04 20:31:57,108 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:32:00,828 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(182) já existe.
+
+2026-02-04 20:32:00,829 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:32:02,686 - INFO - Importados 51000 registros...
+2026-02-04 20:32:07,663 - WARNING - Erro ao processar produto '4379': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(183) já existe.
+
+2026-02-04 20:32:07,664 - WARNING - Produto não encontrado para código: 4379
+2026-02-04 20:32:07,698 - WARNING - Erro ao processar produto '4379': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(184) já existe.
+
+2026-02-04 20:32:07,699 - WARNING - Produto não encontrado para código: 4379
+2026-02-04 20:32:11,785 - INFO - Importados 52000 registros...
+2026-02-04 20:32:20,456 - INFO - Importados 53000 registros...
+2026-02-04 20:32:25,125 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(185) já existe.
+
+2026-02-04 20:32:25,126 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:32:25,159 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(186) já existe.
+
+2026-02-04 20:32:25,160 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:32:29,324 - INFO - Importados 54000 registros...
+2026-02-04 20:32:37,214 - INFO - Importados 55000 registros...
+2026-02-04 20:32:46,096 - INFO - Importados 56000 registros...
+2026-02-04 20:32:46,945 - WARNING - Erro ao processar produto '4435': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(187) já existe.
+
+2026-02-04 20:32:46,946 - WARNING - Produto não encontrado para código: 4435
+2026-02-04 20:32:52,483 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(188) já existe.
+
+2026-02-04 20:32:52,484 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:32:52,873 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(189) já existe.
+
+2026-02-04 20:32:52,874 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:32:55,429 - INFO - Importados 57000 registros...
+2026-02-04 20:33:04,569 - INFO - Importados 58000 registros...
+2026-02-04 20:33:04,730 - WARNING - Erro ao processar produto '4484': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(190) já existe.
+
+2026-02-04 20:33:04,731 - WARNING - Produto não encontrado para código: 4484
+2026-02-04 20:33:04,736 - WARNING - Erro ao processar produto '4484': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(191) já existe.
+
+2026-02-04 20:33:04,736 - WARNING - Produto não encontrado para código: 4484
+2026-02-04 20:33:04,743 - INFO - Produto criado: Produto 4484 (código: 4484)
+2026-02-04 20:33:13,064 - INFO - Importados 59000 registros...
+2026-02-04 20:33:16,580 - INFO - Produto criado: Produto 4513 (código: 4513)
+2026-02-04 20:33:16,948 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(194) já existe.
+
+2026-02-04 20:33:16,948 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:33:16,962 - WARNING - Erro ao processar produto '3694': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(195) já existe.
+
+2026-02-04 20:33:16,963 - WARNING - Produto não encontrado para código: 3694
+2026-02-04 20:33:16,966 - INFO - Produto criado: Produto 3952 (código: 3952)
+2026-02-04 20:33:16,976 - WARNING - Erro ao processar produto '4435': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(197) já existe.
+
+2026-02-04 20:33:16,976 - WARNING - Produto não encontrado para código: 4435
+2026-02-04 20:33:16,982 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(198) já existe.
+
+2026-02-04 20:33:16,983 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:33:16,989 - WARNING - Erro ao processar produto '4249': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(199) já existe.
+
+2026-02-04 20:33:16,990 - WARNING - Produto não encontrado para código: 4249
+2026-02-04 20:33:21,470 - INFO - Importados 60000 registros...
+2026-02-04 20:33:30,058 - INFO - Importados 61000 registros...
+2026-02-04 20:33:38,663 - INFO - Importados 62000 registros...
+2026-02-04 20:33:47,044 - INFO - Importados 63000 registros...
+2026-02-04 20:33:55,238 - INFO - Importados 64000 registros...
+2026-02-04 20:34:03,431 - INFO - Importados 65000 registros...
+2026-02-04 20:34:03,664 - WARNING - Erro ao processar produto '4595': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(200) já existe.
+
+2026-02-04 20:34:03,665 - WARNING - Produto não encontrado para código: 4595
+2026-02-04 20:34:03,908 - WARNING - Erro ao processar produto '4595': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(201) já existe.
+
+2026-02-04 20:34:03,912 - WARNING - Produto não encontrado para código: 4595
+2026-02-04 20:34:11,757 - INFO - Importados 66000 registros...
+2026-02-04 20:34:20,283 - INFO - Importados 67000 registros...
+2026-02-04 20:34:27,745 - WARNING - Erro ao processar produto '4651': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(202) já existe.
+
+2026-02-04 20:34:27,745 - WARNING - Produto não encontrado para código: 4651
+2026-02-04 20:34:28,888 - INFO - Importados 68000 registros...
+2026-02-04 20:34:29,608 - WARNING - Erro ao processar produto '4661': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(203) já existe.
+
+2026-02-04 20:34:29,608 - WARNING - Produto não encontrado para código: 4661
+2026-02-04 20:34:29,673 - WARNING - Erro ao processar produto '4661': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(204) já existe.
+
+2026-02-04 20:34:29,673 - WARNING - Produto não encontrado para código: 4661
+2026-02-04 20:34:29,751 - WARNING - Erro ao processar produto '4661': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(205) já existe.
+
+2026-02-04 20:34:29,751 - WARNING - Produto não encontrado para código: 4661
+2026-02-04 20:34:31,633 - WARNING - Erro ao processar produto '4668': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(206) já existe.
+
+2026-02-04 20:34:31,633 - WARNING - Produto não encontrado para código: 4668
+2026-02-04 20:34:37,858 - INFO - Importados 69000 registros...
+2026-02-04 20:34:38,837 - WARNING - Erro ao processar produto '4685': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(207) já existe.
+
+2026-02-04 20:34:38,837 - WARNING - Produto não encontrado para código: 4685
+2026-02-04 20:34:39,340 - INFO - Produto criado: Produto 4685 (código: 4685)
+2026-02-04 20:34:41,471 - WARNING - Erro ao processar produto '4661': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(209) já existe.
+
+2026-02-04 20:34:41,472 - WARNING - Produto não encontrado para código: 4661
+2026-02-04 20:34:46,580 - INFO - Importados 70000 registros...
+2026-02-04 20:34:50,310 - WARNING - Erro ao processar produto '4726': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(210) já existe.
+
+2026-02-04 20:34:50,311 - WARNING - Produto não encontrado para código: 4726
+2026-02-04 20:34:50,402 - WARNING - Erro ao processar produto '4726': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(211) já existe.
+
+2026-02-04 20:34:50,402 - WARNING - Produto não encontrado para código: 4726
+2026-02-04 20:34:52,219 - WARNING - Erro ao processar produto '4651': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(212) já existe.
+
+2026-02-04 20:34:52,220 - WARNING - Produto não encontrado para código: 4651
+2026-02-04 20:34:53,481 - WARNING - Erro ao processar produto '4668': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(213) já existe.
+
+2026-02-04 20:34:53,482 - WARNING - Produto não encontrado para código: 4668
+2026-02-04 20:34:55,400 - INFO - Importados 71000 registros...
+2026-02-04 20:35:04,476 - INFO - Importados 72000 registros...
+2026-02-04 20:35:13,471 - INFO - Importados 73000 registros...
+2026-02-04 20:35:15,586 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(214) já existe.
+
+2026-02-04 20:35:15,587 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:35:15,610 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(215) já existe.
+
+2026-02-04 20:35:15,611 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:35:15,633 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(216) já existe.
+
+2026-02-04 20:35:15,634 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:35:22,240 - INFO - Importados 74000 registros...
+2026-02-04 20:35:30,249 - INFO - Importados 75000 registros...
+2026-02-04 20:35:33,462 - WARNING - Erro ao processar produto '4804': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(217) já existe.
+
+2026-02-04 20:35:33,463 - WARNING - Produto não encontrado para código: 4804
+2026-02-04 20:35:34,108 - WARNING - Erro ao processar produto '4804': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(218) já existe.
+
+2026-02-04 20:35:34,109 - WARNING - Produto não encontrado para código: 4804
+2026-02-04 20:35:34,133 - WARNING - Erro ao processar produto '4804': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(219) já existe.
+
+2026-02-04 20:35:34,133 - WARNING - Produto não encontrado para código: 4804
+2026-02-04 20:35:34,290 - WARNING - Erro ao processar produto '4804': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(220) já existe.
+
+2026-02-04 20:35:34,291 - WARNING - Produto não encontrado para código: 4804
+2026-02-04 20:35:38,586 - INFO - Importados 76000 registros...
+2026-02-04 20:35:42,043 - INFO - Tipos de movimentação carregados:
+2026-02-04 20:35:42,044 - INFO - - Entrada:  - Entrada por Compra
+2026-02-04 20:35:42,044 - INFO - - Saída:  - Saída por Venda
+2026-02-04 20:35:42,045 - INFO - === INICIANDO MIGRAÇÃO DE MOVIMENTAÇÕES (EXTRATOS) ===
+2026-02-04 20:35:43,046 - INFO - Extraindo dados da tabela NotasFiscais (movimentações)...
+2026-02-04 20:35:46,229 - INFO - Importados 77000 registros...
+2026-02-04 20:35:46,758 - INFO - Extraídos 111805 registros da tabela NotasFiscais
+2026-02-04 20:35:46,759 - INFO - Colunas: ['Chave', 'Produto', 'Documento', 'Data', 'Horario', 'Unitario', 'Quantidade', 'Movimentacao', 'Historico', 'OPERADOR']
+2026-02-04 20:35:46,907 - INFO - Dados extraídos: 111805 registros
+2026-02-04 20:35:46,908 - INFO - === AMOSTRA DOS DADOS ===
+2026-02-04 20:35:46,908 - INFO - Colunas disponíveis: ['Chave', 'Produto', 'Documento', 'Data', 'Horario', 'Unitario', 'Quantidade', 'Movimentacao', 'Historico', 'OPERADOR']
+2026-02-04 20:35:46,908 - INFO - Primeiros 3 registros:
+2026-02-04 20:35:46,914 - INFO - Registro 1: {'Chave': np.int64(1), 'Produto': np.int64(3051), 'Documento': '000000', 'Data': Timestamp('2006-07-03 00:00:00'), 'Horario': Timestamp('1899-12-30 12:31:49'), 'Unitario': np.float64(260.76), 'Quantidade': np.float64(1.0), 'Movimentacao': 'ENTRADA', 'Historico': 'SALDO INICIAL', 'OPERADOR': 'MURILO'}
+2026-02-04 20:35:46,916 - INFO - Registro 2: {'Chave': np.int64(2), 'Produto': np.int64(3051), 'Documento': '1', 'Data': Timestamp('2006-07-03 00:00:00'), 'Horario': Timestamp('1899-12-30 12:33:57'), 'Unitario': np.float64(400.0), 'Quantidade': np.float64(1.0), 'Movimentacao': 'SAIDA', 'Historico': 'NF VENDA GER.:1', 'OPERADOR': 'MURILO'}
+2026-02-04 20:35:46,917 - INFO - Registro 3: {'Chave': np.int64(3), 'Produto': np.int64(3326), 'Documento': '000000', 'Data': Timestamp('2006-07-04 00:00:00'), 'Horario': Timestamp('1899-12-30 14:42:04'), 'Unitario': np.float64(456.43), 'Quantidade': np.float64(1.0), 'Movimentacao': 'ENTRADA', 'Historico': 'SALDO INICIAL', 'OPERADOR': 'IVONNE'}
+2026-02-04 20:35:46,917 - INFO - Iniciando importação para PostgreSQL...
+2026-02-04 20:35:47,441 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(221) já existe.
+
+2026-02-04 20:35:47,441 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:35:47,571 - WARNING - Erro ao processar produto '2850': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(222) já existe.
+
+2026-02-04 20:35:47,571 - WARNING - Produto não encontrado para código: 2850
+2026-02-04 20:35:47,615 - WARNING - Erro ao processar produto '3183': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(223) já existe.
+
+2026-02-04 20:35:47,615 - WARNING - Produto não encontrado para código: 3183
+2026-02-04 20:35:47,619 - WARNING - Erro ao processar produto '2863': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(224) já existe.
+
+2026-02-04 20:35:47,620 - WARNING - Produto não encontrado para código: 2863
+2026-02-04 20:35:47,624 - WARNING - Erro ao processar produto '3193': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(225) já existe.
+
+2026-02-04 20:35:47,625 - WARNING - Produto não encontrado para código: 3193
+2026-02-04 20:35:48,696 - WARNING - Erro ao processar produto '2007': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(226) já existe.
+
+2026-02-04 20:35:48,696 - WARNING - Produto não encontrado para código: 2007
+2026-02-04 20:35:48,863 - WARNING - Erro ao processar produto '2416': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(227) já existe.
+
+2026-02-04 20:35:48,864 - WARNING - Produto não encontrado para código: 2416
+2026-02-04 20:35:49,835 - WARNING - Erro ao processar produto '3346': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(228) já existe.
+
+2026-02-04 20:35:49,835 - WARNING - Produto não encontrado para código: 3346
+2026-02-04 20:35:52,388 - WARNING - Erro ao processar produto '2007': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(229) já existe.
+
+2026-02-04 20:35:52,388 - WARNING - Produto não encontrado para código: 2007
+2026-02-04 20:35:53,242 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(230) já existe.
+
+2026-02-04 20:35:53,243 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:35:53,259 - WARNING - Erro ao processar produto '2850': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(231) já existe.
+
+2026-02-04 20:35:53,260 - WARNING - Produto não encontrado para código: 2850
+2026-02-04 20:35:53,265 - WARNING - Erro ao processar produto '3183': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(232) já existe.
+
+2026-02-04 20:35:53,266 - WARNING - Produto não encontrado para código: 3183
+2026-02-04 20:35:53,270 - WARNING - Erro ao processar produto '2863': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(233) já existe.
+
+2026-02-04 20:35:53,271 - WARNING - Produto não encontrado para código: 2863
+2026-02-04 20:35:53,276 - WARNING - Erro ao processar produto '3193': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(234) já existe.
+
+2026-02-04 20:35:53,276 - WARNING - Produto não encontrado para código: 3193
+2026-02-04 20:35:53,505 - WARNING - Erro ao processar produto '3611': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(235) já existe.
+
+2026-02-04 20:35:53,505 - WARNING - Produto não encontrado para código: 3611
+2026-02-04 20:35:53,705 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(236) já existe.
+
+2026-02-04 20:35:53,706 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:53,859 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(237) já existe.
+
+2026-02-04 20:35:53,859 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:54,070 - INFO - Importados 78000 registros...
+2026-02-04 20:35:54,127 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(238) já existe.
+
+2026-02-04 20:35:54,127 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:54,912 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(239) já existe.
+
+2026-02-04 20:35:54,912 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:55,078 - WARNING - Erro ao processar produto '4870': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(240) já existe.
+
+2026-02-04 20:35:55,079 - WARNING - Produto não encontrado para código: 4870
+2026-02-04 20:35:55,082 - WARNING - Erro ao processar produto '4870': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(241) já existe.
+
+2026-02-04 20:35:55,083 - WARNING - Produto não encontrado para código: 4870
+2026-02-04 20:35:55,393 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(242) já existe.
+
+2026-02-04 20:35:55,393 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:55,455 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(243) já existe.
+
+2026-02-04 20:35:55,455 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:55,470 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(244) já existe.
+
+2026-02-04 20:35:55,471 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:55,497 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(245) já existe.
+
+2026-02-04 20:35:55,497 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:55,512 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(246) já existe.
+
+2026-02-04 20:35:55,513 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:55,544 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(247) já existe.
+
+2026-02-04 20:35:55,544 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:55,575 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(248) já existe.
+
+2026-02-04 20:35:55,576 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:56,316 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(249) já existe.
+
+2026-02-04 20:35:56,317 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:35:56,416 - WARNING - Erro ao processar produto '4857': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(250) já existe.
+
+2026-02-04 20:35:56,416 - WARNING - Produto não encontrado para código: 4857
+2026-02-04 20:35:56,433 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(251) já existe.
+
+2026-02-04 20:35:56,434 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:35:56,634 - WARNING - Erro ao processar produto '433': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(252) já existe.
+
+2026-02-04 20:35:56,634 - WARNING - Produto não encontrado para código: 433
+2026-02-04 20:35:57,038 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(253) já existe.
+
+2026-02-04 20:35:57,038 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,042 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(254) já existe.
+
+2026-02-04 20:35:57,042 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,047 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(255) já existe.
+
+2026-02-04 20:35:57,047 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,051 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(256) já existe.
+
+2026-02-04 20:35:57,051 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,056 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(257) já existe.
+
+2026-02-04 20:35:57,057 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,061 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(258) já existe.
+
+2026-02-04 20:35:57,061 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,091 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(259) já existe.
+
+2026-02-04 20:35:57,092 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,095 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(260) já existe.
+
+2026-02-04 20:35:57,096 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,100 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(261) já existe.
+
+2026-02-04 20:35:57,100 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:35:57,977 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(262) já existe.
+
+2026-02-04 20:35:57,977 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:35:57,981 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(263) já existe.
+
+2026-02-04 20:35:57,981 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:35:58,348 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(264) já existe.
+
+2026-02-04 20:35:58,349 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:36:00,133 - WARNING - Erro ao processar produto '3642': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(265) já existe.
+
+2026-02-04 20:36:00,133 - WARNING - Produto não encontrado para código: 3642
+2026-02-04 20:36:00,176 - WARNING - Erro ao processar produto '3626': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(266) já existe.
+
+2026-02-04 20:36:00,176 - WARNING - Produto não encontrado para código: 3626
+2026-02-04 20:36:00,211 - WARNING - Erro ao processar produto '3658': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(267) já existe.
+
+2026-02-04 20:36:00,212 - WARNING - Produto não encontrado para código: 3658
+2026-02-04 20:36:00,217 - WARNING - Erro ao processar produto '3657': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(268) já existe.
+
+2026-02-04 20:36:00,218 - WARNING - Produto não encontrado para código: 3657
+2026-02-04 20:36:00,221 - WARNING - Erro ao processar produto '3658': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(269) já existe.
+
+2026-02-04 20:36:00,222 - WARNING - Produto não encontrado para código: 3658
+2026-02-04 20:36:00,225 - WARNING - Erro ao processar produto '3657': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(270) já existe.
+
+2026-02-04 20:36:00,226 - WARNING - Produto não encontrado para código: 3657
+2026-02-04 20:36:02,258 - INFO - Importados 79000 registros...
+2026-02-04 20:36:04,063 - WARNING - Erro ao processar produto '3677': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(271) já existe.
+
+2026-02-04 20:36:04,064 - WARNING - Produto não encontrado para código: 3677
+2026-02-04 20:36:05,661 - WARNING - Erro ao processar produto '3684': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(272) já existe.
+
+2026-02-04 20:36:05,662 - WARNING - Produto não encontrado para código: 3684
+2026-02-04 20:36:06,271 - WARNING - Erro ao processar produto '3686': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(273) já existe.
+
+2026-02-04 20:36:06,271 - WARNING - Produto não encontrado para código: 3686
+2026-02-04 20:36:07,697 - WARNING - Erro ao processar produto '3694': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(274) já existe.
+
+2026-02-04 20:36:07,697 - WARNING - Produto não encontrado para código: 3694
+2026-02-04 20:36:09,853 - INFO - Importados 80000 registros...
+2026-02-04 20:36:11,061 - WARNING - Erro ao processar produto '4911': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(275) já existe.
+
+2026-02-04 20:36:11,062 - WARNING - Produto não encontrado para código: 4911
+2026-02-04 20:36:11,724 - WARNING - Erro ao processar produto '4911': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(276) já existe.
+
+2026-02-04 20:36:11,725 - WARNING - Produto não encontrado para código: 4911
+2026-02-04 20:36:12,814 - WARNING - Erro ao processar produto '3677': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(277) já existe.
+
+2026-02-04 20:36:12,815 - WARNING - Produto não encontrado para código: 3677
+2026-02-04 20:36:14,273 - WARNING - Erro ao processar produto '3711': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(278) já existe.
+
+2026-02-04 20:36:14,273 - WARNING - Produto não encontrado para código: 3711
+2026-02-04 20:36:16,467 - INFO - Importados 81000 registros...
+2026-02-04 20:36:23,844 - INFO - Importados 82000 registros...
+2026-02-04 20:36:30,569 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(279) já existe.
+
+2026-02-04 20:36:30,570 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:30,798 - INFO - Importados 83000 registros...
+2026-02-04 20:36:32,221 - WARNING - Erro ao processar produto '3767': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(280) já existe.
+
+2026-02-04 20:36:32,222 - WARNING - Produto não encontrado para código: 3767
+2026-02-04 20:36:33,935 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(281) já existe.
+
+2026-02-04 20:36:33,936 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:36:36,658 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(282) já existe.
+
+2026-02-04 20:36:36,659 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:37,496 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(283) já existe.
+
+2026-02-04 20:36:37,496 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:38,286 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(284) já existe.
+
+2026-02-04 20:36:38,286 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:36:39,261 - INFO - Importados 84000 registros...
+2026-02-04 20:36:39,790 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(285) já existe.
+
+2026-02-04 20:36:39,791 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:39,796 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(286) já existe.
+
+2026-02-04 20:36:39,797 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:39,848 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(287) já existe.
+
+2026-02-04 20:36:39,849 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:39,854 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(288) já existe.
+
+2026-02-04 20:36:39,854 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:39,861 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(289) já existe.
+
+2026-02-04 20:36:39,862 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:40,683 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(290) já existe.
+
+2026-02-04 20:36:40,683 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:40,711 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(291) já existe.
+
+2026-02-04 20:36:40,711 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:40,718 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(292) já existe.
+
+2026-02-04 20:36:40,719 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:40,736 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(293) já existe.
+
+2026-02-04 20:36:40,736 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:40,751 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(294) já existe.
+
+2026-02-04 20:36:40,752 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:42,127 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(295) já existe.
+
+2026-02-04 20:36:42,128 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:42,669 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(296) já existe.
+
+2026-02-04 20:36:42,670 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:36:42,680 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(297) já existe.
+
+2026-02-04 20:36:42,680 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:36:42,688 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(298) já existe.
+
+2026-02-04 20:36:42,689 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:36:42,767 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(299) já existe.
+
+2026-02-04 20:36:42,767 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:36:46,892 - INFO - Importados 85000 registros...
+2026-02-04 20:36:52,576 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(300) já existe.
+
+2026-02-04 20:36:52,576 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:36:53,577 - WARNING - Erro ao processar produto '3828': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(301) já existe.
+
+2026-02-04 20:36:53,578 - WARNING - Produto não encontrado para código: 3828
+2026-02-04 20:36:53,716 - INFO - Importados 86000 registros...
+2026-02-04 20:37:01,398 - INFO - Importados 87000 registros...
+2026-02-04 20:37:08,288 - WARNING - Erro ao processar produto '3767': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(302) já existe.
+
+2026-02-04 20:37:08,289 - WARNING - Produto não encontrado para código: 3767
+2026-02-04 20:37:08,317 - INFO - Importados 88000 registros...
+2026-02-04 20:37:08,319 - WARNING - Erro ao processar produto '3767': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(303) já existe.
+
+2026-02-04 20:37:08,319 - WARNING - Produto não encontrado para código: 3767
+2026-02-04 20:37:14,869 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(304) já existe.
+
+2026-02-04 20:37:14,870 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:37:14,873 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(305) já existe.
+
+2026-02-04 20:37:14,873 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:37:14,876 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(306) já existe.
+
+2026-02-04 20:37:14,877 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:37:14,880 - WARNING - Erro ao processar produto '3888': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(307) já existe.
+
+2026-02-04 20:37:14,881 - WARNING - Produto não encontrado para código: 3888
+2026-02-04 20:37:15,232 - WARNING - Erro ao processar produto '3890': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(308) já existe.
+
+2026-02-04 20:37:15,233 - WARNING - Produto não encontrado para código: 3890
+2026-02-04 20:37:15,238 - WARNING - Erro ao processar produto '3890': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(309) já existe.
+
+2026-02-04 20:37:15,239 - WARNING - Produto não encontrado para código: 3890
+2026-02-04 20:37:16,113 - INFO - Importados 89000 registros...
+2026-02-04 20:37:23,550 - INFO - Importados 90000 registros...
+2026-02-04 20:37:31,215 - INFO - Importados 91000 registros...
+2026-02-04 20:37:32,668 - WARNING - Erro ao processar produto '3938': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(310) já existe.
+
+2026-02-04 20:37:32,669 - WARNING - Produto não encontrado para código: 3938
+2026-02-04 20:37:33,913 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(311) já existe.
+
+2026-02-04 20:37:33,913 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:37:33,917 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(312) já existe.
+
+2026-02-04 20:37:33,917 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:37:33,920 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(313) já existe.
+
+2026-02-04 20:37:33,921 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:37:33,924 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(314) já existe.
+
+2026-02-04 20:37:33,925 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:37:33,928 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(315) já existe.
+
+2026-02-04 20:37:33,929 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:37:33,932 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(316) já existe.
+
+2026-02-04 20:37:33,932 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:37:33,935 - WARNING - Erro ao processar produto '3939': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(317) já existe.
+
+2026-02-04 20:37:33,936 - WARNING - Produto não encontrado para código: 3939
+2026-02-04 20:37:34,905 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(318) já existe.
+
+2026-02-04 20:37:34,906 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:37:40,691 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(319) já existe.
+
+2026-02-04 20:37:40,692 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:37:40,704 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(320) já existe.
+
+2026-02-04 20:37:40,705 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:37:41,390 - INFO - Importados 92000 registros...
+2026-02-04 20:37:50,128 - INFO - Importados 93000 registros...
+2026-02-04 20:37:50,952 - WARNING - Erro ao processar produto '3694': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(321) já existe.
+
+2026-02-04 20:37:50,952 - WARNING - Produto não encontrado para código: 3694
+2026-02-04 20:37:51,520 - WARNING - Erro ao processar produto '3694': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(322) já existe.
+
+2026-02-04 20:37:51,521 - WARNING - Produto não encontrado para código: 3694
+2026-02-04 20:37:57,119 - INFO - Importados 94000 registros...
+2026-02-04 20:37:58,676 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(323) já existe.
+
+2026-02-04 20:37:58,677 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:37:58,682 - WARNING - Erro ao processar produto '3792': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(324) já existe.
+
+2026-02-04 20:37:58,683 - WARNING - Produto não encontrado para código: 3792
+2026-02-04 20:38:03,814 - INFO - Importados 95000 registros...
+2026-02-04 20:38:11,147 - INFO - Importados 96000 registros...
+2026-02-04 20:38:18,990 - INFO - Importados 97000 registros...
+2026-02-04 20:38:26,169 - INFO - Importados 98000 registros...
+2026-02-04 20:38:28,520 - INFO - Produto criado: Produto 4135 (código: 4135)
+2026-02-04 20:38:32,736 - WARNING - Erro ao processar produto '3946': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(326) já existe.
+
+2026-02-04 20:38:32,737 - WARNING - Produto não encontrado para código: 3946
+2026-02-04 20:38:32,744 - INFO - Produto criado: Produto 3946 (código: 3946)
+2026-02-04 20:38:33,684 - INFO - Importados 99000 registros...
+2026-02-04 20:38:40,559 - INFO - Importados 100000 registros...
+2026-02-04 20:38:44,384 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(328) já existe.
+
+2026-02-04 20:38:44,385 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:38:44,388 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(329) já existe.
+
+2026-02-04 20:38:44,389 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:38:44,392 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(330) já existe.
+
+2026-02-04 20:38:44,393 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:38:44,397 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(331) já existe.
+
+2026-02-04 20:38:44,397 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:38:44,402 - WARNING - Erro ao processar produto '4169': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(332) já existe.
+
+2026-02-04 20:38:44,403 - WARNING - Produto não encontrado para código: 4169
+2026-02-04 20:38:48,407 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(333) já existe.
+
+2026-02-04 20:38:48,407 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:38:48,411 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(334) já existe.
+
+2026-02-04 20:38:48,411 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:38:48,503 - INFO - Importados 101000 registros...
+2026-02-04 20:38:53,951 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(335) já existe.
+
+2026-02-04 20:38:53,951 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:38:53,957 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(336) já existe.
+
+2026-02-04 20:38:53,958 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:38:56,016 - INFO - Importados 102000 registros...
+2026-02-04 20:39:03,292 - INFO - Importados 103000 registros...
+2026-02-04 20:39:09,596 - INFO - Importados 104000 registros...
+2026-02-04 20:39:12,000 - WARNING - Erro ao processar produto '4249': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(337) já existe.
+
+2026-02-04 20:39:12,001 - WARNING - Produto não encontrado para código: 4249
+2026-02-04 20:39:12,714 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(338) já existe.
+
+2026-02-04 20:39:12,715 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:39:13,642 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(339) já existe.
+
+2026-02-04 20:39:13,642 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:39:13,770 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(340) já existe.
+
+2026-02-04 20:39:13,770 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:39:13,795 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(341) já existe.
+
+2026-02-04 20:39:13,796 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:39:13,830 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(342) já existe.
+
+2026-02-04 20:39:13,831 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:39:13,834 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(343) já existe.
+
+2026-02-04 20:39:13,834 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:39:13,853 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(344) já existe.
+
+2026-02-04 20:39:13,854 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:39:15,348 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(345) já existe.
+
+2026-02-04 20:39:15,349 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:39:15,581 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(346) já existe.
+
+2026-02-04 20:39:15,581 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:39:16,609 - INFO - Importados 105000 registros...
+2026-02-04 20:39:23,979 - INFO - Importados 106000 registros...
+2026-02-04 20:39:27,903 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(347) já existe.
+
+2026-02-04 20:39:27,904 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:39:27,937 - WARNING - Erro ao processar produto '3786': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(348) já existe.
+
+2026-02-04 20:39:27,937 - WARNING - Produto não encontrado para código: 3786
+2026-02-04 20:39:30,400 - INFO - Importados 107000 registros...
+2026-02-04 20:39:37,111 - WARNING - Erro ao processar produto '4344': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(349) já existe.
+
+2026-02-04 20:39:37,122 - WARNING - Produto não encontrado para código: 4344
+2026-02-04 20:39:37,350 - INFO - Importados 108000 registros...
+2026-02-04 20:39:43,224 - WARNING - Erro ao processar produto '6291': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(350) já existe.
+
+2026-02-04 20:39:43,224 - WARNING - Produto não encontrado para código: 6291
+2026-02-04 20:39:43,299 - INFO - Produto criado: Produto 6291 (código: 6291)
+2026-02-04 20:39:44,469 - INFO - Produto criado: Produto 4344 (código: 4344)
+2026-02-04 20:39:44,541 - INFO - Importados 109000 registros...
+2026-02-04 20:39:45,532 - INFO - Produto criado: Produto 6319 (código: 6319)
+2026-02-04 20:39:50,145 - INFO - Produto criado: Produto 4379 (código: 4379)
+2026-02-04 20:39:53,572 - INFO - Importados 110000 registros...
+2026-02-04 20:40:02,877 - INFO - Importados 111000 registros...
+2026-02-04 20:40:03,833 - INFO - Produto criado: Produto 3786 (código: 3786)
+2026-02-04 20:40:05,302 - INFO - Produto criado: Produto 6481 (código: 6481)
+2026-02-04 20:40:08,653 - INFO - === RELATÓRIO FINAL ===
+2026-02-04 20:40:08,659 - INFO - Total de registros processados: 111805
+2026-02-04 20:40:08,660 - INFO - Registros importados: 111555
+2026-02-04 20:40:08,661 - INFO - Registros pulados (já existiam): 9
+2026-02-04 20:40:08,661 - INFO - Registros com erro: 241
+2026-02-04 20:40:20,341 - INFO - Produto criado: Produto 4435 (código: 4435)
+2026-02-04 20:40:40,137 - INFO - Produto criado: Produto 3694 (código: 3694)
+2026-02-04 20:40:40,171 - INFO - Produto criado: Produto 4249 (código: 4249)
+2026-02-04 20:41:11,142 - WARNING - Erro ao processar produto '4595': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(360) já existe.
+
+2026-02-04 20:41:11,143 - WARNING - Produto não encontrado para código: 4595
+2026-02-04 20:41:11,312 - WARNING - Erro ao processar produto '4595': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(361) já existe.
+
+2026-02-04 20:41:11,312 - WARNING - Produto não encontrado para código: 4595
+2026-02-04 20:41:27,018 - WARNING - Erro ao processar produto '4651': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(362) já existe.
+
+2026-02-04 20:41:27,019 - WARNING - Produto não encontrado para código: 4651
+2026-02-04 20:41:28,468 - INFO - Produto criado: Produto 4661 (código: 4661)
+2026-02-04 20:41:29,887 - INFO - Produto criado: Produto 4668 (código: 4668)
+2026-02-04 20:41:41,666 - INFO - Produto criado: Produto 4726 (código: 4726)
+2026-02-04 20:41:42,956 - INFO - Produto criado: Produto 4651 (código: 4651)
+2026-02-04 20:42:09,190 - INFO - Produto criado: Produto 4804 (código: 4804)
+2026-02-04 20:42:22,351 - INFO - Produto criado: Produto 4857 (código: 4857)
+2026-02-04 20:42:23,217 - WARNING - Erro ao processar produto '4870': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(369) já existe.
+
+2026-02-04 20:42:23,218 - WARNING - Produto não encontrado para código: 4870
+2026-02-04 20:42:23,223 - WARNING - Erro ao processar produto '4870': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(370) já existe.
+
+2026-02-04 20:42:23,223 - WARNING - Produto não encontrado para código: 4870
+2026-02-04 20:42:32,610 - WARNING - Erro ao processar produto '4911': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(371) já existe.
+
+2026-02-04 20:42:32,611 - WARNING - Produto não encontrado para código: 4911
+2026-02-04 20:42:32,947 - WARNING - Erro ao processar produto '4911': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(372) já existe.
+
+2026-02-04 20:42:32,948 - WARNING - Produto não encontrado para código: 4911
+2026-02-04 20:42:47,162 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(373) já existe.
+
+2026-02-04 20:42:47,163 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:51,550 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(374) já existe.
+
+2026-02-04 20:42:51,551 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:51,982 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(375) já existe.
+
+2026-02-04 20:42:51,984 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:53,425 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(376) já existe.
+
+2026-02-04 20:42:53,426 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:53,432 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(377) já existe.
+
+2026-02-04 20:42:53,432 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:53,472 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(378) já existe.
+
+2026-02-04 20:42:53,472 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:53,478 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(379) já existe.
+
+2026-02-04 20:42:53,478 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:53,485 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(380) já existe.
+
+2026-02-04 20:42:53,486 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:54,113 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(381) já existe.
+
+2026-02-04 20:42:54,114 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:54,134 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(382) já existe.
+
+2026-02-04 20:42:54,135 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:54,140 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(383) já existe.
+
+2026-02-04 20:42:54,141 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:54,207 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(384) já existe.
+
+2026-02-04 20:42:54,208 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:54,222 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(385) já existe.
+
+2026-02-04 20:42:54,223 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:42:55,246 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(386) já existe.
+
+2026-02-04 20:42:55,246 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:43:03,387 - WARNING - Erro ao processar produto '4980': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(387) já existe.
+
+2026-02-04 20:43:03,387 - WARNING - Produto não encontrado para código: 4980
+2026-02-04 20:44:31,064 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(388) já existe.
+
+2026-02-04 20:44:31,065 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:44:31,575 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(389) já existe.
+
+2026-02-04 20:44:31,576 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:44:31,697 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(390) já existe.
+
+2026-02-04 20:44:31,697 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:44:31,712 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(391) já existe.
+
+2026-02-04 20:44:31,712 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:44:31,728 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(392) já existe.
+
+2026-02-04 20:44:31,728 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:44:31,731 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(393) já existe.
+
+2026-02-04 20:44:31,732 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:44:31,742 - WARNING - Erro ao processar produto '6013': ERRO:  duplicar valor da chave viola a restrição de unicidade "produtos_pkey"
+DETAIL:  Chave (id)=(394) já existe.
+
+2026-02-04 20:44:31,742 - WARNING - Produto não encontrado para código: 6013
+2026-02-04 20:45:00,996 - INFO - === RELATÓRIO FINAL ===
+2026-02-04 20:45:00,999 - INFO - Total de registros processados: 111805
+2026-02-04 20:45:00,999 - INFO - Registros importados: 137
+2026-02-04 20:45:00,999 - INFO - Registros pulados (já existiam): 111549
+2026-02-04 20:45:01,000 - INFO - Registros com erro: 119

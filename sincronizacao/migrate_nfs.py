@@ -2,7 +2,7 @@ import pyodbc
 import psycopg2
 from datetime import datetime
 from decimal import Decimal
-from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB # ou o DB específico
+from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB, MOVIMENTOS_DB # ou o DB específico
 
 def clean_string(value):
     return str(value).strip() if value else None
@@ -33,7 +33,7 @@ def get_valid_entities(pg_cursor):
 
 def migrar_nfs():
     try:
-        db_path = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos\Movimentos\Movimentos.mdb"
+        db_path = MOVIMENTOS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={db_path};'
@@ -71,7 +71,7 @@ def migrar_nfs():
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                          %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                          %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (numero_nota) DO UPDATE SET
+                ON CONFLICT (id) DO UPDATE SET
                     data = EXCLUDED.data,
                     cliente_id = EXCLUDED.cliente_id,
                     valor_produtos = EXCLUDED.valor_produtos,

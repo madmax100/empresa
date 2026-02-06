@@ -1020,6 +1020,29 @@ def suprimentos_por_contrato(request):
             cliente_id__in=clientes_com_contratos_vigentes
         ).select_related('cliente', 'vendedor', 'transportadora')
         
+        # 2.5. CALCULAR CUSTO TOTAL ÚNICO (sem duplicação por múltiplos contratos)
+        # Isso é importante porque um cliente pode ter múltiplos contratos
+        custo_total_unico = Decimal('0.00')
+        notas_processadas_custos = set()
+        
+        for nota in notas_query:
+            if nota.id not in notas_processadas_custos:
+                notas_processadas_custos.add(nota.id)
+                # Calcular custo de aquisição para esta NF
+                itens_nota = ItensNfSaida.objects.filter(nota_fiscal=nota)
+                for item in itens_nota:
+                    quantidade = item.quantidade or Decimal('0')
+                    ultima_entrada = ItensNfEntrada.objects.filter(
+                        produto_id=item.produto_id,
+                        nota_fiscal__data_entrada__lte=nota.data
+                    ).order_by('-nota_fiscal__data_entrada', '-id').first()
+                    
+                    if ultima_entrada:
+                        custo_unitario = ultima_entrada.valor_unitario or Decimal('0')
+                    else:
+                        custo_unitario = Decimal('0')
+                    
+                    custo_total_unico += quantidade * custo_unitario
         
         # 3. PROCESSAR RESULTADOS POR CONTRATO VIGENTE
         resultados = []
@@ -1049,6 +1072,9 @@ def suprimentos_por_contrato(request):
                 'inicio_efetivo': inicio_efetivo,
                 'fim_efetivo': fim_efetivo
             }
+        
+        # Rastrear NFs já processadas globalmente para evitar duplicação
+        notas_globais_processadas = set()
         
         for contrato in contratos_vigentes:
             # Buscar notas específicas deste contrato no período
@@ -1082,7 +1108,38 @@ def suprimentos_por_contrato(request):
             todas_as_notas_contrato = notas_contrato.order_by('-data')
             
             notas = []
+            custo_aquisicao_contrato = Decimal('0.00')  # Custo total de aquisição do contrato
+            valor_total_notas_contrato = Decimal('0.00')
+            qtd_notas_contrato = 0
+            
             for nota in todas_as_notas_contrato:
+                if nota.id in notas_globais_processadas:
+                    continue
+                notas_globais_processadas.add(nota.id)
+                qtd_notas_contrato += 1
+                valor_total_notas_contrato += nota.valor_total_nota or Decimal('0.00')
+
+                # Calcular custo de aquisição dos itens da NF
+                custo_nota = Decimal('0.00')
+                itens_nota = ItensNfSaida.objects.filter(nota_fiscal=nota).select_related('produto')
+                
+                for item in itens_nota:
+                    quantidade = item.quantidade or Decimal('0')
+                    # Buscar última entrada do produto antes da data da nota
+                    ultima_entrada = ItensNfEntrada.objects.filter(
+                        produto_id=item.produto_id,
+                        nota_fiscal__data_entrada__lte=nota.data
+                    ).order_by('-nota_fiscal__data_entrada', '-id').first()
+                    
+                    if ultima_entrada:
+                        custo_unitario = ultima_entrada.valor_unitario or Decimal('0')
+                    else:
+                        custo_unitario = Decimal('0')
+                    
+                    custo_nota += quantidade * custo_unitario
+                
+                custo_aquisicao_contrato += custo_nota
+                
                 notas.append({
                     'id': nota.id,
                     'numero_nota': nota.numero_nota,
@@ -1090,6 +1147,7 @@ def suprimentos_por_contrato(request):
                     'operacao': nota.operacao or '',
                     'cfop': nota.cfop or '',
                     'valor_total_nota': float(nota.valor_total_nota or 0),
+                    'custo_aquisicao': float(custo_nota),  # Novo campo: custo de aquisição
                     'obs': nota.obs[:100] + '...' if nota.obs and len(nota.obs) > 100 else nota.obs or ''
                 })
             
@@ -1118,16 +1176,17 @@ def suprimentos_por_contrato(request):
                     'nome': contrato.cliente.nome
                 },
                 'suprimentos': {
-                    'total_valor': float(totais_contrato['total_valor'] or 0),
-                    'quantidade_notas': totais_contrato['quantidade_notas'] or 0,
+                    'total_valor': float(valor_total_notas_contrato),
+                    'custo_aquisicao': float(custo_aquisicao_contrato),
+                    'quantidade_notas': qtd_notas_contrato,
                     'notas': notas
                 },
                 'analise_financeira': {
                     'faturamento_proporcional': float(faturamento_contrato),
-                    'custo_suprimentos': float(totais_contrato['total_valor'] or 0),
-                    'margem_bruta': float(faturamento_contrato - (totais_contrato['total_valor'] or Decimal('0.00'))),
+                    'custo_suprimentos': float(custo_aquisicao_contrato),  # Usar custo de aquisição
+                    'margem_bruta': float(faturamento_contrato - custo_aquisicao_contrato),
                     'percentual_margem': float(
-                        ((faturamento_contrato - (totais_contrato['total_valor'] or Decimal('0.00'))) / faturamento_contrato * 100) 
+                        ((faturamento_contrato - custo_aquisicao_contrato) / faturamento_contrato * 100) 
                         if faturamento_contrato > 0 else 0
                     ),
                     'observacao': f"Faturamento proporcional a {dias_vigentes} dias do período"
@@ -1138,10 +1197,10 @@ def suprimentos_por_contrato(request):
             total_contratos += 1
             total_faturamento_periodo += faturamento_contrato
             
-            # Somar totais gerais apenas se houver atividade
-            if totais_contrato['quantidade_notas'] and totais_contrato['quantidade_notas'] > 0:
-                total_geral_valor += totais_contrato['total_valor'] or Decimal('0.00')
-                total_geral_notas += totais_contrato['quantidade_notas'] or 0
+            # Somar totais gerais usando custo de aquisição
+            if qtd_notas_contrato > 0:
+                total_geral_valor += custo_aquisicao_contrato  # Usar custo de aquisição
+                total_geral_notas += qtd_notas_contrato
         
         # 4. RESPOSTA FINAL COM INFORMAÇÕES DE VIGÊNCIA E FATURAMENTO
         response_data = {
@@ -1157,16 +1216,16 @@ def suprimentos_por_contrato(request):
             },
             'resumo': {
                 'total_contratos_vigentes': total_contratos,
-                'total_suprimentos': float(total_geral_valor),
-                'total_notas': total_geral_notas,
+                'total_suprimentos': float(custo_total_unico),  # Usar custo único (sem duplicação)
+                'total_notas': len(notas_processadas_custos),  # Quantidade de NFs únicas
                 'contratos_com_atividade': len([r for r in resultados if r['suprimentos']['quantidade_notas'] > 0])
             },
             'resumo_financeiro': {
                 'faturamento_total_proporcional': float(total_faturamento_periodo),
-                'custo_total_suprimentos': float(total_geral_valor),
-                'margem_bruta_total': float(total_faturamento_periodo - total_geral_valor),
+                'custo_total_suprimentos': float(custo_total_unico),  # Usar custo único (sem duplicação)
+                'margem_bruta_total': float(total_faturamento_periodo - custo_total_unico),
                 'percentual_margem_total': float(
-                    ((total_faturamento_periodo - total_geral_valor) / total_faturamento_periodo * 100) 
+                    ((total_faturamento_periodo - custo_total_unico) / total_faturamento_periodo * 100) 
                     if total_faturamento_periodo > 0 else 0
                 ),
                 'metodo_calculo': 'proporcional',

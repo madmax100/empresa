@@ -3,7 +3,7 @@ import psycopg2
 from datetime import datetime, date
 from decimal import Decimal
 import re
-from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB # ou o DB específico
+from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB, CONTAS_DB # ou o DB específico
 
 def clean_string(value):
     return str(value).strip() if value else None
@@ -57,7 +57,7 @@ def get_valid_entities(pg_cursor):
 
 def migrar_contas_pagar():
     try:
-        db_path = r"C:\Users\Cirilo\Documents\empresa\Bancos\Contas\Contas.mdb"
+        db_path = CONTAS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={db_path};'

@@ -20,7 +20,7 @@ def get_existing_fornecedores(pg_cursor):
 
 def migrate_fornecedores():
     try:
-        access_path = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos\Cadastros\Cadastros.mdb"
+        access_path = CADASTROS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={access_path};'

@@ -8,12 +8,13 @@ PG_CONFIG = {
 }
 
 # Caminhos dos bancos de dados Access
-BASE_DIR = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos"
+BASE_DIR = r"C:\Users\Cirilo\Documents\programas\empresa\InterMax.03.02.2026\Bancos"
 
 CADASTROS_DB = f"{BASE_DIR}\\Cadastros\\Cadastros.mdb"
 MOVIMENTOS_DB = f"{BASE_DIR}\\Movimentos\\Movimentos.mdb"
 OUTROS_MOVIMENTOS_DB = f"{BASE_DIR}\\Movimentos\\Outrosmovimentos.mdb"
 CONTAS_DB = f"{BASE_DIR}\\Contas\\Contas.mdb"
+EXTRATOS_DB = f"{BASE_DIR}\\Extratos\\Extratos.mdb"
 
 # Senha do Access
 ACCESS_PASSWORD = "010182"

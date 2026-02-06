@@ -40,3 +40,6 @@ wheels/
 *.swp
 *.swo
 .DS_Store
+
+# Ignored Folders
+InterMax.03.02.2026/

@@ -35,7 +35,7 @@ logging.basicConfig(
 
 class MovimentacoesExtratosImporter:
     def __init__(self):
-        self.mdb_file = r"C:\Users\Cirilo\Documents\Bancos\Extratos\Extratos.mdb"
+        self.mdb_file = r"C:\Users\Cirilo\Documents\programas\empresa\InterMax.03.02.2026\Bancos\Extratos\Extratos.mdb"
         self.imported_count = 0
         self.error_count = 0
         self.skipped_count = 0
@@ -49,31 +49,37 @@ class MovimentacoesExtratosImporter:
         self.load_tipos_movimentacao()
         
     def load_tipos_movimentacao(self):
-        """Carrega os tipos de movimentação do banco de dados"""
+        """Carrega ou cria os tipos de movimentação do banco de dados"""
         try:
-            # Buscar tipo de entrada (compra/entrada)
+            # Buscar ou criar tipo de entrada
             self.tipo_entrada = TiposMovimentacaoEstoque.objects.filter(
                 descricao__icontains='entrada'
             ).first()
             
             if not self.tipo_entrada:
-                # Se não encontrar, buscar por tipo 'E'
                 self.tipo_entrada = TiposMovimentacaoEstoque.objects.filter(tipo='E').first()
             
-            # Buscar tipo de saída (venda/saída)
+            if not self.tipo_entrada:
+                logging.info("Criando tipo de movimentação: Entrada")
+                self.tipo_entrada = TiposMovimentacaoEstoque.objects.create(
+                    tipo='E',
+                    descricao='Entrada por Compra'
+                )
+            
+            # Buscar ou criar tipo de saída
             self.tipo_saida = TiposMovimentacaoEstoque.objects.filter(
                 descricao__icontains='saida'
             ).first()
             
             if not self.tipo_saida:
-                # Se não encontrar, buscar por tipo 'S'
                 self.tipo_saida = TiposMovimentacaoEstoque.objects.filter(tipo='S').first()
-            
-            if not self.tipo_entrada or not self.tipo_saida:
-                logging.error("Tipos de movimentação não encontrados no banco de dados!")
-                logging.error(f"Entrada: {self.tipo_entrada}")
-                logging.error(f"Saída: {self.tipo_saida}")
-                raise Exception("Tipos de movimentação obrigatórios não encontrados")
+                
+            if not self.tipo_saida:
+                logging.info("Criando tipo de movimentação: Saída")
+                self.tipo_saida = TiposMovimentacaoEstoque.objects.create(
+                    tipo='S',
+                    descricao='Saída por Venda'
+                )
             
             logging.info(f"Tipos de movimentação carregados:")
             logging.info(f"- Entrada: {self.tipo_entrada}")

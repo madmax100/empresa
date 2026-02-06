@@ -1,10 +1,10 @@
-import pyodbc
-import psycopg2
-import pandas as pd
+import pyodbc # type: ignore
+import psycopg2 # type: ignore
+import pandas as pd # type: ignore
 import re
 from datetime import datetime
 from decimal import Decimal
-from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB # ou o DB específico
+from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB # type: ignore
 
 def clean_string(value):
     if pd.isna(value) or value is None:
@@ -75,7 +75,7 @@ def process_client_row(row):
 
 def migrar_clientes():
     try:
-        db_path = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos\cadastros\Cadastros.mdb"
+        db_path = CADASTROS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={db_path};'
@@ -117,9 +117,9 @@ def migrar_clientes():
                     contato = EXCLUDED.contato
             """
 
-            contador_insercoes = 0
-            contador_atualizacoes = 0
-            erros = 0
+            contador_insercoes: int = 0
+            contador_atualizacoes: int = 0
+            erros: int = 0
 
             for row in access_rows:
                 try:

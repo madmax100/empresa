@@ -52,12 +52,20 @@ class RelatorioCustosFixosView(APIView):
             # Categorias padrão para custos e despesas fixas
             categorias_filtro = ['despesas_operacionais', 'despesas_administrativas', 'impostos', 'aluguel']
 
-        # 2. Lógica de Negócio - Filtrar por fornecedores com tipos fixos
+        # 2. Lógica de Negócio - Filtrar por nome do fornecedor contendo palavras-chave de custos fixos
         
-        # Primeiro, obter fornecedores com tipos "DESPESA FIXA" ou "CUSTO FIXO"
-        fornecedores_fixos = Fornecedores.objects.filter(
-            Q(tipo__icontains='DESPESA FIXA') | Q(tipo__icontains='CUSTO FIXO')
-        ).values_list('id', flat=True)
+        # Palavras-chave para identificar custos fixos no nome do fornecedor
+        # (alinhado com a classificação do fluxo de caixa)
+        KEYWORDS_FIXOS = ['FOLHA', 'PROLABORE', 'PRO-LABORE', 'ALUGUEL', 'SALARIO', 'SALÁRIO', 
+                         'INSS', 'FGTS', 'CONTADOR', 'CONTABILIDADE', 'LUZ', 'ENERGIA', 
+                         'ÁGUA', 'AGUA', 'TELEFONE', 'INTERNET', 'SEGURO']
+        
+        # Construir query para buscar fornecedores com nomes contendo palavras-chave
+        nome_query = Q()
+        for keyword in KEYWORDS_FIXOS:
+            nome_query |= Q(nome__icontains=keyword)
+        
+        fornecedores_fixos = Fornecedores.objects.filter(nome_query).values_list('id', flat=True)
         
         # Filtrar contas pagas por esses fornecedores no período
         queryset = ContasPagar.objects.filter(
@@ -68,76 +76,104 @@ class RelatorioCustosFixosView(APIView):
         
         # 3. Estrutura da Resposta
         
-        # Detalhes dos pagamentos
+        # 3. Estrutura da Resposta - Agregação via Python para permitir categorização inteligente
+        
         pagamentos_detalhados = []
+        resumo_por_tipo = {} # Dicionário para acumular totais por categoria
+        resumo_por_fornecedor = {} # Dicionário para acumular totais por fornecedor
+
+        def definir_categoria_fixa(nome, tipo_original):
+            # Se já tiver um tipo definido no banco, respeita (opcional, pode-se forçar a regra também)
+            # Mas dada a queixa do usuário, vamos priorizar a regra de palavras-chave se o tipo for nulo ou genérico
+            
+            nome = str(nome or '').upper()
+            tipo_original = str(tipo_original or '').upper()
+            
+            if 'FOLHA' in nome or 'SALARIO' in nome or 'SALÁRIO' in nome: return 'Pessoal'
+            if 'PROLABORE' in nome or 'PRO-LABORE' in nome: return 'Pró-Labore'
+            if 'INSS' in nome or 'FGTS' in nome or 'DARF' in nome: return 'Impostos'
+            if 'ALUGUEL' in nome: return 'Aluguel'
+            if 'LUZ' in nome or 'ENERGIA' in nome or 'AGUA' in nome or 'ÁGUA' in nome: return 'Utilidades'
+            if 'TELEFONE' in nome or 'INTERNET' in nome: return 'Telecom'
+            if 'CONTADOR' in nome or 'CONTABILIDADE' in nome: return 'Contabilidade'
+            if 'SEGURO' in nome: return 'Seguros'
+            
+            return tipo_original if tipo_original and tipo_original != 'N/A' else 'Outros Fixos'
+
         for conta in queryset:
             # Função auxiliar para tratar valores numéricos None
-            def safe_float(value):
-                return float(value) if value is not None else 0.0
+            val_original = float(conta.valor or 0)
+            val_pago = float(conta.valor_total_pago or 0)
+            val_juros = float(conta.juros or 0)
+            val_tarifas = float(conta.tarifas or 0)
             
+            nome_fornecedor = conta.fornecedor.nome if conta.fornecedor else 'N/A'
+            tipo_fornecedor_db = conta.fornecedor.tipo if conta.fornecedor else None
+            
+            # Categoria Inteligente
+            categoria = definir_categoria_fixa(nome_fornecedor, tipo_fornecedor_db)
+            
+            # 1. Adicionar aos Detalhes
             pagamentos_detalhados.append({
                 'id': conta.id,
                 'data_pagamento': conta.data_pagamento.strftime('%Y-%m-%d') if conta.data_pagamento else 'N/A',
                 'data_vencimento': conta.vencimento.strftime('%Y-%m-%d') if conta.vencimento else 'N/A',
-                'valor_original': safe_float(conta.valor),
-                'valor_pago': safe_float(conta.valor_pago),
-                'juros': safe_float(conta.juros),
-                'tarifas': safe_float(conta.tarifas),
-                'valor_total_pago': safe_float(conta.valor_total_pago),
+                'valor_original': val_original,
+                'valor_pago': val_pago,
+                'juros': val_juros,
+                'tarifas': val_tarifas,
+                'valor_total_pago': val_pago,
                 'historico': conta.historico or 'N/A',
-                'fornecedor': conta.fornecedor.nome if conta.fornecedor else 'N/A',
-                'fornecedor_tipo': conta.fornecedor.tipo if conta.fornecedor and conta.fornecedor.tipo else 'N/A',
+                'fornecedor_nome': nome_fornecedor,
+                'fornecedor_tipo': categoria, # Usamos a categoria calculada aqui também
                 'conta_bancaria': str(conta.conta) if conta.conta else 'N/A',
                 'forma_pagamento': conta.forma_pagamento or 'N/A',
                 'numero_duplicata': conta.numero_duplicata or 'N/A',
             })
             
-        # Resumo agregado por tipo de fornecedor
-        resumo_por_tipo = queryset.values('fornecedor__tipo').annotate(
-            total_pago=Sum('valor_total_pago'),
-            quantidade_contas=Count('id'),
-            total_valor_original=Sum('valor'),
-            total_juros=Sum('juros'),
-            total_tarifas=Sum('tarifas')
-        ).order_by('-total_pago')
+            # 2. Agregação por Categoria (Tipo)
+            if categoria not in resumo_por_tipo:
+                resumo_por_tipo[categoria] = {
+                    'fornecedor__tipo': categoria,
+                    'total_pago': 0.0,
+                    'quantidade_contas': 0,
+                    'total_valor_original': 0.0,
+                    'total_juros': 0.0,
+                    'total_tarifas': 0.0
+                }
+            resumo_por_tipo[categoria]['total_pago'] += val_pago
+            resumo_por_tipo[categoria]['quantidade_contas'] += 1
+            resumo_por_tipo[categoria]['total_valor_original'] += val_original
+            resumo_por_tipo[categoria]['total_juros'] += val_juros
+            resumo_por_tipo[categoria]['total_tarifas'] += val_tarifas
+            
+            # 3. Agregação por Fornecedor (Nome)
+            if nome_fornecedor not in resumo_por_fornecedor:
+                resumo_por_fornecedor[nome_fornecedor] = {
+                    'fornecedor__nome': nome_fornecedor,
+                    'fornecedor__tipo': categoria,
+                    'total_pago': 0.0,
+                    'quantidade_contas': 0,
+                    'total_valor_original': 0.0,
+                    'total_juros': 0.0,
+                    'total_tarifas': 0.0
+                }
+            resumo_por_fornecedor[nome_fornecedor]['total_pago'] += val_pago
+            resumo_por_fornecedor[nome_fornecedor]['quantidade_contas'] += 1
+            resumo_por_fornecedor[nome_fornecedor]['total_valor_original'] += val_original
+            resumo_por_fornecedor[nome_fornecedor]['total_juros'] += val_juros
+            resumo_por_fornecedor[nome_fornecedor]['total_tarifas'] += val_tarifas
+
+        # Converter dicionários de resumo para listas
+        resumo_por_tipo_limpo = list(resumo_por_tipo.values())
+        resumo_por_tipo_limpo.sort(key=lambda x: x['total_pago'], reverse=True)
         
-        # Função auxiliar para tratar valores None em agregações
+        resumo_por_fornecedor_limpo = list(resumo_por_fornecedor.values())
+        resumo_por_fornecedor_limpo.sort(key=lambda x: x['total_pago'], reverse=True)
+        
+        # Helper não é mais necessário dentro do loop pois fizemos conversão direta
         def safe_aggregate_value(value):
-            return float(value) if value is not None else 0.0
-        
-        # Tratar valores None nos resumos
-        resumo_por_tipo_limpo = []
-        for item in resumo_por_tipo:
-            resumo_por_tipo_limpo.append({
-                'fornecedor__tipo': item['fornecedor__tipo'] or 'N/A',
-                'total_pago': safe_aggregate_value(item['total_pago']),
-                'quantidade_contas': item['quantidade_contas'] or 0,
-                'total_valor_original': safe_aggregate_value(item['total_valor_original']),
-                'total_juros': safe_aggregate_value(item['total_juros']),
-                'total_tarifas': safe_aggregate_value(item['total_tarifas'])
-            })
-        
-        # Resumo agregado por fornecedor
-        resumo_por_fornecedor = queryset.values('fornecedor__nome', 'fornecedor__tipo').annotate(
-            total_pago=Sum('valor_total_pago'),
-            quantidade_contas=Count('id'),
-            total_valor_original=Sum('valor'),
-            total_juros=Sum('juros'),
-            total_tarifas=Sum('tarifas')
-        ).order_by('-total_pago')
-        
-        # Tratar valores None no resumo por fornecedor
-        resumo_por_fornecedor_limpo = []
-        for item in resumo_por_fornecedor:
-            resumo_por_fornecedor_limpo.append({
-                'fornecedor__nome': item['fornecedor__nome'] or 'N/A',
-                'fornecedor__tipo': item['fornecedor__tipo'] or 'N/A',
-                'total_pago': safe_aggregate_value(item['total_pago']),
-                'quantidade_contas': item['quantidade_contas'] or 0,
-                'total_valor_original': safe_aggregate_value(item['total_valor_original']),
-                'total_juros': safe_aggregate_value(item['total_juros']),
-                'total_tarifas': safe_aggregate_value(item['total_tarifas'])
-            })
+             return float(value) if value is not None else 0.0
         
         # Totais gerais
         totais_gerais = queryset.aggregate(
@@ -155,7 +191,7 @@ class RelatorioCustosFixosView(APIView):
             'parametros': {
                 'data_inicio': data_inicio,
                 'data_fim': data_fim,
-                'filtro_aplicado': 'Fornecedores com tipo DESPESA FIXA ou CUSTO FIXO',
+                'filtro_aplicado': 'Fornecedores com nome contendo: FOLHA, PROLABORE, ALUGUEL, SALARIO, INSS, FGTS, CONTADOR, LUZ, ENERGIA, ÁGUA, TELEFONE, INTERNET, SEGURO',
                 'fonte_dados': 'Contas a Pagar (status: Pago)',
             },
             'estatisticas_fornecedores': {
@@ -220,19 +256,26 @@ class RelatorioCustosVariaveisView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        # 2. Identificar fornecedores com tipos relacionados a custos variáveis
-        fornecedores_variaveis = Fornecedores.objects.filter(
-            Q(tipo__icontains='VARIAVEL') |
-            Q(tipo__icontains='DESPESA VARIAVEL') |
-            Q(tipo__icontains='CUSTO VARIAVEL')
-        ).values_list('id', flat=True)
+        # 2. Lógica: Custos Variáveis = tudo que NÃO é custo fixo
+        # Palavras-chave para identificar custos fixos (a serem EXCLUÍDOS)
+        KEYWORDS_FIXOS = ['FOLHA', 'PROLABORE', 'PRO-LABORE', 'ALUGUEL', 'SALARIO', 'SALÁRIO', 
+                         'INSS', 'FGTS', 'CONTADOR', 'CONTABILIDADE', 'LUZ', 'ENERGIA', 
+                         'ÁGUA', 'AGUA', 'TELEFONE', 'INTERNET', 'SEGURO']
+        
+        # Construir query para EXCLUIR fornecedores com nomes contendo palavras-chave de custos fixos
+        exclude_query = Q()
+        for keyword in KEYWORDS_FIXOS:
+            exclude_query |= Q(nome__icontains=keyword)
+        
+        # Fornecedores variáveis = todos EXCETO os fixos
+        fornecedores_variaveis = Fornecedores.objects.exclude(exclude_query).values_list('id', flat=True)
         
         if not fornecedores_variaveis.exists():
             return Response({
                 'parametros': {
                     'data_inicio': data_inicio,
                     'data_fim': data_fim,
-                    'filtro_aplicado': 'Fornecedores com tipo relacionado a CUSTOS VARIÁVEIS',
+                    'filtro_aplicado': 'Fornecedores que NÃO são custos fixos (excluindo: FOLHA, PROLABORE, ALUGUEL, etc)',
                     'fonte_dados': 'Contas a Pagar (status: Pago)',
                 },
                 'message': 'Nenhum fornecedor encontrado com tipo relacionado a custos variáveis.',
@@ -264,13 +307,122 @@ class RelatorioCustosVariaveisView(APIView):
         )
         
         # 5. Agrupar por especificação do fornecedor
+        # 5. Agrupar por especificação do fornecedor e Detalhar Contas (Single Loop)
         resumo_por_especificacao = {}
-        for conta in queryset:
-            especificacao = conta.fornecedor.especificacao if conta.fornecedor and conta.fornecedor.especificacao else 'Sem Especificação'
+        pagamentos_detalhados = []
+        
+        # Determinar categoria (Helper function) - Categorização Expandida
+        def definir_categoria(nome_fornecedor, historico, especificacao_original):
+            # Garantir strings seguras
+            nome_safe = str(nome_fornecedor) if nome_fornecedor is not None else ''
+            hist_safe = str(historico) if historico is not None else ''
+            texto = (nome_safe + ' ' + hist_safe).upper()
             
-            if especificacao not in resumo_por_especificacao:
-                resumo_por_especificacao[especificacao] = {
-                    'especificacao': especificacao,
+            # --- Categorias Financeiras ---
+            if 'TARIFA' in texto and ('BANC' in texto or 'BOLETO' in texto or 'PIX' in texto or 'CHEQUE' in texto or 'MANUTENÇ' in texto or 'RELACION' in texto or 'BAIXA' in texto or 'REGISTRO' in texto or 'ALTERAÇ' in texto or 'CONCESS' in texto):
+                return 'Tarifas Bancárias'
+            elif 'JUROS' in texto:
+                return 'Juros'
+            elif 'EMPREST' in texto or 'EMPRÉSTIMO' in texto or 'CONSIGNAD' in texto:
+                return 'Empréstimos'
+            elif 'COMPRA DE TIT' in texto or 'DESCONTO' in texto and 'TARIFA' not in texto:
+                return 'Operações Financeiras'
+            
+            # --- Categorias Operacionais / Logística ---
+            elif 'FRETE' in texto or 'TRANSPORT' in texto:
+                return 'Frete'
+            elif 'COMBUSTIVEL' in texto or 'COMBUSTÍVEL' in texto:
+                return 'Combustível'
+            elif 'ESTACIONAMENTO' in texto:
+                return 'Estacionamento'
+            elif 'MANUTENÇÃ' in texto and 'VEIC' in texto or 'VIA MOTOS' in texto or 'ÓLEO' in texto or 'OLEO' in texto or 'REVISÃO' in texto:
+                return 'Manutenção Veículos'
+            elif 'VIAGEM' in texto or 'PASSAGEM' in texto:
+                return 'Despesas de Viagem'
+            elif 'RASTREAMENTO' in texto:
+                return 'Rastreamento'
+            
+            # --- Categorias de Alimentação ---
+            elif 'REFEIÇÃO' in texto or 'REFEICAO' in texto:
+                return 'Alimentação'
+            elif 'COPA' in texto or 'CAFÉ' in texto or 'CAFE' in texto or 'AGUA' in texto or 'ÁGUA' in texto:
+                return 'Materiais Copa'
+            
+            # --- Categorias de Materiais ---
+            elif 'ASSIST' in texto and 'TECN' in texto or 'ASSIST.TECN' in texto:
+                return 'Materiais Assist. Técnica'
+            elif 'ESCRITORIO' in texto or 'ESCRITÓRIO' in texto:
+                return 'Materiais Escritório'
+            
+            # --- Categorias de Serviços ---
+            elif 'DIARISTA' in texto or 'SERV.TERCEIROS' in texto or 'SERVIÇOS TERCEIROS' in texto:
+                return 'Serviços Terceiros'
+            elif 'CONTADOR' in texto or 'CONTABIL' in texto or 'CONTÁBIL' in texto:
+                return 'Contabilidade'
+            elif 'CERTIFICAÇ' in texto or 'CERTIFICADO DIGITAL' in texto:
+                return 'Certificação Digital'
+            elif 'TREINAMENTO' in texto or 'CURSO' in texto:
+                return 'Treinamento'
+            elif 'MARKETING' in texto or 'IMPULSIONAMENTO' in texto:
+                return 'Marketing'
+            elif 'INTERMAX' in texto or 'SISTEMA' in texto:
+                return 'Software/Sistemas'
+            
+            # --- Categorias de Telecomunicações e Utilidades ---
+            elif 'OI' in nome_safe.upper() and ('CONTA' in texto or 'NIO' in texto) or 'TELEFONE' in texto:
+                return 'Telecomunicações'
+            elif 'COELCE' in texto or 'ENERGIA' in texto or 'LUZ' in texto:
+                return 'Energia Elétrica'
+            
+            # --- Categorias de Impostos e Taxas ---
+            elif 'ICMS' in texto or 'IMPOSTO' in texto:
+                return 'ICMS'
+            elif 'SIMPLES' in texto or 'DARF' in texto:
+                return 'Impostos'
+            elif 'CDL' in texto or 'SINDICATO' in texto:
+                return 'Associações/Sindicatos'
+            
+            # --- Categorias de Pessoal ---
+            elif 'CONFRATERNIZAÇ' in texto or 'ANIVERSÁRIO' in texto:
+                return 'Confraternização'
+            elif 'AJUDA CUSTO' in texto:
+                return 'Ajuda de Custo'
+            
+            # --- Categorias Comerciais ---
+            elif 'COMISSAO' in texto or 'COMISSÃO' in texto or 'REPRESENTANTE' in texto:
+                return 'Comissão'
+            
+            # --- Diversos ---
+            elif 'DIVERSOS' in texto:
+                return 'Diversos'
+            
+            # --- Se já tem especificação original útil, usa ela ---
+            if especificacao_original and especificacao_original.strip() and especificacao_original != 'Sem Especificação':
+                return especificacao_original
+            
+            # --- Fallback: Verificar se o nome do fornecedor parece ser de uma empresa (contém LTDA, ME, EIRELI, etc.) ---
+            if any(term in nome_safe.upper() for term in ['LTDA', 'ME', 'EIRELI', 'EPP', 'S/A', 'S.A.', 'COMERCIO', 'COMÉRCIO', 'DISTRIBUI', 'IMPORTA']):
+                return 'Fornecedor'
+            
+            return 'Outros'
+
+        for conta in queryset.order_by('-data_pagamento'):
+            # Preparar dados
+            nome_fornecedor = conta.fornecedor.nome if conta.fornecedor else 'N/A'
+            tipo_fornecedor = conta.fornecedor.tipo if conta.fornecedor else 'N/A'
+            espec_original = conta.fornecedor.especificacao if conta.fornecedor else None
+            
+            categoria = definir_categoria(nome_fornecedor, conta.historico, espec_original)
+            
+            val_original = float(conta.valor or 0)
+            val_pago = float(conta.valor_total_pago or 0)
+            val_juros = float(conta.juros or 0)
+            val_tarifas = float(conta.tarifas or 0)
+            
+            # --- 1. Adicionar ao Resumo ---
+            if categoria not in resumo_por_especificacao:
+                resumo_por_especificacao[categoria] = {
+                    'especificacao': categoria,
                     'valor_original_total': 0.0,
                     'valor_pago_total': 0.0,
                     'juros_total': 0.0,
@@ -279,42 +431,41 @@ class RelatorioCustosVariaveisView(APIView):
                     'fornecedores': set()
                 }
             
-            # Somar valores
-            resumo_por_especificacao[especificacao]['valor_original_total'] += float(conta.valor or 0)
-            resumo_por_especificacao[especificacao]['valor_pago_total'] += float(conta.valor_total_pago or 0)
-            resumo_por_especificacao[especificacao]['juros_total'] += float(conta.juros or 0)
-            resumo_por_especificacao[especificacao]['tarifas_total'] += float(conta.tarifas or 0)
-            resumo_por_especificacao[especificacao]['quantidade_contas'] += 1
+            resumo_por_especificacao[categoria]['valor_original_total'] += val_original
+            resumo_por_especificacao[categoria]['valor_pago_total'] += val_pago
+            resumo_por_especificacao[categoria]['juros_total'] += val_juros
+            resumo_por_especificacao[categoria]['tarifas_total'] += val_tarifas
+            resumo_por_especificacao[categoria]['quantidade_contas'] += 1
             
             if conta.fornecedor:
-                resumo_por_especificacao[especificacao]['fornecedores'].add(conta.fornecedor.nome)
+                resumo_por_especificacao[categoria]['fornecedores'].add(conta.fornecedor.nome)
+            
+            # --- 2. Adicionar aos Detalhes ---
+            pagamentos_detalhados.append({
+                'id': conta.id,
+                'data_pagamento': conta.data_pagamento.strftime('%Y-%m-%d') if conta.data_pagamento else 'N/A',
+                'fornecedor_nome': nome_fornecedor,
+                'fornecedor_tipo': tipo_fornecedor,
+                'fornecedor_especificacao': categoria, 
+                'valor_original': val_original,
+                'valor_pago': val_pago,
+                'juros': val_juros,
+                'tarifas': val_tarifas,
+                'historico': conta.historico or 'N/A',
+                'forma_pagamento': conta.forma_pagamento or 'N/A',
+            })
         
-        # Converter sets para listas no resumo
+        # Converter sets para listas no resumo e ordenar
         resumo_por_especificacao_limpo = []
         for especificacao_data in resumo_por_especificacao.values():
             especificacao_data['fornecedores'] = list(especificacao_data['fornecedores'])
             especificacao_data['quantidade_fornecedores'] = len(especificacao_data['fornecedores'])
             resumo_por_especificacao_limpo.append(especificacao_data)
         
-        # Ordenar por valor pago (maior para menor)
         resumo_por_especificacao_limpo.sort(key=lambda x: x['valor_pago_total'], reverse=True)
         
-        # 6. Detalhes das contas pagas
-        pagamentos_detalhados = []
-        for conta in queryset.order_by('-data_pagamento'):
-            pagamentos_detalhados.append({
-                'id': conta.id,
-                'data_pagamento': conta.data_pagamento,
-                'fornecedor_nome': conta.fornecedor.nome if conta.fornecedor else 'N/A',
-                'fornecedor_tipo': conta.fornecedor.tipo if conta.fornecedor else 'N/A',
-                'fornecedor_especificacao': conta.fornecedor.especificacao if conta.fornecedor and conta.fornecedor.especificacao else 'Sem Especificação',
-                'valor_original': float(conta.valor or 0),
-                'valor_pago': float(conta.valor_total_pago or 0),
-                'juros': float(conta.juros or 0),
-                'tarifas': float(conta.tarifas or 0),
-                'historico': conta.historico,
-                'forma_pagamento': conta.forma_pagamento,
-            })
+        # Detalhes já estão ordenados pela query loop
+
         
         # Estatísticas dos fornecedores
         total_fornecedores_variaveis = fornecedores_variaveis.count()
@@ -324,7 +475,7 @@ class RelatorioCustosVariaveisView(APIView):
             'parametros': {
                 'data_inicio': data_inicio,
                 'data_fim': data_fim,
-                'filtro_aplicado': 'Fornecedores com tipo relacionado a CUSTOS VARIÁVEIS',
+                'filtro_aplicado': 'Fornecedores que NÃO são custos fixos (excluindo: FOLHA, PROLABORE, ALUGUEL, SALARIO, INSS, FGTS, etc)',
                 'fonte_dados': 'Contas a Pagar (status: Pago)',
             },
             'estatisticas_fornecedores': {
@@ -648,7 +799,7 @@ class RelatorioFaturamentoView(APIView):
         }
         
         # Compras
-        for nf in nf_entrada.order_by('-data_emissao')[:50]:
+        for nf in nf_entrada.order_by('-data_emissao'):
             notas_detalhadas['compras'].append({
                 'id': nf.id,
                 'numero_nota': nf.numero_nota,
@@ -662,7 +813,27 @@ class RelatorioFaturamentoView(APIView):
             })
         
         # Vendas
-        for nf in nf_saida.order_by('-data')[:50]:
+        for nf in nf_saida.order_by('-data'):
+            # Calcular custo estimado desta nota
+            custo_estimado_nota = 0.0
+            itens_nota = []
+            for item in nf.itens.all():
+                if item.produto and item.quantidade:
+                    preco_info = self._obter_ultimo_preco_entrada(item.produto.id, data_fim)
+                    custo_item = 0.0
+                    if preco_info['encontrado']:
+                        custo_item = float(item.quantidade) * preco_info['preco']
+                        custo_estimado_nota += custo_item
+                    
+                    itens_nota.append({
+                        'produto_nome': item.produto.nome,
+                        'quantidade': float(item.quantidade),
+                        'custo_unitario': preco_info['preco'] if preco_info['encontrado'] else 0.0,
+                        'custo_total': custo_item,
+                        'valor_unitario_venda': float(item.valor_unitario or 0),
+                        'valor_total_venda': float(item.quantidade) * float(item.valor_unitario or 0)
+                    })
+
             notas_detalhadas['vendas'].append({
                 'id': nf.id,
                 'numero_nota': nf.numero_nota,
@@ -672,7 +843,9 @@ class RelatorioFaturamentoView(APIView):
                 'valor_produtos': float(nf.valor_produtos or 0),
                 'valor_total': float(nf.valor_total_nota or 0),
                 'valor_icms': float(nf.valor_icms or 0),
-                'desconto': float(nf.desconto or 0)
+                'desconto': float(nf.desconto or 0),
+                'valor_custo_estimado': custo_estimado_nota,
+                'itens': itens_nota
             })
         
         # Serviços

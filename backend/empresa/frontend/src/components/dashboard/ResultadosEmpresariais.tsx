@@ -7,7 +7,9 @@ import {
   FileText,
   DollarSign,
   Calculator,
-  AlertCircle
+  AlertCircle,
+  Info,
+  X
 } from "lucide-react";
 import { SeparateDatePicker } from '../common/SeparateDatePicker';
 
@@ -43,11 +45,28 @@ interface MovimentacaoEstoque {
   variacao_snapshot?: number;
 }
 
+
 interface FaturamentoContratos {
   faturamento_total_proporcional: number;
   custo_total_suprimentos: number;
   margem_bruta_total: number;
   percentual_margem_total: number;
+  contratos?: any[];
+}
+
+// Interface para detalhes da conta
+interface ContaDetalhada {
+  id: number;
+  data_pagamento: string;
+  fornecedor_nome: string;
+  fornecedor_tipo: string;
+  fornecedor_especificacao: string;
+  valor_original: number;
+  valor_pago: number;
+  juros: number;
+  tarifas: number;
+  historico: string;
+  forma_pagamento: string;
 }
 
 interface CustosFixos {
@@ -60,6 +79,7 @@ interface CustosFixos {
     quantidade_contas: number;
     incluir_no_calculo: boolean;
   }>;
+  contas_pagas: ContaDetalhada[];
 }
 
 interface CustosVariaveis {
@@ -72,6 +92,7 @@ interface CustosVariaveis {
     quantidade_contas: number;
     incluir_no_calculo: boolean;
   }>;
+  contas_pagas: ContaDetalhada[];
 }
 
 interface MargemVendas {
@@ -81,6 +102,11 @@ interface MargemVendas {
   margem_bruta: number;
   percentual_margem: number;
   itens_analisados: number;
+  notas_detalhadas?: {
+    vendas: any[];
+    compras: any[];
+    servicos: any[];
+  };
 }
 
 interface ResultadoFinal {
@@ -99,7 +125,6 @@ const ResultadosEmpresariais: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Removido: tipoCalculoLucro (não é mais necessário)
 
   // Estados para os dados
   const [movimentacaoEstoque, setMovimentacaoEstoque] = useState<MovimentacaoEstoque | null>(null);
@@ -109,16 +134,21 @@ const ResultadosEmpresariais: React.FC = () => {
   const [margemVendas, setMargemVendas] = useState<MargemVendas | null>(null);
   const [resultadoFinal, setResultadoFinal] = useState<ResultadoFinal | null>(null);
 
+  // Estados para o Modal de Detalhes
+  const [modalOpen, setModalOpen] = useState(false);
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState<{ nome: string; tipo: 'FIXO' | 'VARIAVEL' | 'CONTRATOS' | 'VENDAS' | 'SUPRIMENTOS_CONTRATOS' | 'CUSTO_VENDA' } | null>(null);
+  const [itensModal, setItensModal] = useState<ContaDetalhada[] | any[]>([]);
+
   // Função para alternar inclusão de especificação nos custos fixos
   const toggleCustoFixo = (especificacao: string) => {
     if (!custosFixos) return;
-    
+
     setCustosFixos(prev => {
       if (!prev) return prev;
       return {
         ...prev,
-        especificacoes: prev.especificacoes.map(spec => 
-          spec.especificacao === especificacao 
+        especificacoes: prev.especificacoes.map(spec =>
+          spec.especificacao === especificacao
             ? { ...spec, incluir_no_calculo: !spec.incluir_no_calculo }
             : spec
         )
@@ -129,13 +159,13 @@ const ResultadosEmpresariais: React.FC = () => {
   // Função para alternar inclusão de especificação nos custos variáveis
   const toggleCustoVariavel = (especificacao: string) => {
     if (!custosVariaveis) return;
-    
+
     setCustosVariaveis(prev => {
       if (!prev) return prev;
       return {
         ...prev,
-        especificacoes: prev.especificacoes.map(spec => 
-          spec.especificacao === especificacao 
+        especificacoes: prev.especificacoes.map(spec =>
+          spec.especificacao === especificacao
             ? { ...spec, incluir_no_calculo: !spec.incluir_no_calculo }
             : spec
         )
@@ -148,12 +178,20 @@ const ResultadosEmpresariais: React.FC = () => {
     if (!custosFixos || !custosVariaveis || !faturamentoContratos || !movimentacaoEstoque || !margemVendas) return;
 
     // Totais na 1ª linha
+    // Totais na 1ª linha (Agora usando MARGEM, conforme solicitado)
+    // Formula: Margem Contratos + Margem Venda - Custos Fixos - Custos Variáveis
+
+    // Variáveis para o objeto de estado (mantendo visualização de faturamento)
     const movEstoqueValor = (typeof movimentacaoEstoque.variacao_snapshot === 'number')
       ? movimentacaoEstoque.variacao_snapshot || 0
       : (movimentacaoEstoque.saldo_periodo || 0);
     const faturamentoContratosValor = faturamentoContratos.faturamento_total_proporcional || 0;
-    const notasVendasValor = margemVendas.valor_vendas || 0;
-    const totalPrimeiraLinha = movEstoqueValor + faturamentoContratosValor + notasVendasValor;
+
+    const margemContratosValor = faturamentoContratos.margem_bruta_total || 0;
+    const margemVendasValor = margemVendas.margem_bruta || 0;
+
+    // Total positivo (apenas margens, ignorando estoque por enquanto na regra do líquido)
+    const totalPrimeiraLinha = margemContratosValor + margemVendasValor;
 
     // Totais na 2ª linha (respeitando seleção de especificações)
     const custoFixoCalculado = (custosFixos.especificacoes || [])
@@ -192,12 +230,12 @@ const ResultadosEmpresariais: React.FC = () => {
   // Função para buscar movimentação de estoque
   const buscarMovimentacaoEstoque = async (dataInicial: string, dataFinal: string) => {
     try {
-  const response = await fetch(`http://localhost:8000/contas/estoque-controle/movimentacoes_periodo/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
+      const response = await fetch(`http://localhost:8000/contas/estoque-controle/movimentacoes_periodo/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
       if (!response.ok) {
         throw new Error(`Erro na requisição: ${response.status}`);
       }
       const data = await response.json();
-      
+
       // Se não há movimentação no período, retornar zeros
       if (!data.produtos_movimentados || data.produtos_movimentados.length === 0) {
         return {
@@ -209,9 +247,9 @@ const ResultadosEmpresariais: React.FC = () => {
           margem_percentual: 0
         };
       }
-      
+
       const resumo = data.resumo || {};
-      
+
       return {
         valor_entrada: resumo.valor_total_entradas || 0,
         valor_saida: resumo.valor_total_saidas || 0,
@@ -250,26 +288,26 @@ const ResultadosEmpresariais: React.FC = () => {
   const buscarFaturamentoContratos = useCallback(async (dataInicial: string, dataFinal: string) => {
     try {
       console.log('🔍 Buscando faturamento de contratos do endpoint principal (mesma fonte da página contratos)...');
-      
+
       // Usar o mesmo endpoint e parâmetros da página de contratos de locação
       const url = `http://localhost:8000/api/contratos_locacao/suprimentos/?data_inicial=${dataInicial}&data_final=${dataFinal}`;
       console.log(`🌐 URL: ${url}`);
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
       }
-      
+
       const data = await response.json();
       console.log('✅ Dados de contratos recebidos (estrutura completa):', data);
-      
+
       // Usar a mesma estrutura que a página de contratos usa
       const faturamentoTotal = data.resumo_financeiro?.faturamento_total_proporcional || 0;
       const custoSuprimentosTotal = data.resumo_financeiro?.custo_total_suprimentos || 0;
       const margemBruta = data.resumo_financeiro?.margem_bruta_total || 0;
       const percentualMargem = data.resumo_financeiro?.percentual_margem_total || 0;
-      
+
       console.log('� Valores extraídos do resumo_financeiro:', {
         faturamento: faturamentoTotal,
         custoSuprimentos: custoSuprimentosTotal,
@@ -283,13 +321,14 @@ const ResultadosEmpresariais: React.FC = () => {
           faturamento_total_proporcional: faturamentoTotal,
           custo_total_suprimentos: custoSuprimentosTotal,
           margem_bruta_total: margemBruta,
-          percentual_margem_total: percentualMargem
+          percentual_margem_total: percentualMargem,
+          contratos: data.resultados || []
         };
       } else {
         console.warn('⚠️ Endpoint principal retornou faturamento zero, tentando endpoints alternativos...');
         return await buscarFaturamentoFallback(dataInicial, dataFinal);
       }
-      
+
     } catch (error) {
       console.error('❌ Erro no endpoint principal de contratos:', error);
       console.log('🔄 Tentando endpoints alternativos...');
@@ -314,17 +353,17 @@ const ResultadosEmpresariais: React.FC = () => {
       const endpoint = fallbackEndpoints[i];
       try {
         console.log(`🔍 [Fallback ${i + 1}/${fallbackEndpoints.length}] Tentando: ${endpoint.name}`);
-        
+
         const response = await fetch(endpoint.url);
-        
+
         if (!response.ok) {
           console.warn(`❌ Fallback [${i + 1}] falhou:`, response.status, response.statusText);
           continue;
         }
-        
+
         const data = await response.json();
         console.log(`✅ Dados recebidos do fallback [${i + 1}] (${endpoint.name}):`, data);
-        
+
         let faturamentoTotal = 0;
         let custoSuprimentosTotal = 0;
 
@@ -339,7 +378,7 @@ const ResultadosEmpresariais: React.FC = () => {
 
         const margemBruta = faturamentoTotal - custoSuprimentosTotal;
         const percentualMargem = faturamentoTotal > 0 ? (margemBruta / faturamentoTotal) * 100 : 0;
-        
+
         console.log(`📊 Resultado do fallback [${i + 1}]:`, {
           endpoint: endpoint.name,
           faturamento: faturamentoTotal,
@@ -357,7 +396,7 @@ const ResultadosEmpresariais: React.FC = () => {
             percentual_margem_total: percentualMargem
           };
         }
-        
+
       } catch (fetchError) {
         console.warn(`🔥 Erro no fallback [${i + 1}] (${endpoint.name}):`, fetchError instanceof Error ? fetchError.message : String(fetchError));
       }
@@ -375,14 +414,14 @@ const ResultadosEmpresariais: React.FC = () => {
   // Função para buscar custos fixos
   const buscarCustosFixos = async (dataInicial: string, dataFinal: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/relatorios/custos-fixos/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
+      const response = await fetch(`http://localhost:8000/contas/relatorios/custos-fixos/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
       if (!response.ok) {
         throw new Error(`Erro na requisição: ${response.status}`);
       }
       const data = await response.json();
-      
+
       console.log('📊 Dados de custos fixos recebidos:', data);
-      
+
       return {
         valor_total: data.totais_gerais?.total_valor_pago || 0,
         periodo_inicio: data.parametros?.data_inicio || dataInicial,
@@ -392,7 +431,8 @@ const ResultadosEmpresariais: React.FC = () => {
           valor_pago_total: spec.total_pago || 0,
           quantidade_contas: spec.quantidade_contas || 0,
           incluir_no_calculo: true // default true
-        }))
+        })),
+        contas_pagas: data.contas_pagas || []
       };
     } catch (error) {
       console.error('Erro ao buscar custos fixos:', error);
@@ -400,7 +440,8 @@ const ResultadosEmpresariais: React.FC = () => {
         valor_total: 0,
         periodo_inicio: dataInicial,
         periodo_fim: dataFinal,
-        especificacoes: []
+        especificacoes: [],
+        contas_pagas: []
       };
     }
   };
@@ -408,14 +449,14 @@ const ResultadosEmpresariais: React.FC = () => {
   // Função para buscar custos variáveis
   const buscarCustosVariaveis = async (dataInicial: string, dataFinal: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/relatorios/custos-variaveis/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
+      const response = await fetch(`http://localhost:8000/contas/relatorios/custos-variaveis/?data_inicio=${dataInicial}&data_fim=${dataFinal}`);
       if (!response.ok) {
         throw new Error(`Erro na requisição: ${response.status}`);
       }
       const data = await response.json();
-      
+
       console.log('📊 Dados de custos variáveis recebidos:', data);
-      
+
       return {
         periodo_inicio: data.parametros?.data_inicio || dataInicial,
         periodo_fim: data.parametros?.data_fim || dataFinal,
@@ -425,7 +466,8 @@ const ResultadosEmpresariais: React.FC = () => {
           valor_pago_total: spec.valor_pago_total || 0,
           quantidade_contas: spec.quantidade_contas || 0,
           incluir_no_calculo: true // default true
-        }))
+        })),
+        contas_pagas: data.contas_pagas || []
       };
     } catch (error) {
       console.error('Erro ao buscar custos variáveis:', error);
@@ -433,7 +475,8 @@ const ResultadosEmpresariais: React.FC = () => {
         periodo_inicio: dataInicial,
         periodo_fim: dataFinal,
         valor_total_geral: 0,
-        especificacoes: []
+        especificacoes: [],
+        contas_pagas: []
       };
     }
   };  // Função para buscar margem de vendas
@@ -444,18 +487,19 @@ const ResultadosEmpresariais: React.FC = () => {
         throw new Error(`Erro na requisição: ${response.status}`);
       }
       const data = await response.json();
-      
+
       console.log('📊 Dados de margem de vendas recebidos:', data);
-      
+
       const analiseVendas = data.totais_gerais?.analise_vendas || {};
-      
+
       return {
         valor_vendas: analiseVendas.valor_vendas || 0,
         valor_custo_entrada: analiseVendas.valor_preco_entrada || 0,
         valor_preco_entrada: analiseVendas.valor_preco_entrada || 0,
         margem_bruta: analiseVendas.margem_bruta || 0,
         percentual_margem: analiseVendas.percentual_margem || 0,
-        itens_analisados: analiseVendas.itens_analisados || 0
+        itens_analisados: analiseVendas.itens_analisados || 0,
+        notas_detalhadas: data.notas_detalhadas || { vendas: [], compras: [], servicos: [] }
       };
     } catch (error) {
       console.error('Erro ao buscar margem de vendas:', error);
@@ -479,7 +523,7 @@ const ResultadosEmpresariais: React.FC = () => {
     try {
       const dataInicial = dateRange.from.toISOString().split('T')[0];
       const dataFinal = dateRange.to.toISOString().split('T')[0];
-      
+
       console.log('📅 Carregando dados para período:', dataInicial, 'até', dataFinal);
 
       const [
@@ -524,7 +568,8 @@ const ResultadosEmpresariais: React.FC = () => {
         faturamento_total_proporcional: dadosContratos.faturamento_total_proporcional || 0,
         custo_total_suprimentos: dadosContratos.custo_total_suprimentos || 0,
         margem_bruta_total: dadosContratos.margem_bruta_total || 0,
-        percentual_margem_total: dadosContratos.percentual_margem_total || 0
+        percentual_margem_total: dadosContratos.percentual_margem_total || 0,
+        contratos: dadosContratos.contratos || []
       };
 
       // Processar dados de custos fixos
@@ -532,7 +577,8 @@ const ResultadosEmpresariais: React.FC = () => {
         valor_total: dadosCustos.valor_total || 0,
         periodo_inicio: dadosCustos.periodo_inicio || dataInicial,
         periodo_fim: dadosCustos.periodo_fim || dataFinal,
-        especificacoes: dadosCustos.especificacoes || []
+        especificacoes: dadosCustos.especificacoes || [],
+        contas_pagas: dadosCustos.contas_pagas || []
       };
 
       // Processar dados de custos variáveis
@@ -540,7 +586,8 @@ const ResultadosEmpresariais: React.FC = () => {
         periodo_inicio: dadosCustosVariaveis.periodo_inicio || dataInicial,
         periodo_fim: dadosCustosVariaveis.periodo_fim || dataFinal,
         valor_total_geral: dadosCustosVariaveis.valor_total_geral || 0,
-        especificacoes: dadosCustosVariaveis.especificacoes || []
+        especificacoes: dadosCustosVariaveis.especificacoes || [],
+        contas_pagas: dadosCustosVariaveis.contas_pagas || []
       };
 
       // Processar dados de margem de vendas
@@ -550,7 +597,8 @@ const ResultadosEmpresariais: React.FC = () => {
         valor_preco_entrada: dadosFaturamento.valor_preco_entrada || 0,
         margem_bruta: dadosFaturamento.margem_bruta || 0,
         percentual_margem: dadosFaturamento.percentual_margem || 0,
-        itens_analisados: dadosFaturamento.itens_analisados || 0
+        itens_analisados: dadosFaturamento.itens_analisados || 0,
+        notas_detalhadas: dadosFaturamento.notas_detalhadas
       };
 
       // Log dos dados recebidos dos endpoints
@@ -562,12 +610,19 @@ const ResultadosEmpresariais: React.FC = () => {
       console.log('- Margem Vendas:', margVendas);
 
       // Calcular resultado final conforme regra: (Linha 1) - (Linha 2)
+      // Calcular resultado final conforme regra solicitada: 
+      // Margem Contratos + Margem Venda - Custos Fixos - Custos Variáveis
+
       const movEstoqueValor = (typeof movEstoque.variacao_snapshot === 'number')
         ? (movEstoque.variacao_snapshot || 0)
         : (movEstoque.saldo_periodo || 0);
       const faturamentoContratosValor = fatContratos.faturamento_total_proporcional || 0;
-      const notasVendasValor = margVendas.valor_vendas || 0;
-      const totalPrimeiraLinha = movEstoqueValor + faturamentoContratosValor + notasVendasValor;
+
+      // Valores para cálculo
+      const margemContratosValor = fatContratos.margem_bruta_total || 0;
+      const margemVendasValor = margVendas.margem_bruta || 0;
+
+      const totalPrimeiraLinha = margemContratosValor + margemVendasValor;
 
       const custosFixosValor = custFixos.especificacoes
         .filter(spec => spec.incluir_no_calculo)
@@ -606,6 +661,49 @@ const ResultadosEmpresariais: React.FC = () => {
       setLoading(false);
     }
   }, [dateRange, buscarFaturamentoContratos]);
+
+  // Função para abrir modal de detalhes
+  const handleOpenDetalhes = (categoria: string, tipo: 'FIXO' | 'VARIAVEL' | 'CONTRATOS' | 'VENDAS' | 'SUPRIMENTOS_CONTRATOS' | 'CUSTO_VENDA') => {
+    setCategoriaSelecionada({ nome: categoria, tipo });
+
+    let itens: any[] = [];
+    if (tipo === 'FIXO' && custosFixos) {
+      itens = custosFixos.contas_pagas.filter(c => c.fornecedor_tipo === categoria);
+      itens.sort((a, b) => new Date(b.data_pagamento).getTime() - new Date(a.data_pagamento).getTime());
+    } else if (tipo === 'VARIAVEL' && custosVariaveis) {
+      itens = custosVariaveis.contas_pagas.filter(c => c.fornecedor_especificacao === categoria);
+      itens.sort((a, b) => new Date(b.data_pagamento).getTime() - new Date(a.data_pagamento).getTime());
+    } else if (tipo === 'CONTRATOS' && faturamentoContratos && faturamentoContratos.contratos) {
+      itens = faturamentoContratos.contratos;
+      // Contratos já vêm agrupados, mas podemos ordenar por valor faturado
+      itens.sort((a, b) => b.valores_contratuais.faturamento_proporcional - a.valores_contratuais.faturamento_proporcional);
+    } else if (tipo === 'VENDAS' && margemVendas && margemVendas.notas_detalhadas) {
+      itens = margemVendas.notas_detalhadas.vendas;
+      itens.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+    } else if (tipo === 'SUPRIMENTOS_CONTRATOS' && faturamentoContratos && faturamentoContratos.contratos) {
+      itens = faturamentoContratos.contratos.flatMap(c =>
+        (c.suprimentos.notas || []).map((n: any) => ({
+          ...n,
+          origem_contrato: c.contrato_numero,
+          origem_cliente: c.cliente.nome
+        }))
+      );
+      itens.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+    } else if (tipo === 'CUSTO_VENDA' && margemVendas && margemVendas.notas_detalhadas) {
+      itens = margemVendas.notas_detalhadas.vendas.flatMap(nf =>
+        (nf.itens || []).map((item: any) => ({
+          ...item,
+          data: nf.data,
+          numero_nota: nf.numero_nota,
+          cliente: nf.cliente
+        }))
+      );
+      itens.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+    }
+
+    setItensModal(itens);
+    setModalOpen(true);
+  };
 
   // Carregar dados iniciais
   useEffect(() => {
@@ -665,12 +763,12 @@ const ResultadosEmpresariais: React.FC = () => {
           >
             {loading ? (
               <>
-                <div style={{ 
-                  width: '16px', 
-                  height: '16px', 
-                  border: '2px solid #ffffff', 
-                  borderTop: '2px solid transparent', 
-                  borderRadius: '50%', 
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid #ffffff',
+                  borderTop: '2px solid transparent',
+                  borderRadius: '50%',
                   animation: 'spin 1s linear infinite'
                 }}></div>
                 Carregando...
@@ -702,7 +800,7 @@ const ResultadosEmpresariais: React.FC = () => {
 
       {/* Linha 1: Mov. Estoque, Faturamento Contratos, NFs de Venda */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-          {/* Movimentação de Estoque */}
+        {/* Movimentação de Estoque */}
         <div style={{
           backgroundColor: 'white',
           borderRadius: '8px',
@@ -757,7 +855,28 @@ const ResultadosEmpresariais: React.FC = () => {
             <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#6b7280', margin: 0 }}>
               📋 Faturamento Contratos
             </h3>
-            <FileText style={{ width: '20px', height: '20px', color: '#06b6d4' }} />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenDetalhes('Contratos de Locação', 'CONTRATOS');
+                }}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: '#6b7280',
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginRight: '8px'
+                }}
+                title="Ver detalhes dos contratos"
+              >
+                <Info size={16} />
+              </button>
+              <FileText style={{ width: '20px', height: '20px', color: '#06b6d4' }} />
+            </div>
           </div>
           {faturamentoContratos ? (
             <>
@@ -770,7 +889,28 @@ const ResultadosEmpresariais: React.FC = () => {
               </div>
               <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px' }}>
                 Margem: {formatCurrency(faturamentoContratos.margem_bruta_total)}<br />
-                Custo suprimentos: {formatCurrency(faturamentoContratos.custo_total_suprimentos)}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  Custo suprimentos: {formatCurrency(faturamentoContratos.custo_total_suprimentos)}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenDetalhes('Custo Suprimentos', 'SUPRIMENTOS_CONTRATOS');
+                    }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      padding: '2px',
+                      color: '#6b7280',
+                      marginLeft: '4px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title="Ver detalhes dos suprimentos"
+                  >
+                    <Info size={14} />
+                  </button>
+                </div>
               </div>
             </>
           ) : (
@@ -790,7 +930,28 @@ const ResultadosEmpresariais: React.FC = () => {
             <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#6b7280', margin: 0 }}>
               🧾 Notas Fiscais de Venda
             </h3>
-            <DollarSign style={{ width: '20px', height: '20px', color: '#0ea5e9' }} />
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenDetalhes('Notas de Venda', 'VENDAS');
+                }}
+                style={{
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  color: '#6b7280',
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginRight: '8px'
+                }}
+                title="Ver detalhes das notas"
+              >
+                <Info size={16} />
+              </button>
+              <DollarSign style={{ width: '20px', height: '20px', color: '#0ea5e9' }} />
+            </div>
           </div>
           {margemVendas ? (
             <>
@@ -802,7 +963,29 @@ const ResultadosEmpresariais: React.FC = () => {
                 {formatPercent(margemVendas.percentual_margem)}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '8px' }}>
-                Margem bruta: {formatCurrency(margemVendas.margem_bruta)}
+                Margem bruta: {formatCurrency(margemVendas.margem_bruta)}<br />
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  Custo Estimado (Últ. Compra): {formatCurrency(margemVendas.valor_custo_entrada)}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenDetalhes('Custo Estimado de Vendas', 'CUSTO_VENDA');
+                    }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      padding: '2px',
+                      color: '#6b7280',
+                      marginLeft: '4px',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                    title="Ver detalhes do custo"
+                  >
+                    <Info size={14} />
+                  </button>
+                </div>
               </div>
             </>
           ) : (
@@ -889,27 +1072,27 @@ const ResultadosEmpresariais: React.FC = () => {
             <h3 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#6b7280', margin: 0 }}>
               🎯 Resultado Líquido
             </h3>
-            {resultadoFinal && resultadoFinal.resultado_liquido >= 0 ? 
+            {resultadoFinal && resultadoFinal.resultado_liquido >= 0 ?
               <TrendingUp style={{ width: '20px', height: '20px', color: '#059669' }} /> :
               <TrendingDown style={{ width: '20px', height: '20px', color: '#dc2626' }} />
             }
           </div>
           {resultadoFinal ? (
             <>
-              <div style={{ 
-                fontSize: '1.5rem', 
-                fontWeight: '700', 
+              <div style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
                 color: resultadoFinal.resultado_liquido >= 0 ? '#059669' : '#dc2626',
-                marginBottom: '4px' 
+                marginBottom: '4px'
               }}>
                 {formatCurrency(resultadoFinal.resultado_liquido)}
               </div>
-              <div style={{ 
-                fontSize: '0.75rem', 
+              <div style={{
+                fontSize: '0.75rem',
                 color: resultadoFinal.resultado_liquido >= 0 ? '#059669' : '#dc2626',
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '4px' 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
               }}>
                 Margem: {formatPercent(resultadoFinal.margem_liquida_percentual)}
               </div>
@@ -922,7 +1105,7 @@ const ResultadosEmpresariais: React.FC = () => {
 
       {/* Seções de Configuração dos Custos */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-        
+
         {/* Configuração Custos Fixos */}
         {custosFixos && custosFixos.especificacoes.length > 0 && (
           <div style={{
@@ -938,12 +1121,12 @@ const ResultadosEmpresariais: React.FC = () => {
                 (Selecione os tipos a incluir)
               </span>
             </h4>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {custosFixos.especificacoes.map((spec, index) => (
-                <label key={index} style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <label key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: '8px',
                   padding: '8px',
                   borderRadius: '4px',
@@ -957,22 +1140,42 @@ const ResultadosEmpresariais: React.FC = () => {
                     onChange={() => toggleCustoFixo(spec.especificacao)}
                     style={{ marginRight: '4px' }}
                   />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
-                      {spec.especificacao}
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
+                        {spec.especificacao}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                        {formatCurrency(spec.valor_pago_total)} • {spec.quantidade_contas} contas
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                      {formatCurrency(spec.valor_pago_total)} • {spec.quantidade_contas} contas
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Evitar toggle do checkbox
+                        handleOpenDetalhes(spec.especificacao, 'FIXO');
+                      }}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        color: '#6b7280',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                      title="Ver detalhes"
+                    >
+                      <Info size={16} />
+                    </button>
                   </div>
                 </label>
               ))}
             </div>
-            
-            <div style={{ 
-              marginTop: '12px', 
-              padding: '8px', 
-              backgroundColor: '#f3f4f6', 
+
+            <div style={{
+              marginTop: '12px',
+              padding: '8px',
+              backgroundColor: '#f3f4f6',
               borderRadius: '4px',
               fontSize: '0.875rem',
               color: '#374151'
@@ -1001,12 +1204,12 @@ const ResultadosEmpresariais: React.FC = () => {
                 (Selecione as especificações a incluir)
               </span>
             </h4>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {custosVariaveis.especificacoes.map((spec, index) => (
-                <label key={index} style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <label key={index} style={{
+                  display: 'flex',
+                  alignItems: 'center',
                   gap: '8px',
                   padding: '8px',
                   borderRadius: '4px',
@@ -1020,22 +1223,42 @@ const ResultadosEmpresariais: React.FC = () => {
                     onChange={() => toggleCustoVariavel(spec.especificacao)}
                     style={{ marginRight: '4px' }}
                   />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
-                      {spec.especificacao}
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
+                        {spec.especificacao}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                        {formatCurrency(spec.valor_pago_total)} • {spec.quantidade_contas} contas
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                      {formatCurrency(spec.valor_pago_total)} • {spec.quantidade_contas} contas
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Evitar toggle do checkbox
+                        handleOpenDetalhes(spec.especificacao, 'VARIAVEL');
+                      }}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        color: '#6b7280',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                      title="Ver detalhes"
+                    >
+                      <Info size={16} />
+                    </button>
                   </div>
                 </label>
               ))}
             </div>
-            
-            <div style={{ 
-              marginTop: '12px', 
-              padding: '8px', 
-              backgroundColor: '#f3f4f6', 
+
+            <div style={{
+              marginTop: '12px',
+              padding: '8px',
+              backgroundColor: '#f3f4f6',
               borderRadius: '4px',
               fontSize: '0.875rem',
               color: '#374151'
@@ -1048,11 +1271,242 @@ const ResultadosEmpresariais: React.FC = () => {
             </div>
           </div>
         )}
-        
+
       </div>
 
       {/* Debug removido conforme solicitado */}
 
+
+
+      {/* Modal de Detalhes */}
+      {
+        modalOpen && categoriaSelecionada && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              width: '100%',
+              maxWidth: '900px',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            }}>
+              {/* Header Modal */}
+              <div style={{
+                padding: '16px 24px',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', margin: 0 }}>
+                    Detalhes: {categoriaSelecionada.nome}
+                  </h3>
+                  <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                    {categoriaSelecionada.tipo === 'FIXO' ? 'Custos Fixos' :
+                      categoriaSelecionada.tipo === 'VARIAVEL' ? 'Custos Variáveis' :
+                        categoriaSelecionada.tipo === 'CONTRATOS' ? 'Faturamento de Contratos' :
+                          categoriaSelecionada.tipo === 'SUPRIMENTOS_CONTRATOS' ? 'Suprimentos por Contrato' :
+                            categoriaSelecionada.tipo === 'CUSTO_VENDA' ? 'Custo Estimado por Nota' :
+                              'Notas Fiscais de Venda'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  style={{
+                    border: 'none',
+                    background: 'none',
+                    cursor: 'pointer',
+                    color: '#6b7280',
+                    padding: '4px'
+                  }}
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Content Table */}
+              <div style={{ overflowY: 'auto', padding: '24px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
+                  <thead style={{ backgroundColor: '#f9fafb', color: '#374151' }}>
+                    <tr>
+                      {categoriaSelecionada.tipo === 'CONTRATOS' ? (
+                        <>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Contrato</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Cliente</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Vigência Efetiva</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Valor Mensal</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Faturamento Proporcional</th>
+                        </>
+                      ) : categoriaSelecionada.tipo === 'VENDAS' ? (
+                        <>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Data</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Cliente</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Nota Fiscal</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Operação</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Valor Total</th>
+                        </>
+                      ) : categoriaSelecionada.tipo === 'SUPRIMENTOS_CONTRATOS' ? (
+                        <>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Data</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Contrato / Cliente</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Nota / Operação</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Valor Total</th>
+                        </>
+                      ) : categoriaSelecionada.tipo === 'CUSTO_VENDA' ? (
+                        <>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Data / Nota</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Cliente</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Produto</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Quantidade</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Custo Unit.</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Custo Total</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Preço Unit.</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Preço Total</th>
+                        </>
+                      ) : (
+                        <>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Data</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Fornecedor</th>
+                          <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>Descrição</th>
+                          <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e5e7eb' }}>Valor</th>
+                        </>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {itensModal.length > 0 ? (
+                      itensModal.map((item, idx) => (
+                        <tr key={item.id || idx} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                          {categoriaSelecionada.tipo === 'CONTRATOS' ? (
+                            <>
+                              <td style={{ padding: '12px', fontWeight: '500' }}>{item.contrato_numero}</td>
+                              <td style={{ padding: '12px' }}>{item.cliente?.nome || 'N/A'}</td>
+                              <td style={{ padding: '12px', fontSize: '0.8rem', color: '#6b7280' }}>
+                                {new Date(item.vigencia?.periodo_efetivo?.inicio).toLocaleDateString()} a {new Date(item.vigencia?.periodo_efetivo?.fim).toLocaleDateString()} ({item.vigencia?.periodo_efetivo?.dias_vigentes} dias)
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', color: '#6b7280' }}>
+                                {formatCurrency(item.valores_contratuais?.valor_mensal || 0)}
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#10b981' }}>
+                                {formatCurrency(item.valores_contratuais?.faturamento_proporcional || 0)}
+                              </td>
+                            </>
+                          ) : categoriaSelecionada.tipo === 'VENDAS' ? (
+                            <>
+                              <td style={{ padding: '12px' }}>
+                                {new Date(item.data).toLocaleDateString('pt-BR')}
+                              </td>
+                              <td style={{ padding: '12px' }}>{item.cliente}</td>
+                              <td style={{ padding: '12px', fontWeight: '500' }}>{item.numero_nota || 'N/A'}</td>
+                              <td style={{ padding: '12px', fontSize: '0.8rem', color: '#6b7280' }}>{item.operacao}</td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#3b82f6' }}>
+                                {formatCurrency(item.valor_total)}
+                              </td>
+                            </>
+                          ) : categoriaSelecionada.tipo === 'SUPRIMENTOS_CONTRATOS' ? (
+                            <>
+                              <td style={{ padding: '12px' }}>
+                                {item.data ? new Date(item.data).toLocaleDateString('pt-BR') : '-'}
+                              </td>
+                              <td style={{ padding: '12px' }}>
+                                <div style={{ fontSize: '0.85rem', fontWeight: '500' }}>{item.origem_contrato}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{item.origem_cliente}</div>
+                              </td>
+                              <td style={{ padding: '12px' }}>
+                                <div style={{ fontSize: '0.85rem' }}>Nota: {item.numero_nota || 'N/A'}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{item.operacao}</div>
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#ef4444' }}>
+                                {formatCurrency(item.valor_total_nota || 0)}
+                              </td>
+                            </>
+                          ) : categoriaSelecionada.tipo === 'CUSTO_VENDA' ? (
+                            <>
+                              <td style={{ padding: '12px', fontSize: '0.8rem' }}>
+                                <div>{new Date(item.data).toLocaleDateString('pt-BR')}</div>
+                                <div style={{ color: '#6b7280' }}>{item.numero_nota || 'N/A'}</div>
+                              </td>
+                              <td style={{ padding: '12px', fontSize: '0.85rem' }}>{item.cliente}</td>
+                              <td style={{ padding: '12px', fontSize: '0.85rem' }}>{item.produto_nome}</td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '0.85rem' }}>{item.quantidade}</td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '0.8rem', color: '#6b7280' }}>
+                                {formatCurrency(item.custo_unitario || 0)}
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#f59e0b' }}>
+                                {formatCurrency(item.custo_total || 0)}
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontSize: '0.8rem', color: '#6b7280' }}>
+                                {formatCurrency(item.valor_unitario_venda || 0)}
+                              </td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: '#10b981' }}>
+                                {formatCurrency(item.valor_total_venda || 0)}
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td style={{ padding: '12px' }}>
+                                {new Date(item.data_pagamento).toLocaleDateString('pt-BR')}
+                              </td>
+                              <td style={{ padding: '12px' }}>{item.fornecedor_nome}</td>
+                              <td style={{ padding: '12px', color: '#6b7280' }}>{item.historico || '-'}</td>
+                              <td style={{ padding: '12px', textAlign: 'right', fontWeight: '500' }}>
+                                {formatCurrency(item.valor_pago)}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: '#6b7280' }}>
+                          Nenhum registro encontrado para esta categoria.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                  <tfoot style={{ backgroundColor: '#f9fafb', fontWeight: '600' }}>
+                    <tr>
+                      <td colSpan={categoriaSelecionada.tipo === 'CONTRATOS' ? 4 : categoriaSelecionada.tipo === 'VENDAS' ? 4 : categoriaSelecionada.tipo === 'SUPRIMENTOS_CONTRATOS' ? 3 : categoriaSelecionada.tipo === 'CUSTO_VENDA' ? 4 : 3} style={{ padding: '12px', textAlign: 'right' }}>Total:</td>
+                      <td style={{ padding: '12px', textAlign: 'right' }}>
+                        {formatCurrency(itensModal.reduce((sum, item) => {
+                          if (categoriaSelecionada.tipo === 'CONTRATOS') return sum + (item.valores_contratuais?.faturamento_proporcional || 0);
+                          if (categoriaSelecionada.tipo === 'VENDAS') return sum + (item.valor_total || 0);
+                          if (categoriaSelecionada.tipo === 'SUPRIMENTOS_CONTRATOS') return sum + (item.valor_total_nota || 0);
+                          if (categoriaSelecionada.tipo === 'CUSTO_VENDA') return sum + (item.custo_total || 0);
+                          return sum + (item.valor_pago || 0);
+                        }, 0))}
+                      </td>
+                      {categoriaSelecionada.tipo === 'CUSTO_VENDA' && (
+                        <>
+                          <td style={{ padding: '12px' }}></td>
+                          <td style={{ padding: '12px', textAlign: 'right', color: '#10b981' }}>
+                            {formatCurrency(itensModal.reduce((sum, item) => sum + (item.valor_total_venda || 0), 0))}
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        )
+      }
     </div>
   );
 };

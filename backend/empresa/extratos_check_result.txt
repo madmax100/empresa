@@ -1,0 +1,3 @@
+C:\Users\Cirilo\Documents\programas\empresa\InterMax.03.02.2026\Bancos\Extratos\Extratos.mdb | 5017-05-01 00:00:00  | 111805    
+C:\Users\Cirilo\Documents\programas\empresa\InterMax.03.02.2026\Dados\Extratos\Extratos.mdb | 2006-10-26 00:00:00  | 16367     
+C:\Users\Cirilo\Documents\programas\empresa\InterMax.03.02.2026\Dados Limpos\Extratos\Extratos.mdb | None                 | 0         

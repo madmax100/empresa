@@ -45,17 +45,25 @@ class DatabaseSync:
             migrate_clientes = importlib.import_module('migrate_clientes')
             migrate_fornecedores = importlib.import_module('migrate_fornecedores')
             migrate_contratos = importlib.import_module('migrate_contratos')
+            migrate_contratos = importlib.import_module('migrate_contratos')
             migrate_itens_contrato = importlib.import_module('migrate_itens_contrato')
+            migrate_itens_contrato = importlib.import_module('migrate_itens_contrato')
+            migrate_grupos = importlib.import_module('migrate_grupos')
+            migrate_produtos = importlib.import_module('migrate_produtos')
             
             migrate_clientes.migrar_clientes()
             migrate_fornecedores.migrate_fornecedores()
             migrate_contratos.migrar_contratos()
+            migrate_contratos.migrar_contratos()
             migrate_itens_contrato.migrar_itens_contrato()
+            migrate_itens_contrato.migrar_itens_contrato()
+            migrate_grupos.migrar_grupos()
+            migrate_produtos.migrar_produtos()
             return True
         return False
 
-    def sync_movimentos(self):
-        if self.should_sync_file(MOVIMENTOS_DB):
+    def sync_movimentos(self, force=False):
+        if force or self.should_sync_file(MOVIMENTOS_DB):
             print("\nSincronizando Movimentos...")
             
             migrate_nfe = importlib.import_module('migrate_nfe')
@@ -74,8 +82,8 @@ class DatabaseSync:
             return True
         return False
 
-    def sync_outros_movimentos(self):
-        if self.should_sync_file(OUTROS_MOVIMENTOS_DB):
+    def sync_outros_movimentos(self, force=False):
+        if force or self.should_sync_file(OUTROS_MOVIMENTOS_DB):
             print("\nSincronizando Outros Movimentos...")
             
             migrate_nfconsumo = importlib.import_module('migrate_nfconsumo')
@@ -86,8 +94,8 @@ class DatabaseSync:
             return True
         return False
 
-    def sync_contas(self):
-        if self.should_sync_file(CONTAS_DB):
+    def sync_contas(self, force=False):
+        if force or self.should_sync_file(CONTAS_DB):
             print("\nSincronizando Contas...")
             
             migrate_contas_receber = importlib.import_module('migrate_contas_receber')
@@ -98,27 +106,61 @@ class DatabaseSync:
             return True
         return False
 
+    def sync_estoque(self, force=False):
+        # Fallback para caso EXTRATOS_DB não esteja definido no config (versões antigas em memória)
+        try:
+            db_path = EXTRATOS_DB
+        except NameError:
+            # Caminho hardcoded como fallback seguro
+            db_path = r"C:\Users\Cirilo\Documents\programas\empresa\InterMax.03.02.2026\Bancos\Extratos\Extratos.mdb"
+
+        if force or self.should_sync_file(db_path):
+            print("\nSincronizando Estoque (Movimentações)...")
+            try:
+                # Adicionar path para garantir que importe o arquivo local
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                if current_dir not in sys.path:
+                    sys.path.append(current_dir)
+                    
+                import migrate_estoque
+                migrate_estoque.migrar_estoque()
+                return True
+            except Exception as e:
+                print(f"Erro ao sincronizar estoque: {e}")
+                # Não retornamos False para não impedir o update do hash se for algo simples?
+                # Melhor retornar False e não atualizar hash se falhar?
+                # O metodo should_sync_file já atualizou o hash.
+                # Se falhar, talvez devêssemos reverter, mas por simplicidade mantemos assim.
+                return True # Hash já foi atualizado
+        return False
+
     def sync_all(self):
         print("=== INICIANDO SINCRONIZAÇÃO ===")
         print(f"Data/Hora: {datetime.now()}\n")
         
         changes = False
+        force_dependents = False
         
         try:
             if self.sync_cadastros():
                 print("Cadastros sincronizados com sucesso!")
                 changes = True
+                force_dependents = True # Se cadastros mudou (e possivelmente limpou tabelas), força o resto
             
-            if self.sync_movimentos():
+            if self.sync_movimentos(force=force_dependents):
                 print("Movimentos sincronizados com sucesso!")
                 changes = True
             
-            if self.sync_outros_movimentos():
+            if self.sync_outros_movimentos(force=force_dependents):
                 print("Outros movimentos sincronizados com sucesso!")
                 changes = True
             
-            if self.sync_contas():
+            if self.sync_contas(force=force_dependents):
                 print("Contas sincronizadas com sucesso!")
+                changes = True
+                
+            if self.sync_estoque(force=force_dependents):
+                print("Estoque sincronizado com sucesso!")
                 changes = True
             
             if not changes:

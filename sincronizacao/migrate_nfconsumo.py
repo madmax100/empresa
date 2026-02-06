@@ -2,7 +2,7 @@ import pyodbc
 import psycopg2
 from datetime import datetime
 from decimal import Decimal
-from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB # ou o DB específico
+from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB, OUTROS_MOVIMENTOS_DB # ou o DB específico
 
 def clean_string(value):
     return str(value).strip() if value else None
@@ -25,7 +25,7 @@ def get_valid_fornecedores(pg_cursor):
 
 def migrar_nf_consumo():
     try:
-        db_path = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos\Movimentos\Outrosmovimentos.mdb"
+        db_path = OUTROS_MOVIMENTOS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={db_path};'

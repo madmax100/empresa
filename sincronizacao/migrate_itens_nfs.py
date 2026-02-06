@@ -2,7 +2,7 @@ import pyodbc
 import psycopg2
 from datetime import datetime
 from decimal import Decimal
-from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB # ou o DB específico
+from config import PG_CONFIG, ACCESS_PASSWORD, CADASTROS_DB, MOVIMENTOS_DB # ou o DB específico
 
 def clean_string(value):
     return str(value).strip() if value else None
@@ -29,7 +29,7 @@ def get_valid_produtos(pg_cursor):
 
 def migrar_itens_nfs():
     try:
-        db_path = r"C:\Users\Cirilo\Documents\c3mcopias\Bancos\Movimentos\Movimentos.mdb"
+        db_path = MOVIMENTOS_DB
         conn_str = (
             r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};'
             f'DBQ={db_path};'
@@ -92,22 +92,6 @@ def migrar_itens_nfs():
                             valor_total, percentual_ipi, status, aliquota, reducao,
                             desconto, cst_a, cst_b, controle, frete, outras_despesas, seguro
                         ) VALUES %s
-                        ON CONFLICT (nota_fiscal_id, produto_id) DO UPDATE SET
-                            data = EXCLUDED.data,
-                            quantidade = EXCLUDED.quantidade,
-                            valor_unitario = EXCLUDED.valor_unitario,
-                            valor_total = EXCLUDED.valor_total,
-                            percentual_ipi = EXCLUDED.percentual_ipi,
-                            status = EXCLUDED.status,
-                            aliquota = EXCLUDED.aliquota,
-                            reducao = EXCLUDED.reducao,
-                            desconto = EXCLUDED.desconto,
-                            cst_a = EXCLUDED.cst_a,
-                            cst_b = EXCLUDED.cst_b,
-                            controle = EXCLUDED.controle,
-                            frete = EXCLUDED.frete,
-                            outras_despesas = EXCLUDED.outras_despesas,
-                            seguro = EXCLUDED.seguro
                     """, (dados,))
                     
                     pg_conn.commit()

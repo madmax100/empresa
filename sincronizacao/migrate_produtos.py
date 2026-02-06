@@ -28,8 +28,8 @@ def limpar_tabelas(pg_conn):
         cursor.execute("SET session_replication_role = 'replica';")
         
         tabelas = [
-            'itens_nf_compra',
-            'itens_nf_venda',
+            'itens_nf_entrada',
+            'itens_nf_saida',
             'itens_contrato_locacao',
             'movimentacoes_estoque',
             'saldos_estoque',
@@ -95,16 +95,10 @@ def criar_tabela_produtos(pg_cursor):
     """
     pg_cursor.execute(create_table_sql)
 
-def migrar_produtos():
-    pg_config = {
-        'dbname': 'c3mcopiasdb2',
-        'user': 'cirilomax',
-        'password': '226cmm100',
-        'host': 'localhost',
-        'port': '5432'
-    }
+from config import PG_CONFIG, CADASTROS_DB
 
-    db_path = r"C:\Users\Cirilo\Documents\empresa\Bancos\cadastros\Cadastros.mdb"
+def migrar_produtos():
+    db_path = CADASTROS_DB
     
     try:
         # Conexões
@@ -115,7 +109,7 @@ def migrar_produtos():
             'PWD=010182;'
         )
         access_conn = pyodbc.connect(conn_str)
-        pg_conn = psycopg2.connect(**pg_config)
+        pg_conn = psycopg2.connect(**PG_CONFIG)
         
         # Limpar tabelas
         if not limpar_tabelas(pg_conn):
