@@ -25,7 +25,7 @@ KEYWORDS = {
         'FOLHA', 'SALARIO', 'FGTS', 'INSS', 'FERIAS', 'VALE', 'AJUDA CUSTO', 'RESCISAO', 'ADIANTAMENTO', 
         'PROLABORE', 'PRO-LABORE', 'ESTAGIARIO', 'BONIFICACAO'
     ],
-    'IMPOSTOS': ['TRIBUTOS', 'DARF', 'DAS', 'IMPOSTO', 'RETENCAO', 'GUIA', 'ISS', 'ICMS', 'PIS', 'COFINS'],
+    'IMPOSTOS': ['TRIBUTOS', 'DARF', 'DAS', 'IMPOSTO', 'RETENCAO', 'GUIA', 'ISS', 'ICMS', 'PIS', 'COFINS', 'SIMPLES', 'SIMPLES NACIONAL'],
     'UTILIDADES': [
         'AGUA', 'LUZ', 'ENERGIA', 'TELEFONE', 'INTERNET', 'CAGECE', 'COELCE', 'TELEMAR', 'TIM', 'VIVO', 'CLARO', 'OI', 
         'NET', 'SKY'
@@ -37,11 +37,11 @@ KEYWORDS = {
 
 def run():
     updated_count = 0
-    # Process only those with empty specifications
-    suppliers = Fornecedores.objects.filter(Q(especificacao__isnull=True) | Q(especificacao=''))
+    # Process ALL suppliers to ensure consistency (overwrite existing)
+    suppliers = Fornecedores.objects.all()
     
     total = suppliers.count()
-    print(f"Found {total} suppliers without specification.")
+    print(f"Processing {total} suppliers for specification update...")
     
     for s in suppliers:
         name = (s.nome or '').upper()

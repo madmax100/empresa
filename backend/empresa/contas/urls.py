@@ -11,6 +11,7 @@ from .views.relatorios_views import RelatorioCustosFixosView, RelatorioCustosVar
 from .views.dre_views import DREView
 from .views.access import *
 from .views.access import suprimentos_por_contrato
+from .views.comparativo_estoque import ComparativoEstoqueView
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
@@ -74,6 +75,7 @@ urlpatterns = [
     
     # DRE - Demonstrativo de Resultados
     path('dre/', DREView.as_view(), name='dre'),
+    path('estoque-comparativo/', ComparativoEstoqueView.as_view(), name='estoque-comparativo'),
     
     path('', include(router.urls)),
 ]

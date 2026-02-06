@@ -1,0 +1,14 @@
+--- Deep Dive Product 6474 ---
+
+[Fiscal Records]
+NF: 8091 | Qtd: 2.0000 | Val Unit: 299.90 | Val Total: 539.82
+Total Fiscal: Qtd 2.0000 | Val 539.82 | Avg Price 269.91
+
+[Physical Records]
+Doc: 8091 | Tipo:  - Entrada por Compra | Qtd: 2.000 | Custo Unit: 299.9000 | Val Total: 599.80
+Total Physical (Recorded): Qtd 2.000 | Val 599.80
+Total Physical (View Logic): 539.82000 (using Avg Price 269.91)
+
+[Comparison]
+Fiscal vs Recorded Diff: -59.98
+Fiscal vs Calculated Diff: 0.00000

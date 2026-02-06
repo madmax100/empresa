@@ -113,14 +113,14 @@ interface DREResponse {
   ciclo_caixa: CicloCaixa;
 }
 
-const GerenciaDashboard: React.FC = () => {
+interface GerenciaDashboardProps {
+  dataInicio: string;
+  dataFim: string;
+}
+
+const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataFim }) => {
   // Estado de datas
-  const [dataInicio, setDataInicio] = useState<string>(
-    new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]
-  );
-  const [dataFim, setDataFim] = useState<string>(
-    new Date().toISOString().split('T')[0]
-  );
+
 
   // Estado de dados
   const [data, setData] = useState<DREResponse | null>(null);
@@ -492,35 +492,7 @@ const GerenciaDashboard: React.FC = () => {
           </p>
         </div>
 
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          backgroundColor: theme.colors.card,
-          padding: '4px',
-          borderRadius: '12px',
-          boxShadow: theme.shadows.sm,
-          border: `1px solid ${theme.colors.border}`
-        }}>
-          <div style={{ padding: '8px 12px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: theme.colors.secondary, marginBottom: '2px' }}>DE</label>
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-              style={{ border: 'none', background: 'transparent', fontWeight: '600', color: theme.colors.primary, outline: 'none', fontFamily: 'inherit' }}
-            />
-          </div>
-          <div style={{ width: '1px', backgroundColor: theme.colors.border, margin: '8px 0' }} />
-          <div style={{ padding: '8px 12px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: theme.colors.secondary, marginBottom: '2px' }}>ATÉ</label>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-              style={{ border: 'none', background: 'transparent', fontWeight: '600', color: theme.colors.primary, outline: 'none', fontFamily: 'inherit' }}
-            />
-          </div>
-        </div>
+
       </div>
 
       {/* HERO STATS */}

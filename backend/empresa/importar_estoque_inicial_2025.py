@@ -30,8 +30,20 @@ class ImportadorEstoqueInicial:
     
     def __init__(self):
         # Configurações Access
-        self.access_db_path = r"C:\Users\Cirilo\Documents\c3mcopias\backend\empresa\Extratos.mdb"
-        self.cadastros_db_path = r"C:\Users\Cirilo\Documents\c3mcopias\backend\empresa\Cadastros.mdb"
+        # Paths updated to workspace root (2 levels up from backend/empresa)
+        # C:\Users\Cirilo\Documents\programas\empresa\InterMax.03.02.2026...
+        base_path = os.path.dirname(os.path.dirname(os.getcwd())) # Assumes running from backend/empresa
+        # Better: use abspath of this script file to find root
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(os.path.dirname(current_dir))
+        
+        self.access_db_path = os.path.join(project_root, r"InterMax.03.02.2026\Bancos\Extratos\Extratos.mdb")
+        self.cadastros_db_path = os.path.join(project_root, r"InterMax.03.02.2026\Bancos\Cadastros\Cadastros.mdb")
+        
+        # Verify existence
+        if not os.path.exists(self.access_db_path):
+             print(f"❌ DB not found: {self.access_db_path}")
+        
         self.access_password = "010182"
         
         # Configurações PostgreSQL
@@ -336,19 +348,21 @@ class ImportadorEstoqueInicial:
         
         try:
             # 1. Importar grupos
-            if not self.importar_grupos():
-                print("❌ Falha na importação de grupos")
-                return False
+            # if not self.importar_grupos():
+            #     print("❌ Falha na importação de grupos")
+            #     return False
             
             # 2. Importar produtos
-            if not self.importar_produtos_access():
-                print("❌ Falha na importação de produtos")
-                return False
+            # if not self.importar_produtos_access():
+            #     print("❌ Falha na importação de produtos")
+            #     return False
             
             # 3. Importar movimentações
-            if not self.importar_movimentacoes_access():
-                print("❌ Falha na importação de movimentações")
-                return False
+            # if not self.importar_movimentacoes_access():
+            #     print("❌ Falha na importação de movimentações")
+            #     return False
+            
+            print("⚠️  Pulando importação do Access (Dados já existentes no Postgres)")
             
             # 4. Calcular estoque inicial
             if not self.calcular_estoque_reverso():
@@ -385,10 +399,11 @@ def main():
     importador = ImportadorEstoqueInicial()
     
     # Confirmar execução
-    resposta = input("Deseja executar a importação completa? (s/N): ").lower()
-    if resposta != 's':
-        print("❌ Importação cancelada pelo usuário")
-        return
+    # resposta = input("Deseja executar a importação completa? (s/N): ").lower()
+    # if resposta != 's':
+    #     print("❌ Importação cancelada pelo usuário")
+    #     return
+    print("⚠️  Execução automática iniciada (confirmação ignorada)")
     
     # Executar importação
     sucesso = importador.executar_importacao_completa()

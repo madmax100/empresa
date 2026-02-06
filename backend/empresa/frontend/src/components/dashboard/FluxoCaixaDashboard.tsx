@@ -37,7 +37,18 @@ interface ResumoPrevisto {
   total_entradas_previstas: number;
   total_saidas_previstas: number;
   saldo_previsto: number;
-  total_movimentacoes?: number;
+
+  count_periodo: number;
+
+  total_entradas_antes: number;
+  total_saidas_antes: number;
+  count_antes: number;
+
+  total_entradas_depois: number;
+  total_saidas_depois: number;
+  count_depois: number;
+
+  total_movimentacoes: number;
 }
 
 interface Paginacao {
@@ -158,7 +169,12 @@ const FilterCheckboxList: React.FC<{
   );
 };
 
-const FluxoCaixaDashboard: React.FC = () => {
+interface FluxoCaixaDashboardProps {
+  dataInicio: string;
+  dataFim: string;
+}
+
+const FluxoCaixaDashboard: React.FC<FluxoCaixaDashboardProps> = ({ dataInicio, dataFim }) => {
   // Estados para dados
   const [movimentacoesRealizadas, setMovimentacoesRealizadas] = useState<MovimentacaoRealizada[]>([]);
   const [movimentacoesPrevistas, setMovimentacoesPrevistas] = useState<MovimentacaoPrevista[]>([]);
@@ -166,6 +182,7 @@ const FluxoCaixaDashboard: React.FC = () => {
   const [resumoMensal, setResumoMensal] = useState<ResumoMensal | null>(null);
   const [resumoRealizadas, setResumoRealizadas] = useState<ResumoFluxo | null>(null);
   const [resumoPrevisto, setResumoPrevisto] = useState<ResumoPrevisto | null>(null);
+  const [viewScope, setViewScope] = useState<'antes' | 'periodo' | 'depois'>('periodo');
   // Estados removidos: estatisticasVencimento, movimentacoesAbertas, resumoAbertas, clientesContrato
 
   // Estados de paginação
@@ -179,9 +196,9 @@ const FluxoCaixaDashboard: React.FC = () => {
   const resumoMensalFallback = useMemo(() => {
     const map = new Map<string, { entradas: number; saidas: number }>();
     for (const m of movimentacoesRealizadas) {
-      const d = new Date(m.data);
-      if (isNaN(d.getTime())) continue;
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!m.data) continue;
+      // Use string parsing to avoid timezone issues
+      const key = m.data.substring(0, 7); // YYYY-MM
       if (!map.has(key)) map.set(key, { entradas: 0, saidas: 0 });
       const agg = map.get(key)!;
       if (m.tipo === 'entrada') agg.entradas += m.valor; else if (m.tipo === 'saida') agg.saidas += m.valor;
@@ -207,8 +224,7 @@ const FluxoCaixaDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'realizadas' | 'abertas' | 'diario' | 'mensal'>('realizadas');
 
   // Estados para filtros
-  const [dataInicio, setDataInicio] = useState<string>('2024-01-01');
-  const [dataFim, setDataFim] = useState<string>('2024-12-31');
+
 
   // Filtros Multi-select
   const [selectedSpecsPagar, setSelectedSpecsPagar] = useState<string[]>([]);
@@ -248,7 +264,7 @@ const FluxoCaixaDashboard: React.FC = () => {
 
       const [realizadasRes, previstasRes, diarioRes] = await Promise.all([
         fetch(`${baseUrl}/movimentacoes_realizadas/${filterParams}&page=${realizadasPage}`),
-        fetch(`${baseUrl}/movimentacoes_previstas/${filterParams}&page=${previstasPage}`),
+        fetch(`${baseUrl}/movimentacoes_previstas/${filterParams}&page=${previstasPage}&scope=${viewScope}`),
         fetch(`${baseUrl}/resumo_diario/${baseParams}`)
       ]);
 
@@ -294,41 +310,15 @@ const FluxoCaixaDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [dataInicio, dataFim, PAGE_SIZE, selectedSpecsPagar, selectedSpecsReceber, selectedOrigemReceita]);
+  }, [dataInicio, dataFim, PAGE_SIZE, selectedSpecsPagar, selectedSpecsReceber, selectedOrigemReceita, viewScope]);
 
   useEffect(() => {
     loadData();
-  }, [dataInicio, dataFim, selectedSpecsPagar, selectedSpecsReceber, selectedOrigemReceita, loadData]);
+  }, [dataInicio, dataFim, selectedSpecsPagar, selectedSpecsReceber, selectedOrigemReceita, viewScope, loadData]);
 
-  // Função para aplicar filtros
-  const handleApplyFilter = () => {
-    loadData();
-  };
 
-  // Função para definir período pré-definido
-  const setPeriodo = (tipo: 'mes_atual' | 'ano_atual' | 'ultimo_mes') => {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = hoje.getMonth();
 
-    switch (tipo) {
-      case 'mes_atual':
-        setDataInicio(`${ano}-${String(mes + 1).padStart(2, '0')}-01`);
-        setDataFim(`${ano}-${String(mes + 1).padStart(2, '0')}-${new Date(ano, mes + 1, 0).getDate()}`);
-        break;
-      case 'ano_atual':
-        setDataInicio(`${ano}-01-01`);
-        setDataFim(`${ano}-12-31`);
-        break;
-      case 'ultimo_mes': {
-        const mesAnterior = mes === 0 ? 11 : mes - 1;
-        const anoAnterior = mes === 0 ? ano - 1 : ano;
-        setDataInicio(`${anoAnterior}-${String(mesAnterior + 1).padStart(2, '0')}-01`);
-        setDataFim(`${anoAnterior}-${String(mesAnterior + 1).padStart(2, '0')}-${new Date(anoAnterior, mesAnterior + 1, 0).getDate()}`);
-        break;
-      }
-    }
-  };
+
 
 
   if (error) {
@@ -360,105 +350,7 @@ const FluxoCaixaDashboard: React.FC = () => {
       </div>
 
       {/* Filtros de Período */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        marginBottom: '24px'
-      }}>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '16px' }}>Filtros de Período</h3>
 
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-          {/* Botões de período pré-definido */}
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={() => setPeriodo('mes_atual')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.875rem'
-              }}
-            >
-              Mês Atual
-            </button>
-            <button
-              onClick={() => setPeriodo('ultimo_mes')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#6b7280',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.875rem'
-              }}
-            >
-              Último Mês
-            </button>
-            <button
-              onClick={() => setPeriodo('ano_atual')}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#059669',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.875rem'
-              }}
-            >
-              Ano Atual
-            </button>
-          </div>
-
-          {/* Campos de data customizados */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <label style={{ fontSize: '0.875rem', color: '#374151' }}>De:</label>
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-              style={{
-                padding: '8px',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '0.875rem'
-              }}
-            />
-            <label style={{ fontSize: '0.875rem', color: '#374151' }}>Até:</label>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-              style={{
-                padding: '8px',
-                border: '1px solid #d1d5db',
-                borderRadius: '4px',
-                fontSize: '0.875rem'
-              }}
-            />
-            <button
-              onClick={handleApplyFilter}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.875rem'
-              }}
-            >
-              Aplicar
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Abas de Navegação */}
       <div style={{ marginBottom: '24px' }}>
@@ -735,71 +627,119 @@ const FluxoCaixaDashboard: React.FC = () => {
               {/* Resumo das Movimentações Abertas */}
               {resumoPrevisto && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-                  <div style={{
-                    backgroundColor: 'white',
-                    padding: '20px',
-                    borderRadius: '8px',
-                    borderLeft: '4px solid #f59e0b',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', marginBottom: '5px' }}>
-                      Entradas Previstas
+                  <div
+                    onClick={() => setViewScope('antes')}
+                    style={{
+                      backgroundColor: 'white',
+                      padding: '20px',
+                      borderRadius: '8px',
+                      borderLeft: '4px solid #ef4444',
+                      boxShadow: viewScope === 'antes' ? '0 0 0 2px #ef4444, 0 4px 6px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.1)',
+                      cursor: 'pointer',
+                      opacity: viewScope === 'antes' ? 1 : 0.7,
+                      transition: 'all 0.2s ease-in-out',
+                      transform: viewScope === 'antes' ? 'scale(1.02)' : 'scale(1)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500' }}>
+                        Anteriores ao Período
+                      </div>
+                      <div style={{ fontSize: '0.75rem', backgroundColor: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '9999px', fontWeight: '600' }}>
+                        {resumoPrevisto.count_antes || 0}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>
-                      {formatCurrency(resumoPrevisto.total_entradas_previstas)}
-                    </div>
-                  </div>
-
-                  <div style={{
-                    backgroundColor: 'white',
-                    padding: '20px',
-                    borderRadius: '8px',
-                    borderLeft: '4px solid #f59e0b',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', marginBottom: '5px' }}>
-                      Saídas Previstas
-                    </div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>
-                      {formatCurrency(resumoPrevisto.total_saidas_previstas)}
-                    </div>
-                  </div>
-
-                  <div style={{
-                    backgroundColor: 'white',
-                    padding: '20px',
-                    borderRadius: '8px',
-                    borderLeft: `4px solid ${resumoPrevisto.saldo_previsto >= 0 ? '#10b981' : '#ef4444'}`,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                  }}>
-                    <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', marginBottom: '5px' }}>
-                      Saldo Previsto
-                    </div>
-                    <div style={{
-                      fontSize: '1.5rem',
-                      fontWeight: '700',
-                      color: resumoPrevisto.saldo_previsto >= 0 ? '#10b981' : '#ef4444'
-                    }}>
-                      {formatCurrency(resumoPrevisto.saldo_previsto)}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#059669' }}>
+                        <span>Entradas:</span>
+                        <span>{formatCurrency(resumoPrevisto.total_entradas_antes || 0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#dc2626' }}>
+                        <span>Saídas:</span>
+                        <span>{formatCurrency(resumoPrevisto.total_saidas_antes || 0)}</span>
+                      </div>
+                      <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '4px', paddingTop: '4px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: (resumoPrevisto.total_entradas_antes - resumoPrevisto.total_saidas_antes) >= 0 ? '#10b981' : '#ef4444' }}>
+                        <span>Saldo:</span>
+                        <span>{formatCurrency((resumoPrevisto.total_entradas_antes || 0) - (resumoPrevisto.total_saidas_antes || 0))}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {movimentacoesPrevistas.length > 0 && (
-                    <div style={{
+                  <div
+                    onClick={() => setViewScope('periodo')}
+                    style={{
+                      backgroundColor: 'white',
+                      padding: '20px',
+                      borderRadius: '8px',
+                      borderLeft: '4px solid #f59e0b',
+                      boxShadow: viewScope === 'periodo' ? '0 0 0 2px #f59e0b, 0 4px 6px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.1)',
+                      cursor: 'pointer',
+                      opacity: viewScope === 'periodo' ? 1 : 0.7,
+                      transition: 'all 0.2s ease-in-out',
+                      transform: viewScope === 'periodo' ? 'scale(1.02)' : 'scale(1)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500' }}>
+                        Período Selecionado
+                      </div>
+                      <div style={{ fontSize: '0.75rem', backgroundColor: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '9999px', fontWeight: '600' }}>
+                        {resumoPrevisto.count_periodo || 0}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#059669' }}>
+                        <span>Entradas:</span>
+                        <span>{formatCurrency(resumoPrevisto.total_entradas_previstas)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#dc2626' }}>
+                        <span>Saídas:</span>
+                        <span>{formatCurrency(resumoPrevisto.total_saidas_previstas)}</span>
+                      </div>
+                      <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '4px', paddingTop: '4px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: resumoPrevisto.saldo_previsto >= 0 ? '#10b981' : '#ef4444' }}>
+                        <span>Saldo:</span>
+                        <span>{formatCurrency(resumoPrevisto.saldo_previsto)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => setViewScope('depois')}
+                    style={{
                       backgroundColor: 'white',
                       padding: '20px',
                       borderRadius: '8px',
                       borderLeft: '4px solid #3b82f6',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                    }}>
-                      <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', marginBottom: '5px' }}>
-                        Total de Movimentações
+                      boxShadow: viewScope === 'depois' ? '0 0 0 2px #3b82f6, 0 4px 6px rgba(0,0,0,0.1)' : '0 1px 3px rgba(0,0,0,0.1)',
+                      cursor: 'pointer',
+                      opacity: viewScope === 'depois' ? 1 : 0.7,
+                      transition: 'all 0.2s ease-in-out',
+                      transform: viewScope === 'depois' ? 'scale(1.02)' : 'scale(1)'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500' }}>
+                        Posteriores ao Período
                       </div>
-                      <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827' }}>
-                        {movimentacoesPrevistas.length}
+                      <div style={{ fontSize: '0.75rem', backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '9999px', fontWeight: '600' }}>
+                        {resumoPrevisto.count_depois || 0}
                       </div>
                     </div>
-                  )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#059669' }}>
+                        <span>Entradas:</span>
+                        <span>{formatCurrency(resumoPrevisto.total_entradas_depois || 0)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#dc2626' }}>
+                        <span>Saídas:</span>
+                        <span>{formatCurrency(resumoPrevisto.total_saidas_depois || 0)}</span>
+                      </div>
+                      <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '4px', paddingTop: '4px', display: 'flex', justifyContent: 'space-between', fontWeight: '700', color: (resumoPrevisto.total_entradas_depois - resumoPrevisto.total_saidas_depois) >= 0 ? '#10b981' : '#ef4444' }}>
+                        <span>Saldo:</span>
+                        <span>{formatCurrency((resumoPrevisto.total_entradas_depois || 0) - (resumoPrevisto.total_saidas_depois || 0))}</span>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Removed legacy breakdown cards - simplified backend no longer provides required fields */}
                 </div>
@@ -817,7 +757,11 @@ const FluxoCaixaDashboard: React.FC = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                        Movimentações em Aberto ({movimentacoesPrevistas.length})
+                        Movimentações em Aberto - {{
+                          antes: 'Anteriores',
+                          periodo: 'Período',
+                          depois: 'Posteriores'
+                        }[viewScope]} ({movimentacoesPrevistas.length})
                       </h3>
                       <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
                         Lista detalhada das movimentações pendentes
@@ -1278,7 +1222,7 @@ const FluxoCaixaDashboard: React.FC = () => {
                         <tbody>
                           {resumoDiario.dias.map((dia, index) => {
                             const isPositive = dia.saldo_dia >= 0;
-                            const isWeekend = new Date(dia.data).getDay() === 0 || new Date(dia.data).getDay() === 6;
+                            const isWeekend = new Date(dia.data).getUTCDay() === 0 || new Date(dia.data).getUTCDay() === 6;
                             const hasMovement = dia.entradas > 0 || dia.saidas > 0;
                             const maxDayValue = Math.max(...resumoDiario.dias.map(d => Math.abs(d.saldo_dia)));
                             const intensityPercent = maxDayValue > 0 ? (Math.abs(dia.saldo_dia) / maxDayValue) * 100 : 0;
@@ -1527,11 +1471,12 @@ const FluxoCaixaDashboard: React.FC = () => {
                                   // Normaliza chave AAAA-MM
                                   let chave = '';
                                   try {
-                                    const d = new Date(mes.mes);
-                                    chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-                                  } catch {
+                                    // Use string parsing to avoid timezone issues with Date object
+                                    // Backend returns YYYY-MM-DD...
                                     const s = String(mes.mes);
                                     chave = s.length >= 7 ? s.substring(0, 7) : s;
+                                  } catch {
+                                    chave = String(mes.mes);
                                   }
 
                                   // Usar dados do backend ou fallback para os campos antigos

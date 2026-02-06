@@ -1,0 +1,17 @@
+--- Analyzing Stock Comparing: 2026-01-01 to 2026-01-31 ---
+
+[Totals]
+Total Fiscal Variation (Val): R$ -25,298.91
+Total Physical Variation (Val): R$ -25,238.93
+Difference: R$ -59.98
+
+[Top Discrepancies (Fiscal - Physical)]
+
+Product: BULK INK BÁSICO P/EPSON WF-C5XXX P/INSTAÇÃO-S/CART (6474)
+  Fiscal: Ent R$539.82 - Sai R$0.00 = Var R$539.82
+  Physical: Ent R$599.80 - Sai R$0.00 = Var R$599.80
+  Diff: R$ -59.98
+
+[Deep Dive Investigation]
+Movements without Movement Type: 0
+Movements with Zero Value but Quantity > 0: 0

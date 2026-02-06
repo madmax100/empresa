@@ -457,6 +457,9 @@ class DREView(APIView):
             else:
                 lista_outros.append(item_data)
             
+        # Recalcular CMV Total apenas com Vendas e Contratos (Excluindo Outros, conforme solicitado)
+        cmv_total = cmv_vendas + cmv_contratos
+            
         return cmv_total, cmv_vendas, cmv_contratos, cmv_outros, lista_itens, lista_vendas, lista_contratos, lista_outros
 
     def _obter_valor_estoque(self, data):

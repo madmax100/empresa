@@ -8,8 +8,8 @@ ViewSet para consulta do fluxo de caixa.
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Sum, Count, Q
-from django.db.models.functions import TruncMonth, TruncDay
+from django.db.models import Sum, Count, Q, Value, DecimalField
+from django.db.models.functions import TruncMonth, TruncDay, Coalesce
 from datetime import datetime, date
 import time
 
@@ -54,11 +54,19 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             'status': 'P'
         }
         
+        # Filtro de Especificação (Pagar)
+        queries_pagar = Q()
         if specs_pagar:
-            filters_cp['fornecedor__especificacao__in'] = specs_pagar
+            if '(Sem Categoria)' in specs_pagar:
+                queries_pagar |= Q(fornecedor__especificacao__isnull=True) | Q(fornecedor__especificacao='')
+                specs_pagar = [s for s in specs_pagar if s != '(Sem Categoria)']
+            
+            if specs_pagar:
+                queries_pagar |= Q(fornecedor__especificacao__in=specs_pagar)
 
         # Contas a Pagar (Saídas realizadas)
         contas_pagar = ContasPagar.objects.filter(
+            queries_pagar,
             **filters_cp
         ).select_related('fornecedor').values(
             'id', 'data_pagamento', 'valor_pago', 
@@ -73,8 +81,15 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             'status': 'P'
         }
         
+        # Filtro de Especificação (Receber)
+        queries_receber = Q()
         if specs_receber:
-            filters_cr['cliente__especificacao__in'] = specs_receber
+            if '(Sem Categoria)' in specs_receber:
+                queries_receber |= Q(cliente__especificacao__isnull=True) | Q(cliente__especificacao='')
+                specs_receber = [s for s in specs_receber if s != '(Sem Categoria)']
+            
+            if specs_receber:
+                queries_receber |= Q(cliente__especificacao__in=specs_receber)
 
         # Filtro de Origem (Contrato vs Venda)
         if origem_receita:
@@ -90,7 +105,7 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             if 'VENDA' in origem_receita:
                 q_origem |= Q(~Q(cliente_id__in=clientes_com_contrato))
                 
-        qs_receber = ContasReceber.objects.filter(**filters_cr)
+        qs_receber = ContasReceber.objects.filter(queries_receber, **filters_cr)
         
         if origem_receita:
             qs_receber = qs_receber.filter(q_origem)
@@ -162,24 +177,35 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
     def filtros(self, request):
         """
         Retorna listas para filtros (ex: especificações de fornecedores e clientes).
+        Inclui opção "(Sem Categoria)" se houver itens sem especificação.
         """
         from ..models.access import Fornecedores, Clientes
         
-        especificacoes_pagar = Fornecedores.objects.exclude(
+        # Pagar
+        especificacoes_pagar = list(Fornecedores.objects.exclude(
             especificacao__isnull=True
         ).exclude(
             especificacao=''
-        ).values_list('especificacao', flat=True).distinct().order_by('especificacao')
+        ).values_list('especificacao', flat=True).distinct().order_by('especificacao'))
+        
+        has_empty_pagar = Fornecedores.objects.filter(Q(especificacao__isnull=True) | Q(especificacao='')).exists()
+        if has_empty_pagar:
+            especificacoes_pagar.insert(0, '(Sem Categoria)')
 
-        especificacoes_receber = Clientes.objects.exclude(
+        # Receber
+        especificacoes_receber = list(Clientes.objects.exclude(
             especificacao__isnull=True
         ).exclude(
             especificacao=''
-        ).values_list('especificacao', flat=True).distinct().order_by('especificacao')
+        ).values_list('especificacao', flat=True).distinct().order_by('especificacao'))
+        
+        has_empty_receber = Clientes.objects.filter(Q(especificacao__isnull=True) | Q(especificacao='')).exists()
+        if has_empty_receber:
+            especificacoes_receber.insert(0, '(Sem Categoria)')
         
         return Response({
-            'especificacoes_pagar': list(especificacoes_pagar),
-            'especificacoes_receber': list(especificacoes_receber)
+            'especificacoes_pagar': especificacoes_pagar,
+            'especificacoes_receber': especificacoes_receber
         })
 
     @action(detail=False, methods=['get'])
@@ -190,10 +216,6 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
         data_inicio = self.parse_date(request.query_params.get('data_inicio'))
         data_fim = self.parse_date(request.query_params.get('data_fim'))
         
-        # Get lists from query params (e.g. ?especificacao_pagar=A,B&especificacao_receber=C)
-        # Note: DRF request.query_params.getlist might be needed if format is ?key=val&key=val2
-        # If user sends comma separated (key=val1,val2), we split.
-        
         spec_pagar_raw = request.query_params.get('especificacao_pagar')
         spec_receber_raw = request.query_params.get('especificacao_receber')
         origem_receita_raw = request.query_params.get('origem_receita')
@@ -202,69 +224,152 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
         specs_receber = spec_receber_raw.split(',') if spec_receber_raw else []
         origem_receita = origem_receita_raw.split(',') if origem_receita_raw else []
         
-        if not data_inicio or not data_fim:
-            return Response({'error': 'Parâmetros data inválidos'}, status=400)
-
-        # Base filter CP
-        filters_cp = {
-            'vencimento__date__gte': data_inicio,
-            'vencimento__date__lte': data_fim,
-            'status': 'A'
-        }
-        
-        if specs_pagar:
-            filters_cp['fornecedor__especificacao__in'] = specs_pagar
-
-        # Contas a Pagar pendentes
-        contas_pagar = ContasPagar.objects.filter(
-            **filters_cp
-        ).select_related('fornecedor').values(
-            'id', 'vencimento', 'valor',
-            'fornecedor__nome', 'historico', 'fornecedor__especificacao'
-        )
-
-        # Base filter CR
-        filters_cr = {
-            'vencimento__date__gte': data_inicio,
-            'vencimento__date__lte': data_fim,
-            'status': 'A'
-        }
-        
-        if specs_receber:
-            filters_cr['cliente__especificacao__in'] = specs_receber
+        # Helper para lógica de filtro de categoria
+        def get_category_query_pagar(specs):
+            q = Q()
+            if not specs: return q
             
+            local_specs = list(specs)
+            if '(Sem Categoria)' in local_specs:
+                q |= Q(fornecedor__especificacao__isnull=True) | Q(fornecedor__especificacao='')
+                local_specs = [s for s in local_specs if s != '(Sem Categoria)']
+            
+            if local_specs:
+                q |= Q(fornecedor__especificacao__in=local_specs)
+            return q
+
+        def get_category_query_receber(specs):
+            q = Q()
+            if not specs: return q
+            
+            local_specs = list(specs)
+            if '(Sem Categoria)' in local_specs:
+                q |= Q(cliente__especificacao__isnull=True) | Q(cliente__especificacao='')
+                local_specs = [s for s in local_specs if s != '(Sem Categoria)']
+            
+            if local_specs:
+                q |= Q(cliente__especificacao__in=local_specs)
+            return q
+            
+        q_cat_pagar = get_category_query_pagar(specs_pagar)
+        q_cat_receber = get_category_query_receber(specs_receber)
+
         # Filtro de Origem (Contrato vs Venda)
+        q_origem = Q()
         if origem_receita:
             from ..models.access import ContratosLocacao
-            # from datetime import date # Removed shadowed import
-            
-            # IDs de clientes com contratos ativos (fim >= hoje ou indefinido?)
-            # Assumindo contratos ativos se fim >= hoje.
             from datetime import date as dt_date
             hoje = dt_date.today()
+            
             clientes_com_contrato = ContratosLocacao.objects.filter(
                 fim__gte=hoje
             ).values_list('cliente_id', flat=True).distinct()
             
-            q_origem = Q()
             if 'CONTRATO' in origem_receita:
                 q_origem |= Q(cliente_id__in=clientes_com_contrato)
             if 'VENDA' in origem_receita:
                 q_origem |= Q(~Q(cliente_id__in=clientes_com_contrato))
-            
-            # Se ambos selecionados, traz tudo (lógica OR acima já cobre).
-            # Se só um, o filtro Q() aplica corretamente.
-            
-            # Precisamos aplicar esse Q ao QuerySet.
-            # Como filters_cr é um dict de kwargs, não aceita Q diretamente.
-            # Vamos aplicar filters_cr primeiro e depois o Q.
-            
-        qs_receber = ContasReceber.objects.filter(**filters_cr)
         
-        if origem_receita:
-             qs_receber = qs_receber.filter(q_origem)
+        if not data_inicio or not data_fim:
+            return Response({'error': 'Parâmetros data inválidos'}, status=400)
 
-        contas_receber = qs_receber.select_related('cliente').values(
+        # Determina o escopo da listagem (antes, periodo, depois)
+        # Default: 'periodo'
+        scope = request.query_params.get('scope', 'periodo')
+
+        # --- CÁLCULO DOS TOTAIS E CONTAGENS PARA TODOS OS ESCOPOS ---
+        
+        # 1. ANTES DO PERÍODO (< data_inicio)
+        filters_cp_antes = {'vencimento__date__lt': data_inicio, 'status': 'A'}
+        agg_cp_antes = ContasPagar.objects.filter(q_cat_pagar, **filters_cp_antes).aggregate(
+            total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())),
+            count=Count('id')
+        )
+        total_saidas_antes = agg_cp_antes['total']
+        count_antes_cp = agg_cp_antes['count']
+
+        filters_cr_antes = {'vencimento__date__lt': data_inicio, 'status': 'A'}
+        qs_receber_antes = ContasReceber.objects.filter(q_cat_receber, **filters_cr_antes)
+        if origem_receita: qs_receber_antes = qs_receber_antes.filter(q_origem)
+        agg_cr_antes = qs_receber_antes.aggregate(
+            total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())),
+            count=Count('id')
+        )
+        total_entradas_antes = agg_cr_antes['total']
+        count_antes_cr = agg_cr_antes['count']
+        count_antes = count_antes_cp + count_antes_cr
+
+        # 2. NO PERÍODO (>= data_inicio e <= data_fim)
+        filters_cp_periodo = {'vencimento__date__gte': data_inicio, 'vencimento__date__lte': data_fim, 'status': 'A'}
+        agg_cp_periodo = ContasPagar.objects.filter(q_cat_pagar, **filters_cp_periodo).aggregate(
+            total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())),
+            count=Count('id')
+        )
+        total_saidas_periodo = agg_cp_periodo['total']
+        count_periodo_cp = agg_cp_periodo['count']
+
+        filters_cr_periodo = {'vencimento__date__gte': data_inicio, 'vencimento__date__lte': data_fim, 'status': 'A'}
+        qs_receber_periodo = ContasReceber.objects.filter(q_cat_receber, **filters_cr_periodo)
+        if origem_receita: qs_receber_periodo = qs_receber_periodo.filter(q_origem)
+        agg_cr_periodo = qs_receber_periodo.aggregate(
+            total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())),
+            count=Count('id')
+        )
+        total_entradas_periodo = agg_cr_periodo['total']
+        count_periodo_cr = agg_cr_periodo['count']
+        count_periodo = count_periodo_cp + count_periodo_cr
+
+        # 3. DEPOIS DO PERÍODO (> data_fim)
+        filters_cp_depois = {'vencimento__date__gt': data_fim, 'status': 'A'}
+        agg_cp_depois = ContasPagar.objects.filter(q_cat_pagar, **filters_cp_depois).aggregate(
+            total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())),
+            count=Count('id')
+        )
+        total_saidas_depois = agg_cp_depois['total']
+        count_depois_cp = agg_cp_depois['count']
+
+        filters_cr_depois = {'vencimento__date__gt': data_fim, 'status': 'A'}
+        qs_receber_depois = ContasReceber.objects.filter(q_cat_receber, **filters_cr_depois)
+        if origem_receita: qs_receber_depois = qs_receber_depois.filter(q_origem)
+        agg_cr_depois = qs_receber_depois.aggregate(
+            total=Coalesce(Sum('valor'), Value(0, output_field=DecimalField())),
+            count=Count('id')
+        )
+        total_entradas_depois = agg_cr_depois['total']
+        count_depois_cr = agg_cr_depois['count']
+        count_depois = count_depois_cp + count_depois_cr
+
+        # --- SELEÇÃO DE MOVIMENTAÇÕES PARA EXIBIÇÃO ---
+        # Baseado no 'scope', definimos quais QuerySets buscar para listar na tabela
+        
+        # Filtros de Listagem (Pagar)
+        filters_cp_list = {'status': 'A'}
+        
+        # Filtros de Listagem (Receber)
+        filters_cr_list = {'status': 'A'}
+
+        if scope == 'antes':
+            filters_cp_list['vencimento__date__lt'] = data_inicio
+            filters_cr_list['vencimento__date__lt'] = data_inicio
+        elif scope == 'depois':
+            filters_cp_list['vencimento__date__gt'] = data_fim
+            filters_cr_list['vencimento__date__gt'] = data_fim
+        else: # periodo (default)
+            filters_cp_list['vencimento__date__gte'] = data_inicio
+            filters_cp_list['vencimento__date__lte'] = data_fim
+            filters_cr_list['vencimento__date__gte'] = data_inicio
+            filters_cr_list['vencimento__date__lte'] = data_fim
+
+        # Buscando listas efetivas para paginação
+        contas_pagar = ContasPagar.objects.filter(q_cat_pagar, **filters_cp_list).select_related('fornecedor').values(
+            'id', 'vencimento', 'valor',
+            'fornecedor__nome', 'historico', 'fornecedor__especificacao'
+        )
+
+        qs_receber_list = ContasReceber.objects.filter(q_cat_receber, **filters_cr_list)
+        if origem_receita: qs_receber_list = qs_receber_list.filter(q_origem)
+        
+        contas_receber = qs_receber_list.select_related('cliente').values(
             'id', 'vencimento', 'valor',
             'cliente__nome', 'historico', 'cliente__especificacao'
         )
@@ -304,9 +409,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
 
         movimentacoes.sort(key=lambda x: x['data_vencimento'] if x['data_vencimento'] else date.min)
 
-        total_entradas = sum(m['valor'] for m in movimentacoes if m['tipo'] == 'entrada_prevista')
-        total_saidas = sum(m['valor'] for m in movimentacoes if m['tipo'] == 'saida_prevista')
-        total_count = len(movimentacoes)
+        # Totais finais da lista visualizada (pode ser redundante com totais acima, mas ok)
+        total_list_count = len(movimentacoes)
 
         # Paginação
         page = int(request.query_params.get('page', 1))
@@ -314,21 +418,35 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
         start_idx = (page - 1) * page_size
         end_idx = start_idx + page_size
         paginated = movimentacoes[start_idx:end_idx]
-        total_pages = (total_count + page_size - 1) // page_size if page_size > 0 else 1
+        total_pages = (total_list_count + page_size - 1) // page_size if page_size > 0 else 1
 
         return Response({
             'periodo': {'data_inicio': str(data_inicio), 'data_fim': str(data_fim)},
             'resumo': {
-                'total_entradas_previstas': total_entradas,
-                'total_saidas_previstas': total_saidas,
-                'saldo_previsto': total_entradas - total_saidas,
-                'total_movimentacoes': total_count
+                # Totais do Período (Selecionado)
+                'total_entradas_previstas': total_entradas_periodo,
+                'total_saidas_previstas': total_saidas_periodo,
+                'saldo_previsto': total_entradas_periodo - total_saidas_periodo,
+                'count_periodo': count_periodo,
+                
+                # Totais Antes
+                'total_entradas_antes': total_entradas_antes,
+                'total_saidas_antes': total_saidas_antes,
+                'count_antes': count_antes,
+                
+                # Totais Depois
+                'total_entradas_depois': total_entradas_depois,
+                'total_saidas_depois': total_saidas_depois,
+                'count_depois': count_depois,
+                
+                # contagem total da lista retornada
+                'total_movimentacoes': total_list_count 
             },
             'paginacao': {
                 'page': page,
                 'page_size': page_size,
                 'total_pages': total_pages,
-                'total_count': total_count
+                'total_count': total_list_count
             },
             'movimentacoes': paginated
         })
