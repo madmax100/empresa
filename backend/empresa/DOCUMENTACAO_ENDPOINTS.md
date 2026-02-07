@@ -94,6 +94,113 @@ http://localhost:8000
 - **PUT** `/contas/grupos/{id}/` - Atualiza grupo
 - **DELETE** `/contas/grupos/{id}/` - Remove grupo
 
+#### **Fiscal por Produto**
+- **GET** `/contas/produtos-fiscal/` - Lista dados fiscais por produto
+- **POST** `/contas/produtos-fiscal/` - Cria cadastro fiscal de produto
+- **GET** `/contas/produtos-fiscal/{id}/` - Busca cadastro fiscal específico
+- **PUT** `/contas/produtos-fiscal/{id}/` - Atualiza cadastro fiscal
+- **DELETE** `/contas/produtos-fiscal/{id}/` - Remove cadastro fiscal
+
+#### **Variações de Produto**
+- **GET** `/contas/produtos-variacoes/` - Lista variações
+- **POST** `/contas/produtos-variacoes/` - Cria variação
+- **GET** `/contas/produtos-variacoes/{id}/` - Busca variação específica
+- **PUT** `/contas/produtos-variacoes/{id}/` - Atualiza variação
+- **DELETE** `/contas/produtos-variacoes/{id}/` - Remove variação
+
+#### **Composição (BOM/Kits)**
+- **GET** `/contas/produtos-composicao/` - Lista composições
+- **POST** `/contas/produtos-composicao/` - Cria composição
+- **GET** `/contas/produtos-composicao/{id}/` - Busca composição
+- **PUT** `/contas/produtos-composicao/{id}/` - Atualiza composição
+- **DELETE** `/contas/produtos-composicao/{id}/` - Remove composição
+- **GET** `/contas/produtos/composicao/{produto_id}/` - Resumo de composição com custo estimado
+
+#### **Conversões de Unidade**
+- **GET** `/contas/produtos-conversao-unidade/` - Lista conversões
+- **POST** `/contas/produtos-conversao-unidade/` - Cria conversão
+- **GET** `/contas/produtos-conversao-unidade/{id}/` - Busca conversão
+- **PUT** `/contas/produtos-conversao-unidade/{id}/` - Atualiza conversão
+- **DELETE** `/contas/produtos-conversao-unidade/{id}/` - Remove conversão
+- **POST** `/contas/produtos/conversao/` - Calcula conversão de unidade
+
+#### **Histórico de Preços**
+- **GET** `/contas/produtos-historico-preco/` - Lista histórico de preços
+- **POST** `/contas/produtos-historico-preco/` - Cria histórico de preço
+- **GET** `/contas/produtos-historico-preco/{id}/` - Busca histórico específico
+- **PUT** `/contas/produtos-historico-preco/{id}/` - Atualiza histórico
+- **DELETE** `/contas/produtos-historico-preco/{id}/` - Remove histórico
+- **GET** `/contas/produtos/historico-preco/{produto_id}/` - Consulta histórico por produto
+
+#### **Tabelas de Preço**
+- **GET** `/contas/tabelas-precos/` - Lista tabelas de preço
+- **POST** `/contas/tabelas-precos/` - Cria tabela de preço
+- **GET** `/contas/tabelas-precos/{id}/` - Busca tabela de preço
+- **PUT** `/contas/tabelas-precos/{id}/` - Atualiza tabela de preço
+- **DELETE** `/contas/tabelas-precos/{id}/` - Remove tabela de preço
+
+#### **Itens de Tabela de Preço**
+- **GET** `/contas/tabelas-precos-itens/` - Lista itens de tabela
+- **POST** `/contas/tabelas-precos-itens/` - Cria item de tabela
+- **GET** `/contas/tabelas-precos-itens/{id}/` - Busca item específico
+- **PUT** `/contas/tabelas-precos-itens/{id}/` - Atualiza item
+- **DELETE** `/contas/tabelas-precos-itens/{id}/` - Remove item
+
+#### **Políticas de Desconto**
+- **GET** `/contas/politicas-desconto/` - Lista políticas de desconto
+- **POST** `/contas/politicas-desconto/` - Cria política de desconto
+- **GET** `/contas/politicas-desconto/{id}/` - Busca política específica
+- **PUT** `/contas/politicas-desconto/{id}/` - Atualiza política
+- **DELETE** `/contas/politicas-desconto/{id}/` - Remove política
+
+#### **Preço Efetivo**
+- **POST** `/contas/produtos/preco/` - Calcula preço efetivo com tabela e descontos
+
+#### **Substitutos de Produto**
+- **GET** `/contas/produtos-substitutos/` - Lista substitutos
+- **POST** `/contas/produtos-substitutos/` - Cria substituto
+- **GET** `/contas/produtos-substitutos/{id}/` - Busca substituto
+- **PUT** `/contas/produtos-substitutos/{id}/` - Atualiza substituto
+- **DELETE** `/contas/produtos-substitutos/{id}/` - Remove substituto
+- **GET** `/contas/produtos/substitutos/{produto_id}/` - Consulta substitutos por produto
+
+#### **Custo por Local**
+- **GET** `/contas/produtos-custo-local/` - Lista custos por local
+- **POST** `/contas/produtos-custo-local/` - Cria custo por local
+- **GET** `/contas/produtos-custo-local/{id}/` - Busca custo específico
+- **PUT** `/contas/produtos-custo-local/{id}/` - Atualiza custo por local
+- **DELETE** `/contas/produtos-custo-local/{id}/` - Remove custo por local
+
+#### **Alertas Operacionais**
+- **GET** `/contas/produtos/alertas/` - Retorna alertas (estoque crítico, sem preço, sem EAN/SKU)
+
+#### **Exemplos de payloads**
+**Preço efetivo**
+```json
+{
+  "produto_id": 123,
+  "tabela_id": 4,
+  "cliente_id": 10,
+  "quantidade": 5,
+  "data_base": "2025-01-10"
+}
+```
+
+**Conversão de unidade**
+```json
+{
+  "produto_id": 123,
+  "unidade_origem": "CX",
+  "unidade_destino": "UN",
+  "quantidade": 2
+}
+```
+
+**Resumo de composição**
+```json
+GET /contas/produtos/composicao/123/
+```
+
 ---
 
 ### **📋 Gestão Financeira**
