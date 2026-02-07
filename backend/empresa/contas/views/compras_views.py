@@ -926,6 +926,76 @@ class ComprasContaPagarResumoFornecedorView(APIView):
         )
 
 
+class ComprasContaPagarPagasResumoView(APIView):
+    """Resumo de contas pagas por período (compras)."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+        fornecedor_id = request.query_params.get('fornecedor_id')
+
+        if (data_inicio and not data_fim) or (data_fim and not data_inicio):
+            return Response(
+                {'error': 'Informe data_inicio e data_fim no formato YYYY-MM-DD.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if data_inicio and data_fim and data_inicio > data_fim:
+            return Response(
+                {'error': 'A data_inicio não pode ser maior que data_fim.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        contas = ContasPagar.objects.select_related('fornecedor').filter(status='P')
+
+        if fornecedor_id:
+            contas = contas.filter(fornecedor_id=fornecedor_id)
+
+        if data_inicio and data_fim:
+            contas = contas.filter(
+                data_pagamento__date__gte=data_inicio,
+                data_pagamento__date__lte=data_fim
+            )
+
+        resumo = contas.aggregate(
+            quantidade=Count('id'),
+            valor_pago=Sum('valor_pago'),
+            valor_total_pago=Sum('valor_total_pago'),
+            juros=Sum('juros'),
+            tarifas=Sum('tarifas')
+        )
+
+        response = {
+            'filtros': {
+                'data_inicio': data_inicio.isoformat() if data_inicio else None,
+                'data_fim': data_fim.isoformat() if data_fim else None,
+                'fornecedor_id': fornecedor_id
+            },
+            'totais': {
+                'quantidade': resumo['quantidade'] or 0,
+                'valor_pago': self._to_float(resumo['valor_pago']),
+                'valor_total_pago': self._to_float(resumo['valor_total_pago']),
+                'juros': self._to_float(resumo['juros']),
+                'tarifas': self._to_float(resumo['tarifas'])
+            }
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
 class ComprasDevolucaoView(APIView):
     """Registra devolução de itens de uma compra."""
 
