@@ -1056,6 +1056,104 @@ class ComprasDevolucaoSaldoView(APIView):
         )
 
 
+class ComprasDevolucaoResumoView(APIView):
+    """Resumo de devoluções de compras."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+        fornecedor_id = request.query_params.get('fornecedor_id')
+
+        if (data_inicio and not data_fim) or (data_fim and not data_inicio):
+            return Response(
+                {'error': 'Informe data_inicio e data_fim no formato YYYY-MM-DD.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if data_inicio and data_fim and data_inicio > data_fim:
+            return Response(
+                {'error': 'A data_inicio não pode ser maior que data_fim.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        movimentos = MovimentacoesEstoque.objects.filter(
+            nota_fiscal_entrada__isnull=False,
+            tipo_movimentacao__tipo='S'
+        ).select_related('produto', 'nota_fiscal_entrada', 'nota_fiscal_entrada__fornecedor')
+
+        if fornecedor_id:
+            movimentos = movimentos.filter(nota_fiscal_entrada__fornecedor_id=fornecedor_id)
+
+        if data_inicio and data_fim:
+            movimentos = movimentos.filter(
+                data_movimentacao__date__gte=data_inicio,
+                data_movimentacao__date__lte=data_fim
+            )
+
+        totais = movimentos.aggregate(
+            quantidade_total=Sum('quantidade'),
+            valor_total=Sum('valor_total'),
+        )
+
+        top_fornecedores = list(
+            movimentos.values(
+                'nota_fiscal_entrada__fornecedor__id',
+                'nota_fiscal_entrada__fornecedor__nome'
+            )
+            .annotate(
+                quantidade=Sum('quantidade'),
+                valor_total=Sum('valor_total')
+            )
+            .order_by('-valor_total')[:10]
+        )
+
+        for fornecedor in top_fornecedores:
+            fornecedor['quantidade'] = self._to_float(fornecedor['quantidade'])
+            fornecedor['valor_total'] = self._to_float(fornecedor['valor_total'])
+
+        top_produtos = list(
+            movimentos.values('produto__id', 'produto__nome', 'produto__codigo')
+            .annotate(
+                quantidade=Sum('quantidade'),
+                valor_total=Sum('valor_total')
+            )
+            .order_by('-valor_total')[:10]
+        )
+
+        for produto in top_produtos:
+            produto['quantidade'] = self._to_float(produto['quantidade'])
+            produto['valor_total'] = self._to_float(produto['valor_total'])
+
+        response = {
+            'filtros': {
+                'data_inicio': data_inicio.isoformat() if data_inicio else None,
+                'data_fim': data_fim.isoformat() if data_fim else None,
+                'fornecedor_id': fornecedor_id
+            },
+            'totais': {
+                'quantidade_total': self._to_float(totais['quantidade_total']),
+                'valor_total': self._to_float(totais['valor_total'])
+            },
+            'top_fornecedores': top_fornecedores,
+            'top_produtos': top_produtos
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
 class ComprasParcelasContaPagarView(APIView):
     """Gera parcelas de contas a pagar vinculadas à nota fiscal de entrada."""
 
