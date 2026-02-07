@@ -353,6 +353,120 @@ GET /contas/produtos/composicao/123/
 
 ---
 
+### **🛒 Gestão de Compras Avançadas**
+
+#### **Requisições de Compra**
+- **GET** `/contas/requisicoes-compra/` - Lista requisições
+- **POST** `/contas/requisicoes-compra/` - Cria requisição
+- **GET** `/contas/requisicoes-compra/{id}/` - Busca requisição
+- **PUT** `/contas/requisicoes-compra/{id}/` - Atualiza requisição
+- **DELETE** `/contas/requisicoes-compra/{id}/` - Remove requisição
+
+#### **Itens da Requisição**
+- **GET** `/contas/itens-requisicao-compra/` - Lista itens da requisição
+- **POST** `/contas/itens-requisicao-compra/` - Cria item
+- **GET** `/contas/itens-requisicao-compra/{id}/` - Busca item
+- **PUT** `/contas/itens-requisicao-compra/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-requisicao-compra/{id}/` - Remove item
+
+#### **Cotações de Compra**
+- **GET** `/contas/cotacoes-compra/` - Lista cotações
+- **POST** `/contas/cotacoes-compra/` - Cria cotação
+- **GET** `/contas/cotacoes-compra/{id}/` - Busca cotação
+- **PUT** `/contas/cotacoes-compra/{id}/` - Atualiza cotação
+- **DELETE** `/contas/cotacoes-compra/{id}/` - Remove cotação
+
+#### **Itens da Cotação**
+- **GET** `/contas/itens-cotacao-compra/` - Lista itens da cotação
+- **POST** `/contas/itens-cotacao-compra/` - Cria item
+- **GET** `/contas/itens-cotacao-compra/{id}/` - Busca item
+- **PUT** `/contas/itens-cotacao-compra/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-cotacao-compra/{id}/` - Remove item
+
+#### **Pedidos de Compra**
+- **GET** `/contas/pedidos-compra/` - Lista pedidos
+- **POST** `/contas/pedidos-compra/` - Cria pedido
+- **GET** `/contas/pedidos-compra/{id}/` - Busca pedido
+- **PUT** `/contas/pedidos-compra/{id}/` - Atualiza pedido
+- **DELETE** `/contas/pedidos-compra/{id}/` - Remove pedido
+
+#### **Itens do Pedido**
+- **GET** `/contas/itens-pedido-compra/` - Lista itens do pedido
+- **POST** `/contas/itens-pedido-compra/` - Cria item
+- **GET** `/contas/itens-pedido-compra/{id}/` - Busca item
+- **PUT** `/contas/itens-pedido-compra/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-pedido-compra/{id}/` - Remove item
+
+#### **Operações de Compras Avançadas**
+- **POST** `/contas/compras/requisicao/registrar/` - Registra requisição com itens
+- **POST** `/contas/compras/requisicao/aprovar/` - Aprova requisição
+- **POST** `/contas/compras/requisicao/rejeitar/` - Rejeita requisição
+- **POST** `/contas/compras/cotacao/registrar/` - Registra cotação com itens
+- **POST** `/contas/compras/cotacao/aprovar/` - Aprova cotação
+- **POST** `/contas/compras/pedido/registrar/` - Registra pedido com itens
+- **POST** `/contas/compras/pedido/aprovar/` - Aprova pedido
+- **POST** `/contas/compras/pedido/cancelar/` - Cancela pedido
+- **POST** `/contas/compras/pedido/receber/` - Marca pedido como recebido
+
+#### **Exemplos de payloads**
+**Registrar requisição**
+```json
+{
+  "numero_requisicao": "RC-2025-001",
+  "solicitante_id": 4,
+  "fornecedor_preferencial_id": 12,
+  "prioridade": "Alta",
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "10",
+      "valor_estimado": "15.50"
+    }
+  ]
+}
+```
+
+**Registrar cotação**
+```json
+{
+  "numero_cotacao": "CT-2025-010",
+  "requisicao_id": 3,
+  "fornecedor_id": 12,
+  "validade": "2025-02-28",
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "10",
+      "valor_unitario": "14.90",
+      "desconto": "0.00",
+      "impostos": "0.00"
+    }
+  ]
+}
+```
+
+**Registrar pedido**
+```json
+{
+  "numero_pedido": "PC-2025-003",
+  "cotacao_id": 8,
+  "fornecedor_id": 12,
+  "forma_pagamento": "Boleto",
+  "condicoes_pagamento": "30 dias",
+  "frete": "50.00",
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "10",
+      "valor_unitario": "14.90",
+      "desconto": "0.00"
+    }
+  ]
+}
+```
+
+---
+
 ### **📋 Gestão Financeira**
 
 #### **Categorias**

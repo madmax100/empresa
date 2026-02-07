@@ -155,6 +155,42 @@ class ComissoesVendaSerializer(serializers.ModelSerializer):
         model = ComissoesVenda
         fields = '__all__'
 
+
+class RequisicoesCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RequisicoesCompra
+        fields = '__all__'
+
+
+class ItensRequisicaoCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensRequisicaoCompra
+        fields = '__all__'
+
+
+class CotacoesCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CotacoesCompra
+        fields = '__all__'
+
+
+class ItensCotacaoCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensCotacaoCompra
+        fields = '__all__'
+
+
+class PedidosCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PedidosCompra
+        fields = '__all__'
+
+
+class ItensPedidoCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensPedidoCompra
+        fields = '__all__'
+
         
 class LocaisEstoqueSerializer(serializers.ModelSerializer):
     class Meta:

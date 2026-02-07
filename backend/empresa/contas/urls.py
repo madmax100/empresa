@@ -36,6 +36,15 @@ from .views.compras_views import (
     ComprasCancelarNotaView,
     ComprasListaView,
     ComprasCancelarContaPagarView,
+    ComprasRequisicaoRegistrarView,
+    ComprasRequisicaoAprovarView,
+    ComprasRequisicaoRejeitarView,
+    ComprasCotacaoRegistrarView,
+    ComprasCotacaoAprovarView,
+    ComprasPedidoRegistrarView,
+    ComprasPedidoAprovarView,
+    ComprasPedidoCancelarView,
+    ComprasPedidoReceberView,
 )
 from .views.produtos_views import (
     ProdutosAlertasView,
@@ -97,6 +106,12 @@ router.register(r'itens-orcamento-venda', ItensOrcamentoVendaViewSet)
 router.register(r'pedidos-venda', PedidosVendaViewSet)
 router.register(r'itens-pedido-venda', ItensPedidoVendaViewSet)
 router.register(r'comissoes-venda', ComissoesVendaViewSet)
+router.register(r'requisicoes-compra', RequisicoesCompraViewSet)
+router.register(r'itens-requisicao-compra', ItensRequisicaoCompraViewSet)
+router.register(r'cotacoes-compra', CotacoesCompraViewSet)
+router.register(r'itens-cotacao-compra', ItensCotacaoCompraViewSet)
+router.register(r'pedidos-compra', PedidosCompraViewSet)
+router.register(r'itens-pedido-compra', ItensPedidoCompraViewSet)
 router.register(r'locais_estoque', LocaisEstoqueViewSet)
 router.register(r'lotes', LotesViewSet)
 router.register(r'marcas', MarcasViewSet)
@@ -173,6 +188,15 @@ urlpatterns = [
     path('compras/cancelar/<int:nota_id>/', ComprasCancelarNotaView.as_view(), name='compras-cancelar'),
     path('compras/', ComprasListaView.as_view(), name='compras-lista'),
     path('compras/conta-pagar/cancelar/', ComprasCancelarContaPagarView.as_view(), name='compras-conta-pagar-cancelar'),
+    path('compras/requisicao/registrar/', ComprasRequisicaoRegistrarView.as_view(), name='compras-requisicao-registrar'),
+    path('compras/requisicao/aprovar/', ComprasRequisicaoAprovarView.as_view(), name='compras-requisicao-aprovar'),
+    path('compras/requisicao/rejeitar/', ComprasRequisicaoRejeitarView.as_view(), name='compras-requisicao-rejeitar'),
+    path('compras/cotacao/registrar/', ComprasCotacaoRegistrarView.as_view(), name='compras-cotacao-registrar'),
+    path('compras/cotacao/aprovar/', ComprasCotacaoAprovarView.as_view(), name='compras-cotacao-aprovar'),
+    path('compras/pedido/registrar/', ComprasPedidoRegistrarView.as_view(), name='compras-pedido-registrar'),
+    path('compras/pedido/aprovar/', ComprasPedidoAprovarView.as_view(), name='compras-pedido-aprovar'),
+    path('compras/pedido/cancelar/', ComprasPedidoCancelarView.as_view(), name='compras-pedido-cancelar'),
+    path('compras/pedido/receber/', ComprasPedidoReceberView.as_view(), name='compras-pedido-receber'),
     path('produtos/preco/', ProdutosPrecoView.as_view(), name='produtos-preco'),
     path('produtos/conversao/', ProdutosConversaoView.as_view(), name='produtos-conversao'),
     path('produtos/composicao/<int:produto_id>/', ProdutosComposicaoResumoView.as_view(), name='produtos-composicao-resumo'),

@@ -911,6 +911,30 @@ class ComissoesVendaViewSet(viewsets.ModelViewSet):
     queryset = ComissoesVenda.objects.all()
     serializer_class = ComissoesVendaSerializer
     
+class RequisicoesCompraViewSet(viewsets.ModelViewSet):
+    queryset = RequisicoesCompra.objects.all()
+    serializer_class = RequisicoesCompraSerializer
+
+class ItensRequisicaoCompraViewSet(viewsets.ModelViewSet):
+    queryset = ItensRequisicaoCompra.objects.all()
+    serializer_class = ItensRequisicaoCompraSerializer
+
+class CotacoesCompraViewSet(viewsets.ModelViewSet):
+    queryset = CotacoesCompra.objects.all()
+    serializer_class = CotacoesCompraSerializer
+
+class ItensCotacaoCompraViewSet(viewsets.ModelViewSet):
+    queryset = ItensCotacaoCompra.objects.all()
+    serializer_class = ItensCotacaoCompraSerializer
+
+class PedidosCompraViewSet(viewsets.ModelViewSet):
+    queryset = PedidosCompra.objects.all()
+    serializer_class = PedidosCompraSerializer
+
+class ItensPedidoCompraViewSet(viewsets.ModelViewSet):
+    queryset = ItensPedidoCompra.objects.all()
+    serializer_class = ItensPedidoCompraSerializer
+
 class LocaisEstoqueViewSet(viewsets.ModelViewSet):
     queryset = LocaisEstoque.objects.all()
     serializer_class = LocaisEstoqueSerializer

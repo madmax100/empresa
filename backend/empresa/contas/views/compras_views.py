@@ -10,9 +10,15 @@ from rest_framework.views import APIView
 
 from ..models.access import (
     ContasPagar,
+    CotacoesCompra,
+    ItensCotacaoCompra,
     ItensNfEntrada,
+    ItensPedidoCompra,
+    ItensRequisicaoCompra,
     MovimentacoesEstoque,
     NotasFiscaisEntrada,
+    PedidosCompra,
+    RequisicoesCompra,
     SaldosEstoque,
     TiposMovimentacaoEstoque,
 )
@@ -46,6 +52,31 @@ def _atualizar_saldo_estoque(produto_id, local_id, delta_quantidade, custo_unita
     saldo.ultima_movimentacao = data_movimentacao
     saldo.save()
 
+
+def _recalcular_total_requisicao(requisicao):
+    total = ItensRequisicaoCompra.objects.filter(requisicao=requisicao).aggregate(
+        total=Sum('valor_total')
+    )['total'] or Decimal('0.00')
+    requisicao.valor_estimado = total
+    requisicao.save(update_fields=['valor_estimado'])
+
+
+def _recalcular_total_cotacao(cotacao):
+    total = ItensCotacaoCompra.objects.filter(cotacao=cotacao).aggregate(
+        total=Sum('valor_total')
+    )['total'] or Decimal('0.00')
+    cotacao.valor_total = total
+    cotacao.save(update_fields=['valor_total'])
+
+
+def _recalcular_total_pedido(pedido):
+    total = ItensPedidoCompra.objects.filter(pedido=pedido).aggregate(
+        total=Sum('valor_total')
+    )['total'] or Decimal('0.00')
+    pedido.valor_produtos = total
+    pedido.save(update_fields=['valor_produtos'])
+    pedido.clean()
+    pedido.save(update_fields=['valor_total'])
 
 class ComprasResumoView(APIView):
     """Resumo de compras (NF de entrada, itens e contas a pagar)."""
@@ -2115,3 +2146,275 @@ class ComprasCancelarContaPagarView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class ComprasRequisicaoRegistrarView(APIView):
+    """Registra requisição de compra com itens."""
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        itens = data.get('itens', [])
+        if not itens:
+            return Response({'error': 'Informe itens para a requisição.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            requisicao = RequisicoesCompra.objects.create(
+                numero_requisicao=data.get('numero_requisicao'),
+                solicitante_id=data.get('solicitante_id'),
+                fornecedor_preferencial_id=data.get('fornecedor_preferencial_id') or data.get('fornecedor_id'),
+                data_solicitacao=data.get('data_solicitacao') or timezone.now(),
+                prioridade=data.get('prioridade'),
+                observacoes=data.get('observacoes'),
+                status='ABERTA'
+            )
+
+            total = Decimal('0.00')
+            for item in itens:
+                quantidade = Decimal(str(item.get('quantidade') or '0'))
+                valor_estimado = Decimal(str(item.get('valor_estimado') or '0'))
+                valor_total = quantidade * valor_estimado
+                ItensRequisicaoCompra.objects.create(
+                    requisicao=requisicao,
+                    produto_id=item.get('produto_id'),
+                    quantidade=quantidade,
+                    valor_estimado=valor_estimado,
+                    valor_total=valor_total,
+                    observacoes=item.get('observacoes')
+                )
+                total += valor_total
+
+            requisicao.valor_estimado = total
+            requisicao.save(update_fields=['valor_estimado'])
+
+        return Response(
+            {'requisicao_id': requisicao.id, 'status': requisicao.status, 'valor_estimado': float(total)},
+            status=status.HTTP_201_CREATED
+        )
+
+
+class ComprasRequisicaoAprovarView(APIView):
+    """Aprova uma requisição de compra."""
+
+    def post(self, request, *args, **kwargs):
+        requisicao_id = request.data.get('requisicao_id')
+        if not requisicao_id:
+            return Response({'error': 'Informe requisicao_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        requisicao = RequisicoesCompra.objects.filter(id=requisicao_id).first()
+        if not requisicao:
+            return Response({'error': 'Requisição não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if requisicao.status not in ['ABERTA', 'REJEITADA']:
+            return Response({'error': 'Requisição não pode ser aprovada.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        requisicao.status = 'APROVADA'
+        requisicao.data_aprovacao = timezone.now()
+        requisicao.save(update_fields=['status', 'data_aprovacao'])
+
+        return Response({'requisicao_id': requisicao.id, 'status': requisicao.status}, status=status.HTTP_200_OK)
+
+
+class ComprasRequisicaoRejeitarView(APIView):
+    """Rejeita uma requisição de compra."""
+
+    def post(self, request, *args, **kwargs):
+        requisicao_id = request.data.get('requisicao_id')
+        if not requisicao_id:
+            return Response({'error': 'Informe requisicao_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        requisicao = RequisicoesCompra.objects.filter(id=requisicao_id).first()
+        if not requisicao:
+            return Response({'error': 'Requisição não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        requisicao.status = 'REJEITADA'
+        requisicao.save(update_fields=['status'])
+
+        return Response({'requisicao_id': requisicao.id, 'status': requisicao.status}, status=status.HTTP_200_OK)
+
+
+class ComprasCotacaoRegistrarView(APIView):
+    """Registra cotação de compra com itens."""
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        itens = data.get('itens', [])
+        if not itens:
+            return Response({'error': 'Informe itens para a cotação.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            cotacao = CotacoesCompra.objects.create(
+                numero_cotacao=data.get('numero_cotacao'),
+                requisicao_id=data.get('requisicao_id'),
+                fornecedor_id=data.get('fornecedor_id'),
+                data_cotacao=data.get('data_cotacao') or timezone.now(),
+                validade=data.get('validade'),
+                prazo_entrega=data.get('prazo_entrega'),
+                observacoes=data.get('observacoes'),
+                status='EM_ANDAMENTO'
+            )
+
+            total = Decimal('0.00')
+            for item in itens:
+                quantidade = Decimal(str(item.get('quantidade') or '0'))
+                valor_unitario = Decimal(str(item.get('valor_unitario') or '0'))
+                desconto = Decimal(str(item.get('desconto') or '0'))
+                impostos = Decimal(str(item.get('impostos') or '0'))
+                valor_total = (quantidade * valor_unitario) + impostos - desconto
+                ItensCotacaoCompra.objects.create(
+                    cotacao=cotacao,
+                    produto_id=item.get('produto_id'),
+                    quantidade=quantidade,
+                    valor_unitario=valor_unitario,
+                    desconto=desconto,
+                    impostos=impostos,
+                    valor_total=valor_total
+                )
+                total += valor_total
+
+            cotacao.valor_total = total
+            cotacao.save(update_fields=['valor_total'])
+
+        return Response(
+            {'cotacao_id': cotacao.id, 'status': cotacao.status, 'valor_total': float(total)},
+            status=status.HTTP_201_CREATED
+        )
+
+
+class ComprasCotacaoAprovarView(APIView):
+    """Aprova cotação de compra."""
+
+    def post(self, request, *args, **kwargs):
+        cotacao_id = request.data.get('cotacao_id')
+        if not cotacao_id:
+            return Response({'error': 'Informe cotacao_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        cotacao = CotacoesCompra.objects.filter(id=cotacao_id).select_related('requisicao').first()
+        if not cotacao:
+            return Response({'error': 'Cotação não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        cotacao.status = 'APROVADA'
+        cotacao.save(update_fields=['status'])
+
+        if cotacao.requisicao and cotacao.requisicao.status != 'CONVERTIDA':
+            cotacao.requisicao.status = 'CONVERTIDA'
+            cotacao.requisicao.save(update_fields=['status'])
+
+        return Response({'cotacao_id': cotacao.id, 'status': cotacao.status}, status=status.HTTP_200_OK)
+
+
+class ComprasPedidoRegistrarView(APIView):
+    """Registra pedido de compra com itens."""
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        itens = data.get('itens', [])
+        if not itens:
+            return Response({'error': 'Informe itens para o pedido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            cotacao_id = data.get('cotacao_id')
+            cotacao = CotacoesCompra.objects.filter(id=cotacao_id).first() if cotacao_id else None
+            fornecedor_id = data.get('fornecedor_id') or (cotacao.fornecedor_id if cotacao else None)
+
+            pedido = PedidosCompra.objects.create(
+                numero_pedido=data.get('numero_pedido'),
+                fornecedor_id=fornecedor_id,
+                requisicao_id=data.get('requisicao_id'),
+                cotacao=cotacao,
+                data_emissao=data.get('data_emissao') or timezone.now(),
+                data_prevista_entrega=data.get('data_prevista_entrega'),
+                forma_pagamento=data.get('forma_pagamento'),
+                condicoes_pagamento=data.get('condicoes_pagamento'),
+                desconto=Decimal(str(data.get('desconto') or '0')),
+                frete=Decimal(str(data.get('frete') or '0')),
+                impostos=Decimal(str(data.get('impostos') or '0')),
+                observacoes=data.get('observacoes'),
+                status='RASCUNHO'
+            )
+
+            total = Decimal('0.00')
+            for item in itens:
+                quantidade = Decimal(str(item.get('quantidade') or '0'))
+                valor_unitario = Decimal(str(item.get('valor_unitario') or '0'))
+                desconto = Decimal(str(item.get('desconto') or '0'))
+                valor_total = (quantidade * valor_unitario) - desconto
+                ItensPedidoCompra.objects.create(
+                    pedido=pedido,
+                    produto_id=item.get('produto_id'),
+                    quantidade=quantidade,
+                    valor_unitario=valor_unitario,
+                    desconto=desconto,
+                    valor_total=valor_total
+                )
+                total += valor_total
+
+            pedido.valor_produtos = total
+            pedido.save(update_fields=['valor_produtos'])
+            pedido.clean()
+            pedido.save(update_fields=['valor_total'])
+
+        return Response(
+            {'pedido_id': pedido.id, 'status': pedido.status, 'valor_total': float(pedido.valor_total)},
+            status=status.HTTP_201_CREATED
+        )
+
+
+class ComprasPedidoAprovarView(APIView):
+    """Aprova pedido de compra."""
+
+    def post(self, request, *args, **kwargs):
+        pedido_id = request.data.get('pedido_id')
+        if not pedido_id:
+            return Response({'error': 'Informe pedido_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        pedido = PedidosCompra.objects.filter(id=pedido_id).first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if pedido.status not in ['RASCUNHO']:
+            return Response({'error': 'Pedido não pode ser aprovado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        pedido.status = 'APROVADO'
+        pedido.data_aprovacao = timezone.now()
+        pedido.save(update_fields=['status', 'data_aprovacao'])
+
+        return Response({'pedido_id': pedido.id, 'status': pedido.status}, status=status.HTTP_200_OK)
+
+
+class ComprasPedidoCancelarView(APIView):
+    """Cancela pedido de compra."""
+
+    def post(self, request, *args, **kwargs):
+        pedido_id = request.data.get('pedido_id')
+        if not pedido_id:
+            return Response({'error': 'Informe pedido_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        pedido = PedidosCompra.objects.filter(id=pedido_id).first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        pedido.status = 'CANCELADO'
+        pedido.save(update_fields=['status'])
+
+        return Response({'pedido_id': pedido.id, 'status': pedido.status}, status=status.HTTP_200_OK)
+
+
+class ComprasPedidoReceberView(APIView):
+    """Marca pedido de compra como recebido."""
+
+    def post(self, request, *args, **kwargs):
+        pedido_id = request.data.get('pedido_id')
+        if not pedido_id:
+            return Response({'error': 'Informe pedido_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        pedido = PedidosCompra.objects.filter(id=pedido_id).first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if pedido.status not in ['APROVADO', 'ENVIADO']:
+            return Response({'error': 'Pedido não pode ser recebido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        pedido.status = 'RECEBIDO'
+        pedido.save(update_fields=['status'])
+
+        return Response({'pedido_id': pedido.id, 'status': pedido.status}, status=status.HTTP_200_OK)

@@ -2294,6 +2294,490 @@ class ComissoesVenda(models.Model):
         self.clean()
         super().save(*args, **kwargs)
 
+
+class RequisicoesCompra(models.Model):
+    STATUS_CHOICES = [
+        ('ABERTA', 'Aberta'),
+        ('APROVADA', 'Aprovada'),
+        ('REJEITADA', 'Rejeitada'),
+        ('CANCELADA', 'Cancelada'),
+        ('CONVERTIDA', 'Convertida'),
+    ]
+
+    numero_requisicao = models.CharField(
+        max_length=30,
+        verbose_name='Número da Requisição',
+        null=True,
+        blank=True
+    )
+    solicitante = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='requisicoes_compra',
+        verbose_name='Solicitante',
+        null=True,
+        blank=True
+    )
+    fornecedor_preferencial = models.ForeignKey(
+        'Fornecedores',
+        on_delete=models.PROTECT,
+        related_name='requisicoes_compra_preferenciais',
+        verbose_name='Fornecedor Preferencial',
+        null=True,
+        blank=True
+    )
+    data_solicitacao = models.DateTimeField(
+        verbose_name='Data de Solicitação',
+        null=True,
+        blank=True
+    )
+    data_aprovacao = models.DateTimeField(
+        verbose_name='Data de Aprovação',
+        null=True,
+        blank=True
+    )
+    prioridade = models.CharField(
+        max_length=20,
+        verbose_name='Prioridade',
+        null=True,
+        blank=True
+    )
+    valor_estimado = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Estimado',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ABERTA',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'requisicoes_compra'
+        verbose_name = 'Requisição de Compra'
+        verbose_name_plural = 'Requisições de Compra'
+        ordering = ['-data_solicitacao', '-id']
+        indexes = [
+            models.Index(fields=['numero_requisicao']),
+            models.Index(fields=['status']),
+            models.Index(fields=['data_solicitacao']),
+            models.Index(fields=['solicitante']),
+        ]
+
+    def __str__(self):
+        return f"Requisição {self.numero_requisicao or self.id}"
+
+
+class ItensRequisicaoCompra(models.Model):
+    requisicao = models.ForeignKey(
+        'RequisicoesCompra',
+        on_delete=models.CASCADE,
+        related_name='itens',
+        verbose_name='Requisição'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_requisicao_compra',
+        verbose_name='Produto'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        verbose_name='Quantidade',
+        default=Decimal('0.0000')
+    )
+    valor_estimado = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Estimado',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        db_table = 'itens_requisicao_compra'
+        verbose_name = 'Item da Requisição de Compra'
+        verbose_name_plural = 'Itens da Requisição de Compra'
+        ordering = ['requisicao', 'id']
+        indexes = [
+            models.Index(fields=['requisicao', 'produto']),
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Requisição {self.requisicao_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_estimado)
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class CotacoesCompra(models.Model):
+    STATUS_CHOICES = [
+        ('EM_ANDAMENTO', 'Em andamento'),
+        ('RECEBIDA', 'Recebida'),
+        ('APROVADA', 'Aprovada'),
+        ('REJEITADA', 'Rejeitada'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+
+    numero_cotacao = models.CharField(
+        max_length=30,
+        verbose_name='Número da Cotação',
+        null=True,
+        blank=True
+    )
+    requisicao = models.ForeignKey(
+        'RequisicoesCompra',
+        on_delete=models.SET_NULL,
+        related_name='cotacoes',
+        verbose_name='Requisição',
+        null=True,
+        blank=True
+    )
+    fornecedor = models.ForeignKey(
+        'Fornecedores',
+        on_delete=models.PROTECT,
+        related_name='cotacoes_compra',
+        verbose_name='Fornecedor',
+        null=True,
+        blank=True
+    )
+    data_cotacao = models.DateTimeField(
+        verbose_name='Data da Cotação',
+        null=True,
+        blank=True
+    )
+    validade = models.DateField(
+        verbose_name='Validade',
+        null=True,
+        blank=True
+    )
+    prazo_entrega = models.CharField(
+        max_length=100,
+        verbose_name='Prazo de Entrega',
+        null=True,
+        blank=True
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='EM_ANDAMENTO',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'cotacoes_compra'
+        verbose_name = 'Cotação de Compra'
+        verbose_name_plural = 'Cotações de Compra'
+        ordering = ['-data_cotacao', '-id']
+        indexes = [
+            models.Index(fields=['numero_cotacao']),
+            models.Index(fields=['status']),
+            models.Index(fields=['data_cotacao']),
+            models.Index(fields=['fornecedor']),
+        ]
+
+    def __str__(self):
+        return f"Cotação {self.numero_cotacao or self.id}"
+
+
+class ItensCotacaoCompra(models.Model):
+    cotacao = models.ForeignKey(
+        'CotacoesCompra',
+        on_delete=models.CASCADE,
+        related_name='itens',
+        verbose_name='Cotação'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_cotacao_compra',
+        verbose_name='Produto'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        verbose_name='Quantidade',
+        default=Decimal('0.0000')
+    )
+    valor_unitario = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Unitário',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    impostos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Impostos',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+
+    class Meta:
+        db_table = 'itens_cotacao_compra'
+        verbose_name = 'Item da Cotação de Compra'
+        verbose_name_plural = 'Itens da Cotação de Compra'
+        ordering = ['cotacao', 'id']
+        indexes = [
+            models.Index(fields=['cotacao', 'produto']),
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Cotação {self.cotacao_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_unitario) + (self.impostos or Decimal('0.00')) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class PedidosCompra(models.Model):
+    STATUS_CHOICES = [
+        ('RASCUNHO', 'Rascunho'),
+        ('APROVADO', 'Aprovado'),
+        ('ENVIADO', 'Enviado'),
+        ('RECEBIDO', 'Recebido'),
+        ('CANCELADO', 'Cancelado'),
+    ]
+
+    numero_pedido = models.CharField(
+        max_length=30,
+        verbose_name='Número do Pedido',
+        null=True,
+        blank=True
+    )
+    fornecedor = models.ForeignKey(
+        'Fornecedores',
+        on_delete=models.PROTECT,
+        related_name='pedidos_compra',
+        verbose_name='Fornecedor',
+        null=True,
+        blank=True
+    )
+    requisicao = models.ForeignKey(
+        'RequisicoesCompra',
+        on_delete=models.SET_NULL,
+        related_name='pedidos_compra',
+        verbose_name='Requisição',
+        null=True,
+        blank=True
+    )
+    cotacao = models.ForeignKey(
+        'CotacoesCompra',
+        on_delete=models.SET_NULL,
+        related_name='pedidos_compra',
+        verbose_name='Cotação',
+        null=True,
+        blank=True
+    )
+    data_emissao = models.DateTimeField(
+        verbose_name='Data de Emissão',
+        null=True,
+        blank=True
+    )
+    data_aprovacao = models.DateTimeField(
+        verbose_name='Data de Aprovação',
+        null=True,
+        blank=True
+    )
+    data_prevista_entrega = models.DateField(
+        verbose_name='Data Prevista de Entrega',
+        null=True,
+        blank=True
+    )
+    forma_pagamento = models.CharField(
+        max_length=50,
+        verbose_name='Forma de Pagamento',
+        null=True,
+        blank=True
+    )
+    condicoes_pagamento = models.CharField(
+        max_length=100,
+        verbose_name='Condições de Pagamento',
+        null=True,
+        blank=True
+    )
+    valor_produtos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor dos Produtos',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    frete = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Frete',
+        default=Decimal('0.00')
+    )
+    impostos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Impostos',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='RASCUNHO',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'pedidos_compra'
+        verbose_name = 'Pedido de Compra'
+        verbose_name_plural = 'Pedidos de Compra'
+        ordering = ['-data_emissao', '-id']
+        indexes = [
+            models.Index(fields=['numero_pedido']),
+            models.Index(fields=['status']),
+            models.Index(fields=['data_emissao']),
+            models.Index(fields=['fornecedor']),
+        ]
+
+    def __str__(self):
+        return f"Pedido {self.numero_pedido or self.id}"
+
+    def clean(self):
+        self.valor_total = (
+            self.valor_produtos +
+            self.frete +
+            self.impostos -
+            self.desconto
+        )
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ItensPedidoCompra(models.Model):
+    pedido = models.ForeignKey(
+        'PedidosCompra',
+        on_delete=models.CASCADE,
+        related_name='itens',
+        verbose_name='Pedido'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_pedido_compra',
+        verbose_name='Produto'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        verbose_name='Quantidade',
+        default=Decimal('0.0000')
+    )
+    valor_unitario = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Unitário',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+
+    class Meta:
+        db_table = 'itens_pedido_compra'
+        verbose_name = 'Item do Pedido de Compra'
+        verbose_name_plural = 'Itens do Pedido de Compra'
+        ordering = ['pedido', 'id']
+        indexes = [
+            models.Index(fields=['pedido', 'produto']),
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Pedido {self.pedido_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_unitario) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
 class NotasFiscaisServico(models.Model):
     # Identificação
     numero_nota = models.CharField(
