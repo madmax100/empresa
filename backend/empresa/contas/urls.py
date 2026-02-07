@@ -41,7 +41,9 @@ from .views.produtos_views import (
     ProdutosAlertasView,
     ProdutosComposicaoResumoView,
     ProdutosConversaoView,
+    ProdutosHistoricoPrecoView,
     ProdutosPrecoView,
+    ProdutosSubstitutosView,
 )
 
 router = DefaultRouter()
@@ -144,6 +146,8 @@ urlpatterns = [
     path('produtos/conversao/', ProdutosConversaoView.as_view(), name='produtos-conversao'),
     path('produtos/composicao/<int:produto_id>/', ProdutosComposicaoResumoView.as_view(), name='produtos-composicao-resumo'),
     path('produtos/alertas/', ProdutosAlertasView.as_view(), name='produtos-alertas'),
+    path('produtos/historico-preco/<int:produto_id>/', ProdutosHistoricoPrecoView.as_view(), name='produtos-historico-preco'),
+    path('produtos/substitutos/<int:produto_id>/', ProdutosSubstitutosView.as_view(), name='produtos-substitutos'),
     
     path('', include(router.urls)),
 ]

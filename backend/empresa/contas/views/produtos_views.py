@@ -13,6 +13,8 @@ from ..models.access import (
     ProdutoConversaoUnidade,
     Produtos,
     TabelaPrecoItem,
+    ProdutoHistoricoPreco,
+    ProdutoSubstituto,
 )
 
 
@@ -235,4 +237,64 @@ class ProdutosAlertasView(APIView):
             'sem_preco_venda': list(sem_preco),
             'sem_ean': list(sem_ean),
             'sem_sku': list(sem_sku),
+        })
+
+
+class ProdutosHistoricoPrecoView(APIView):
+    """
+    Retorna histórico de preços de um produto com o último preço vigente.
+    """
+
+    def get(self, request, produto_id):
+        historico = ProdutoHistoricoPreco.objects.filter(
+            produto_id=produto_id,
+        ).order_by('-data_inicio')
+
+        itens = [
+            {
+                'id': item.id,
+                'preco_custo': float(item.preco_custo or 0),
+                'preco_venda': float(item.preco_venda or 0),
+                'data_inicio': item.data_inicio,
+                'data_fim': item.data_fim,
+                'origem': item.origem,
+                'observacoes': item.observacoes,
+            }
+            for item in historico
+        ]
+
+        ultimo = itens[0] if itens else None
+
+        return Response({
+            'produto_id': produto_id,
+            'ultimo_preco': ultimo,
+            'historico': itens,
+        })
+
+
+class ProdutosSubstitutosView(APIView):
+    """
+    Lista substitutos de um produto.
+    """
+
+    def get(self, request, produto_id):
+        substitutos = ProdutoSubstituto.objects.filter(
+            produto_id=produto_id,
+            ativo=True,
+        ).select_related('produto_substituto_id')
+
+        itens = [
+            {
+                'id': item.id,
+                'produto_substituto_id': item.produto_substituto_id_id,
+                'codigo': item.produto_substituto_id.codigo,
+                'nome': item.produto_substituto_id.nome,
+                'motivo': item.motivo,
+            }
+            for item in substitutos
+        ]
+
+        return Response({
+            'produto_id': produto_id,
+            'substitutos': itens,
         })
