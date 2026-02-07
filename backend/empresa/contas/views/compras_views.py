@@ -988,6 +988,89 @@ class ComprasCancelarDevolucaoView(APIView):
         )
 
 
+class ComprasAtualizarDevolucaoView(APIView):
+    """Atualiza a quantidade de uma devolução e ajusta o saldo."""
+
+    @staticmethod
+    def _decimal(value, default='0.000'):
+        if value is None or value == '':
+            return Decimal(default)
+        return Decimal(str(value))
+
+    def post(self, request, *args, **kwargs):
+        payload = request.data or {}
+        movimento_id = payload.get('movimento_id')
+        nova_quantidade = payload.get('quantidade')
+
+        if not movimento_id or nova_quantidade is None:
+            return Response(
+                {'error': 'movimento_id e quantidade são obrigatórios.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        nova_quantidade = self._decimal(nova_quantidade)
+        if nova_quantidade <= 0:
+            return Response(
+                {'error': 'A quantidade deve ser maior que zero.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            movimento = MovimentacoesEstoque.objects.select_related(
+                'tipo_movimentacao', 'nota_fiscal_entrada'
+            ).get(id=movimento_id, tipo_movimentacao__tipo='S')
+        except MovimentacoesEstoque.DoesNotExist:
+            return Response(
+                {'error': 'Movimento de devolução não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not movimento.nota_fiscal_entrada_id:
+            return Response(
+                {'error': 'Movimento informado não pertence a uma devolução de compra.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not movimento.local_origem_id:
+            return Response(
+                {'error': 'Movimento sem local de origem configurado.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        quantidade_atual = movimento.quantidade or Decimal('0.000')
+        delta = nova_quantidade - quantidade_atual
+
+        if delta == 0:
+            return Response(
+                {'status': 'sem_alteracoes', 'movimento_id': movimento_id},
+                status=status.HTTP_200_OK
+            )
+
+        with transaction.atomic():
+            _atualizar_saldo_estoque(
+                produto_id=movimento.produto_id,
+                local_id=movimento.local_origem_id,
+                delta_quantidade=-(delta),
+                custo_unitario=movimento.custo_unitario,
+                data_movimentacao=movimento.data_movimentacao
+            )
+
+            movimento.quantidade = nova_quantidade
+            if movimento.custo_unitario is not None:
+                movimento.valor_total = nova_quantidade * movimento.custo_unitario
+            movimento.save()
+
+        return Response(
+            {
+                'status': 'atualizado',
+                'movimento_id': movimento_id,
+                'quantidade': float(movimento.quantidade or 0),
+                'valor_total': float(movimento.valor_total or 0)
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasDevolucaoSaldoView(APIView):
     """Consulta o saldo disponível para devolução por produto em uma nota."""
 
