@@ -702,6 +702,69 @@ class ComprasContaPagarView(APIView):
         )
 
 
+class ComprasContaPagarAgingView(APIView):
+    """Resumo de contas a pagar por faixa de atraso/aberto."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_referencia = self._parse_date(request.query_params.get('data_referencia'))
+        fornecedor_id = request.query_params.get('fornecedor_id')
+
+        if not data_referencia:
+            data_referencia = timezone.now().date()
+
+        contas = ContasPagar.objects.select_related('fornecedor').filter(status='A')
+
+        if fornecedor_id:
+            contas = contas.filter(fornecedor_id=fornecedor_id)
+
+        vencidas = contas.filter(vencimento__date__lt=data_referencia)
+        a_vencer = contas.filter(vencimento__date__gte=data_referencia)
+
+        def _faixa(queryset, dias_inicio=None, dias_fim=None):
+            filtro = {}
+            if dias_inicio is not None:
+                filtro['vencimento__date__lte'] = data_referencia - timedelta(days=dias_inicio)
+            if dias_fim is not None:
+                filtro['vencimento__date__gte'] = data_referencia - timedelta(days=dias_fim)
+            if filtro:
+                queryset = queryset.filter(**filtro)
+            agregado = queryset.aggregate(valor_total=Sum('valor'), quantidade=Count('id'))
+            return {
+                'quantidade': agregado['quantidade'] or 0,
+                'valor_total': self._to_float(agregado['valor_total'])
+            }
+
+        response = {
+            'data_referencia': data_referencia.isoformat(),
+            'fornecedor_id': fornecedor_id,
+            'aberto': {
+                'vencidas': _faixa(vencidas),
+                'a_vencer': _faixa(a_vencer)
+            },
+            'faixas_vencidas': {
+                '1_30': _faixa(vencidas, dias_inicio=1, dias_fim=30),
+                '31_60': _faixa(vencidas, dias_inicio=31, dias_fim=60),
+                '61_90': _faixa(vencidas, dias_inicio=61, dias_fim=90),
+                '90_mais': _faixa(vencidas, dias_inicio=91, dias_fim=None)
+            }
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
 class ComprasDevolucaoView(APIView):
     """Registra devolução de itens de uma compra."""
 
