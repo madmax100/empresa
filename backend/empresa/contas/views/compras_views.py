@@ -702,6 +702,165 @@ class ComprasContaPagarView(APIView):
         )
 
 
+class ComprasDevolucaoView(APIView):
+    """Registra devolução de itens de uma compra."""
+
+    @staticmethod
+    def _decimal(value, default='0.000'):
+        if value is None or value == '':
+            return Decimal(default)
+        return Decimal(str(value))
+
+    def post(self, request, *args, **kwargs):
+        payload = request.data or {}
+        nota_id = payload.get('nota_id')
+        itens_data = payload.get('itens') or []
+        estoque_data = payload.get('estoque') or {}
+
+        if not nota_id:
+            return Response(
+                {'error': 'Informe o nota_id da compra.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not itens_data:
+            return Response(
+                {'error': 'Informe ao menos um item em itens.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            nota = NotasFiscaisEntrada.objects.get(id=nota_id)
+        except NotasFiscaisEntrada.DoesNotExist:
+            return Response(
+                {'error': 'Nota fiscal de entrada não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        local_origem_id = estoque_data.get('local_origem_id')
+        if not local_origem_id:
+            return Response(
+                {'error': 'Informe local_origem_id em estoque.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        tipo_movimentacao_id = estoque_data.get('tipo_movimentacao_id')
+        if tipo_movimentacao_id:
+            tipo_movimentacao = (
+                TiposMovimentacaoEstoque.objects.filter(id=tipo_movimentacao_id, ativo=True)
+                .first()
+            )
+        else:
+            tipo_movimentacao = (
+                TiposMovimentacaoEstoque.objects.filter(tipo='S', ativo=True).first()
+            )
+
+        if not tipo_movimentacao:
+            return Response(
+                {'error': 'Tipo de movimentação de saída não encontrado.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        itens_nota = list(nota.itens.all())
+        if not itens_nota:
+            return Response(
+                {'error': 'Nota fiscal sem itens cadastrados.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resumo_itens = {}
+        for item in itens_nota:
+            resumo = resumo_itens.setdefault(
+                item.produto_id,
+                {'quantidade': Decimal('0.000'), 'valor': Decimal('0.00')}
+            )
+            resumo['quantidade'] += item.quantidade or Decimal('0.000')
+            resumo['valor'] += item.valor_total or Decimal('0.00')
+
+        devolucoes = MovimentacoesEstoque.objects.filter(
+            nota_fiscal_entrada=nota,
+            tipo_movimentacao__tipo='S'
+        ).values('produto_id').annotate(quantidade=Sum('quantidade'))
+
+        devolvido_por_produto = {item['produto_id']: item['quantidade'] for item in devolucoes}
+
+        data_movimentacao = estoque_data.get('data_movimentacao') or timezone.now()
+
+        movimentos_criados = []
+        with transaction.atomic():
+            for item in itens_data:
+                produto_id = item.get('produto_id')
+                quantidade = self._decimal(item.get('quantidade'), default='0.000')
+
+                if not produto_id:
+                    return Response(
+                        {'error': 'Cada item deve possuir produto_id.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if quantidade <= 0:
+                    return Response(
+                        {'error': 'A quantidade devolvida deve ser maior que zero.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if produto_id not in resumo_itens:
+                    return Response(
+                        {'error': f'Produto {produto_id} não pertence à nota informada.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                quantidade_comprada = resumo_itens[produto_id]['quantidade']
+                quantidade_devolvida = devolvido_por_produto.get(produto_id, Decimal('0.000'))
+                quantidade_disponivel = quantidade_comprada - quantidade_devolvida
+
+                if quantidade > quantidade_disponivel:
+                    return Response(
+                        {'error': f'Quantidade devolvida maior que o disponível para o produto {produto_id}.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                valor_total = resumo_itens[produto_id]['valor']
+                custo_unitario = (
+                    (valor_total / quantidade_comprada)
+                    if quantidade_comprada > 0 else None
+                )
+
+                movimento = MovimentacoesEstoque.objects.create(
+                    data_movimentacao=data_movimentacao,
+                    tipo_movimentacao=tipo_movimentacao,
+                    produto_id=produto_id,
+                    lote_id=None,
+                    local_origem_id=local_origem_id,
+                    local_destino_id=None,
+                    quantidade=quantidade,
+                    custo_unitario=custo_unitario,
+                    valor_total=(quantidade * custo_unitario) if custo_unitario is not None else None,
+                    nota_fiscal_entrada=nota,
+                    observacoes='Devolução de compra',
+                    documento_referencia=str(nota.numero_nota)
+                )
+
+                _atualizar_saldo_estoque(
+                    produto_id=produto_id,
+                    local_id=local_origem_id,
+                    delta_quantidade=-quantidade,
+                    custo_unitario=custo_unitario,
+                    data_movimentacao=data_movimentacao
+                )
+
+                movimentos_criados.append(movimento.id)
+
+        return Response(
+            {
+                'nota_id': nota.id,
+                'movimentos_criados': movimentos_criados,
+                'total_itens': len(movimentos_criados)
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
 class ComprasParcelasContaPagarView(APIView):
     """Gera parcelas de contas a pagar vinculadas à nota fiscal de entrada."""
 
