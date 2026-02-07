@@ -331,7 +331,7 @@ function App() {
       {/* Conteúdo dos Painéis */}
       <div>
         {activePanel === 'fluxo-realizado' && <FluxoCaixaDashboard dataInicio={dataInicio} dataFim={dataFim} />}
-        {activePanel === 'fluxo-lucro' && <FluxoLucroDashboard />}
+        {activePanel === 'fluxo-lucro' && <FluxoLucroDashboard dataInicio={dataInicio} dataFim={dataFim} />}
         {activePanel === 'estoque' && <EstoqueDashboard />}
         {activePanel === 'estoque-comparativo' && <EstoqueComparacao dataInicio={dataInicio} dataFim={dataFim} />}
         {activePanel === 'gerencia' && <GerenciaDashboard dataInicio={dataInicio} dataFim={dataFim} />}

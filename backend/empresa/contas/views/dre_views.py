@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Sum, Q
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from decimal import Decimal
 
 from ..models.access import (
@@ -200,9 +200,89 @@ class DREView(APIView):
         })
     
     def _calcular_dre(self, data_inicio, data_fim):
-        """Calcula o Demonstrativo de Resultados do período."""
+        """
+        Método central que orquestra o cálculo do DRE.
+        """
+        # Garantir que as datas cubram o dia inteiro
+        if isinstance(data_inicio, datetime):
+            data_inicio = data_inicio.date()
+        if isinstance(data_fim, datetime):
+            data_fim = data_fim.date()
+            
+        # Converter para datetime com horário limite
+        # De 00:00:00 do dia inicial até 23:59:59 do dia final
+        data_inicio_dt = datetime.combine(data_inicio, datetime.min.time())
+        data_fim_dt = datetime.combine(data_fim, datetime.max.time())
         
-        # 1. FATURAMENTO BRUTO - NFe de Saída (Vendas) + NF Serviço
+        # Faturamento
+        faturamento_bruto, faturamento_vendas, faturamento_servicos_contratos, faturamento_servicos_avulsos, \
+        lista_vendas, lista_servicos_contratos, lista_servicos_avulsos, impostos_vendas = \
+            self._calcular_faturamento(data_inicio_dt, data_fim_dt)
+            
+        # Custos (CMV)
+        cmv, cmv_vendas, cmv_contratos, cmv_outros, lista_cmv, lista_cmv_vendas, lista_cmv_contratos, lista_cmv_outros = \
+            self._calcular_cmv_real(data_inicio_dt, data_fim_dt)
+            
+        # Lucro Bruto
+        lucro_bruto = faturamento_bruto - impostos_vendas - cmv
+        margem_bruta_percent = (lucro_bruto / faturamento_bruto * 100) if faturamento_bruto > 0 else 0
+        
+        # Despesas Operacionais (Fixas e Variáveis)
+        # Nota: calcular_custos usa ContasPagar (Caixa)
+        custos_fixos, custos_variaveis, detalhe_fixos, detalhe_variaveis = \
+            self._calcular_custos(data_inicio_dt, data_fim_dt)
+            
+        despesas_operacionais = custos_fixos + custos_variaveis
+        
+        # Resultado Líquido
+        resultado_liquido = lucro_bruto - despesas_operacionais
+        margem_liquida_percent = (resultado_liquido / faturamento_bruto * 100) if faturamento_bruto > 0 else 0
+        
+        # Estoques (informativo, aproximado pelo saldo atual)
+        # Idealmente necessitaria de snapshot, aqui pegamos saldo atual como referência
+        estoque_fim = self._obter_valor_estoque(data_fim_dt)
+        # Estoque inicial aproximado: Final - Compras + CMV (fórmula básica de inventário reverso)
+        # Compras do período
+        compras_periodo = Decimal('0') 
+        estoque_inicio = estoque_fim - compras_periodo + cmv # Aproximação grosseira
+        
+        # Ajuste zero se negativo (pode ocorrer pela aproximação)
+        if estoque_inicio < 0: estoque_inicio = Decimal('0')
+
+        return {
+            'faturamento_bruto': float(faturamento_bruto),
+            'faturamento_vendas': float(faturamento_vendas),
+            'faturamento_servicos_contratos': float(faturamento_servicos_contratos),
+            'faturamento_servicos_avulsos': float(faturamento_servicos_avulsos),
+            'lista_vendas': lista_vendas,
+            'lista_servicos_contratos': lista_servicos_contratos,
+            'lista_servicos_avulsos': lista_servicos_avulsos,
+            'impostos_vendas': float(impostos_vendas),
+            'percentual_impostos': float(self.PERCENTUAL_IMPOSTOS * 100),
+            'estoque_inicio': float(estoque_inicio),
+            'compras_periodo': float(compras_periodo),
+            'estoque_fim': float(estoque_fim),
+            'cmv': float(cmv),
+            'cmv_vendas': float(cmv_vendas),
+            'cmv_contratos': float(cmv_contratos),
+            'cmv_outros': float(cmv_outros),
+            'lista_cmv': lista_cmv,
+            'lista_cmv_vendas': lista_cmv_vendas,
+            'lista_cmv_contratos': lista_cmv_contratos,
+            'lista_cmv_outros': lista_cmv_outros,
+            'lucro_bruto': float(lucro_bruto),
+            'margem_bruta_percent': float(margem_bruta_percent),
+            'custos_fixos': float(custos_fixos),
+            'custos_variaveis': float(custos_variaveis),
+            'detalhe_custos_fixos': detalhe_fixos,
+            'detalhe_custos_variaveis': detalhe_variaveis,
+            'despesas_operacionais': float(despesas_operacionais),
+            'resultado_liquido': float(resultado_liquido),
+            'margem_liquida_percent': float(margem_liquida_percent)
+        }
+    
+    def _calcular_faturamento(self, data_inicio, data_fim):
+        """Calcula faturamento bruto e detalhado."""
         
         # 1.1 Vendas de Mercadorias (NF Saída)
         # Filtro: apenas operações que contêm "VENDA" (consistente com relatorios_views.py)
@@ -266,71 +346,8 @@ class DREView(APIView):
         # 2. IMPOSTOS SOBRE VENDAS (estimativa)
         impostos_vendas = faturamento_bruto * self.PERCENTUAL_IMPOSTOS
         
-        
-        # 3. CMV (Custo da Mercadoria Vendida)
-        # Novo cálculo: Custo dos itens que saíram (baseado na última entrada)
-        # Estoque e compras não são mais usados para CMV, definindo como 0 para manter compatibilidade do retorno
-        estoque_inicio = Decimal('0')
-        estoque_fim = Decimal('0')
-        # 4. Cálculo do CMV (Custo da Mercadoria Vendida)
-        itens_vendidos_result = self._calcular_cmv_real(data_inicio, data_fim)
-        # Unpacking handled dynamically below to support old/new signature if needed, but here we expect the new one
-        if len(itens_vendidos_result) == 8:
-             cmv, cmv_vendas, cmv_contratos, cmv_outros, lista_cmv, lista_cmv_vendas, lista_cmv_contratos, lista_cmv_outros = itens_vendidos_result
-        else:
-             cmv, cmv_vendas, cmv_contratos, cmv_outros, lista_cmv = itens_vendidos_result
-             lista_cmv_vendas, lista_cmv_contratos, lista_cmv_outros = [], [], []
-        
-        
-        # 4. LUCRO BRUTO
-        lucro_bruto = faturamento_bruto - impostos_vendas - cmv
-        
-        # 5. DESPESAS OPERACIONAIS (Custos Fixos + Variáveis)
-        custos_fixos, custos_variaveis, detalhe_fixos, detalhe_variaveis = self._calcular_custos(data_inicio, data_fim)
-        despesas_operacionais = custos_fixos + custos_variaveis
-        despesas_operacionais = custos_fixos + custos_variaveis
-        
-        # 6. RESULTADO LÍQUIDO
-        resultado_liquido = lucro_bruto - despesas_operacionais
-        
-        # 7. MARGENS
-        margem_bruta_percent = (lucro_bruto / faturamento_bruto * 100) if faturamento_bruto > 0 else Decimal('0')
-        margem_liquida_percent = (resultado_liquido / faturamento_bruto * 100) if faturamento_bruto > 0 else Decimal('0')
-        
-        compras_periodo = Decimal('0')
-
-        return {
-            'faturamento_bruto': float(faturamento_bruto),
-            'faturamento_vendas': float(faturamento_vendas),
-            'faturamento_servicos_contratos': float(faturamento_servicos_contratos),
-            'faturamento_servicos_avulsos': float(faturamento_servicos_avulsos),
-            'lista_vendas': lista_vendas,
-            'lista_servicos_contratos': lista_servicos_contratos,
-            'lista_servicos_avulsos': lista_servicos_avulsos,
-            'impostos_vendas': float(impostos_vendas),
-            'percentual_impostos': float(self.PERCENTUAL_IMPOSTOS * 100),
-            'estoque_inicio': float(estoque_inicio),
-            'compras_periodo': float(compras_periodo),
-            'estoque_fim': float(estoque_fim),
-            'cmv': float(cmv),
-            'cmv_vendas': float(cmv_vendas),
-            'cmv_contratos': float(cmv_contratos),
-            'cmv_outros': float(cmv_outros),
-            'lista_cmv': lista_cmv,
-            'lista_cmv_vendas': lista_cmv_vendas,
-            'lista_cmv_contratos': lista_cmv_contratos,
-            'lista_cmv_outros': lista_cmv_outros,
-            'lucro_bruto': float(lucro_bruto),
-            'margem_bruta_percent': float(margem_bruta_percent),
-            'custos_fixos': float(custos_fixos),
-            'custos_variaveis': float(custos_variaveis),
-            'detalhe_custos_fixos': detalhe_fixos,
-            'detalhe_custos_variaveis': detalhe_variaveis,
-            'despesas_operacionais': float(despesas_operacionais),
-            'resultado_liquido': float(resultado_liquido),
-            'margem_liquida_percent': float(margem_liquida_percent)
-        }
-    
+        return faturamento_bruto, faturamento_vendas, faturamento_servicos_contratos, faturamento_servicos_avulsos, \
+               lista_vendas, lista_servicos_contratos, lista_servicos_avulsos, impostos_vendas
 
     def _calcular_cmv_real(self, data_inicio, data_fim):
         """
@@ -346,12 +363,18 @@ class DREView(APIView):
         # Obter IDs de todas as NFs
         valid_nf_ids = list(all_nfs.values_list('id', flat=True))
         
-        # 2. Identificar contratos vigentes no período (mesma lógica da página Contratos de Locação)
-        contratos_vigentes = ContratosLocacao.objects.filter(
+        # 2. Carregar contratos vigentes no período
+        from collections import defaultdict
+        
+        contratos_qs = ContratosLocacao.objects.filter(
             Q(inicio__lte=data_fim) & 
             (Q(fim__gte=data_inicio) | Q(fim__isnull=True))
-        )
-        clientes_contratos_vigentes = set(contratos_vigentes.values_list('cliente_id', flat=True).distinct())
+        ).values('cliente_id', 'inicio', 'fim')
+        
+        # Mapa: cliente_id -> lista de (inicio, fim)
+        contratos_map = defaultdict(list)
+        for c in contratos_qs:
+            contratos_map[c['cliente_id']].append((c['inicio'], c['fim']))
         
         # 3. Obter itens vendidos/enviados
         try:
@@ -359,7 +382,7 @@ class DREView(APIView):
                 nota_fiscal_id__in=valid_nf_ids
             ).select_related('produto', 'nota_fiscal', 'nota_fiscal__cliente')
         except:
-            return Decimal('0'), Decimal('0'), Decimal('0'), Decimal('0'), []
+            return Decimal('0'), Decimal('0'), Decimal('0'), Decimal('0'), [], [], [], []
         
         cmv_total = Decimal('0')
         cmv_vendas = Decimal('0')
@@ -370,7 +393,6 @@ class DREView(APIView):
         lista_vendas = []
         lista_contratos = []
         lista_outros = []
-        custos_cache = {}
         
         for item in itens_vendidos:
             produto_id = item.produto_id
@@ -378,45 +400,50 @@ class DREView(APIView):
             valor_venda_total = item.valor_total or Decimal('0')
             valor_venda_unitario = item.valor_unitario or Decimal('0')
             
-            # Classificação do Item usando mesmo critério da página Contratos de Locação
+            # Classificação do Item
             operacao = (item.nota_fiscal.operacao or '').upper()
             cliente_id = item.nota_fiscal.cliente_id
+            data_venda = item.nota_fiscal.data
+            data_venda_date = data_venda.date() if isinstance(data_venda, datetime) else data_venda
             
             tipo_item = 'OUTROS'
             if 'VENDA' in operacao:
                 tipo_item = 'VENDA'
-            elif 'SIMPLES REMESSA' in operacao and cliente_id in clientes_contratos_vigentes:
-                # Critério correto: SIMPLES REMESSA para cliente com contrato vigente
-                tipo_item = 'CONTRATO'
+            elif 'SIMPLES REMESSA' in operacao:
+                # Verificar se existe contrato vigente NA DATA DA VENDA
+                eh_contrato = False
+                if cliente_id in contratos_map:
+                    for inicio, fim in contratos_map[cliente_id]:
+                        # inicio <= data_venda <= fim (ou fim is None)
+                        if inicio <= data_venda_date and (fim is None or fim >= data_venda_date):
+                            eh_contrato = True
+                            break
+                
+                if eh_contrato:
+                    tipo_item = 'CONTRATO'
             
-            data_venda = item.nota_fiscal.data
+            # Calcular Custo Unitário (Sem Cache)
+            custo_unit = Decimal('0')
+            try:
+                ultima_entrada = ItensNfEntrada.objects.filter(
+                    produto_id=produto_id,
+                    nota_fiscal__data_entrada__lte=data_venda
+                ).order_by('-nota_fiscal__data_entrada', '-id').first()
+                
+                if ultima_entrada:
+                    if ultima_entrada.valor_total and ultima_entrada.quantidade:
+                            custo_unit = ultima_entrada.valor_total / ultima_entrada.quantidade
+                    elif ultima_entrada.valor_unitario:
+                            custo_unit = ultima_entrada.valor_unitario
+            except:
+                pass
             
-            if produto_id in custos_cache:
-                custo_unit = custos_cache[produto_id]
-            else:
-                custo_unit = Decimal('0')
+            if custo_unit == Decimal('0'):
                 try:
-                    ultima_entrada = ItensNfEntrada.objects.filter(
-                        produto_id=produto_id,
-                        nota_fiscal__data_entrada__lte=data_venda
-                    ).order_by('-nota_fiscal__data_entrada', '-id').first()
-                    
-                    if ultima_entrada:
-                        if ultima_entrada.valor_total and ultima_entrada.quantidade:
-                             custo_unit = ultima_entrada.valor_total / ultima_entrada.quantidade
-                        elif ultima_entrada.valor_unitario:
-                             custo_unit = ultima_entrada.valor_unitario
+                    produto = Produtos.objects.get(id=produto_id)
+                    custo_unit = getattr(produto, 'preco_custo', Decimal('0')) or Decimal('0')
                 except:
                     pass
-                
-                if custo_unit == Decimal('0'):
-                    try:
-                        produto = Produtos.objects.get(id=produto_id)
-                        custo_unit = getattr(produto, 'preco_custo', Decimal('0')) or Decimal('0')
-                    except:
-                        pass
-                
-                custos_cache[produto_id] = custo_unit
             
             custo_total_item = quantidade * custo_unit
             cmv_total += custo_total_item
@@ -492,11 +519,15 @@ class DREView(APIView):
     
     def _calcular_custos(self, data_inicio, data_fim):
         """Calcula custos fixos e variáveis do período categorizados."""
+        from django.db.models.functions import Coalesce
         
-        contas_pagas = ContasPagar.objects.filter(
-            data_pagamento__range=[data_inicio, data_fim],
+        contas_pagas = ContasPagar.objects.annotate(
+            data_efetiva=Coalesce('data_pagamento', 'vencimento')
+        ).filter(
+            data_efetiva__date__range=[data_inicio, data_fim],
             status='P'
         ).select_related('fornecedor')
+
         
         # Estruturas para acumular valores
         # { 'Categoria': {'valor': Decimal, 'itens': []} }
@@ -542,10 +573,11 @@ class DREView(APIView):
             
             # Prepara dados do item
             item_data = {
-                'data': conta.data_pagamento.strftime('%d/%m/%Y'),
+                'data': conta.data_efetiva.strftime('%d/%m/%Y') if conta.data_efetiva else '',
                 'descricao': f"{nome_fornecedor} - {historico}"[:60],
                 'valor': float(valor)
             }
+
             
             # Acumula nos mapas
             if tipo_custo == 'FIXO':
@@ -576,74 +608,6 @@ class DREView(APIView):
         detalhe_variaveis = map_to_list(variaveis_map)
         
         return total_fixo, total_variavel, detalhe_fixos, detalhe_variaveis
-        
-        for conta in contas_pagas:
-            valor = Decimal(str(conta.valor_total_pago or conta.valor or 0))
-            if valor <= 0: continue
-            
-            nome_fornecedor = conta.fornecedor.nome.upper() if conta.fornecedor and conta.fornecedor.nome else ''
-            historico = (conta.historico or '').upper()
-            texto_busca = f"{nome_fornecedor} {historico}"
-            
-            # Identificar Categoria
-            categoria_encontrada = 'Outros'
-            tipo_custo = 'VARIAVEL' # Default
-            
-            # 1. Tenta Fixos
-            found = False
-            for cat, keywords in self.CATEGORIAS_MAPPING['FIXO'].items():
-                if any(k in texto_busca for k in keywords):
-                    categoria_encontrada = cat
-                    tipo_custo = 'FIXO'
-                    found = True
-                    break
-            
-            # 2. Tenta Variáveis (se não achou fixo)
-            if not found:
-                for cat, keywords in self.CATEGORIAS_MAPPING['VARIAVEL'].items():
-                    if any(k in texto_busca for k in keywords):
-                        categoria_encontrada = cat
-                        tipo_custo = 'VARIAVEL'
-                        found = True
-                        break
-            
-            # Se não achou nada, mantém default (Outros Variáveis)
-            if not found:
-                categoria_encontrada = 'Outros / Não Classificado'
-                tipo_custo = 'VARIAVEL'
-
-            # Adicionar ao mapa
-            item_data = {
-                'data': conta.data_pagamento.strftime('%d/%m/%Y'),
-                'descricao': f"{nome_fornecedor} - {historico}"[:60],
-                'valor': float(valor)
-            }
-            
-            if tipo_custo == 'FIXO':
-                total_fixo += valor
-                if categoria_encontrada not in fixos_map:
-                    fixos_map[categoria_encontrada] = {'valor': Decimal('0'), 'itens': []}
-                fixos_map[categoria_encontrada]['valor'] += valor
-                fixos_map[categoria_encontrada]['itens'].append(item_data)
-            else:
-                total_variavel += valor
-                if categoria_encontrada not in variaveis_map:
-                    variaveis_map[categoria_encontrada] = {'valor': Decimal('0'), 'itens': []}
-                variaveis_map[categoria_encontrada]['valor'] += valor
-                variaveis_map[categoria_encontrada]['itens'].append(item_data)
-        
-        # Converter mapas para listas ordenadas
-        def map_to_list(map_data):
-            lista = []
-            for cat, dados in map_data.items():
-                lista.append({
-                    'categoria': cat,
-                    'valor': float(dados['valor']),
-                    'itens': dados['itens'] # Já é uma lista de dicts
-                })
-            return sorted(lista, key=lambda x: x['valor'], reverse=True)
-
-        return total_fixo, total_variavel, map_to_list(fixos_map), map_to_list(variaveis_map)
     
     def _calcular_saude_financeira(self, data_corte):
         """Calcula indicadores de saúde financeira na data de corte."""

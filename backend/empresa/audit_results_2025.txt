@@ -1,0 +1,20 @@
+--- COMPARATIVO 2025 (2025-01-01 a 2025-12-31) ---
+
+[FLUXO REALIZADO (Backend Logic)]
+Total Saídas Realizadas: R$ 845,851.68 (1527 registros)
+Destaques 'Fantasmas' (Status=P, Data=Null, usa Vencimento): R$ 17,808.27 (2 registros)
+
+[PAINEL DE GERÊNCIA - DRE]
+Custos Fixos:           R$ 213,726.13
+Custos Variáveis (Op):  R$ 632,125.55
+Subtotal (Fixos+Var):   R$ 845,851.68
+CMV (Uso de Estoque):   R$ 235,487.90
+Total DRE (incl. CMV):  R$ 1,081,339.58
+
+[COMPARAÇÃO]
+Diferença (Fluxo Realizado - DRE Fixos/Var): R$ 0.00
+>>> RESULTADO: O total de saídas do Fluxo Realizado bate EXATAMENTE com a soma de Custos Fixos e Variáveis do DRE.
+
+[ANÁLISE ADICIONAL]
+Valor de 'MERCADORIA' em Contas Pagar (Fluxo): R$ 333,150.75
+Nota: No DRE, pagamentos de Mercadoria costumam ser substituídos pelo CMV para refletir o lucro correto.

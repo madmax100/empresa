@@ -188,7 +188,12 @@ interface EstativicasData {
   tendencias: Tendencia[];
 }
 
-const FluxoLucroDashboard: React.FC = () => {
+interface FluxoLucroDashboardProps {
+  dataInicio: string;
+  dataFim: string;
+}
+
+const FluxoLucroDashboard: React.FC<FluxoLucroDashboardProps> = ({ dataInicio, dataFim }) => {
   // Estados para os dados
   const [activeTab, setActiveTab] = useState('dashboard');
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -215,31 +220,31 @@ const FluxoLucroDashboard: React.FC = () => {
       'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
-    
+
     // Se já é um nome de mês, retorna como está
     if (isNaN(Number(mesString))) {
       return mesString;
     }
-    
+
     // Se é um número, converte para nome
     const mesNumero = parseInt(mesString);
     if (mesNumero >= 1 && mesNumero <= 12) {
       return monthNames[mesNumero - 1];
     }
-    
+
     return mesString; // Retorna o valor original se não conseguir converter
   };
 
   // Função para obter todas as semanas de todos os meses
   const obterTodasSemanas = (meses: MesInfo[]): SemanaInfo[] => {
     const todasSemanas: SemanaInfo[] = [];
-    
+
     meses.forEach(mes => {
       mes.semanas.forEach(semana => {
         todasSemanas.push(semana);
       });
     });
-    
+
     return todasSemanas;
   };
 
@@ -247,14 +252,14 @@ const FluxoLucroDashboard: React.FC = () => {
   const formatarPeriodoSemana = (semana: SemanaInfo): string => {
     const dataInicio = new Date(semana.dias[0]?.data || '');
     const dataFim = new Date(semana.dias[semana.dias.length - 1]?.data || '');
-    
+
     const formatarData = (data: Date): string => {
-      return data.toLocaleDateString('pt-BR', { 
-        day: '2-digit', 
-        month: '2-digit' 
+      return data.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit'
       });
     };
-    
+
     return `${formatarData(dataInicio)} - ${formatarData(dataFim)}`;
   };
 
@@ -276,14 +281,21 @@ const FluxoLucroDashboard: React.FC = () => {
     setLoading(true);
     setError(null);
 
+    // Evita requisições com dados indefinidos
+    if (!dataInicio || !dataFim || dataInicio === 'undefined' || dataFim === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     try {
+      const params = `?data_inicial=${dataInicio}&data_final=${dataFim}`;
       const [dashboardRes, indicadoresRes, alertasRes, estatisticasRes, projecaoRes, dreRes] = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/fluxo-caixa-lucro/dashboard/'),
-        fetch('http://127.0.0.1:8000/api/fluxo-caixa-lucro/indicadores/'),
-        fetch('http://127.0.0.1:8000/api/fluxo-caixa-lucro/alertas_inteligentes/'),
-        fetch('http://127.0.0.1:8000/api/fluxo-caixa-lucro/estatisticas/'),
-        fetch('http://127.0.0.1:8000/api/fluxo-caixa-lucro/projecao_fluxo/'),
-        fetch('http://127.0.0.1:8000/api/fluxo-caixa-lucro/relatorio_dre/')
+        fetch(`http://127.0.0.1:8000/api/fluxo-caixa-lucro/dashboard/${params}`),
+        fetch(`http://127.0.0.1:8000/api/fluxo-caixa-lucro/indicadores/${params}`),
+        fetch(`http://127.0.0.1:8000/api/fluxo-caixa-lucro/alertas_inteligentes/${params}`),
+        fetch(`http://127.0.0.1:8000/api/fluxo-caixa-lucro/estatisticas/${params}`),
+        fetch(`http://127.0.0.1:8000/api/fluxo-caixa-lucro/projecao_fluxo/${params}`),
+        fetch(`http://127.0.0.1:8000/api/fluxo-caixa-lucro/relatorio_dre/${params}`)
       ]);
 
       if (!dashboardRes.ok || !indicadoresRes.ok || !alertasRes.ok || !estatisticasRes.ok || !projecaoRes.ok || !dreRes.ok) {
@@ -310,7 +322,7 @@ const FluxoLucroDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dataInicio, dataFim]);
 
   useEffect(() => {
     carregarDados();
@@ -318,10 +330,10 @@ const FluxoLucroDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         height: '400px',
         fontSize: '1.1rem',
         color: '#6b7280'
@@ -333,25 +345,25 @@ const FluxoLucroDashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div style={{ 
-        backgroundColor: '#fee2e2', 
-        border: '1px solid #fca5a5', 
-        borderRadius: '8px', 
-        padding: '16px', 
+      <div style={{
+        backgroundColor: '#fee2e2',
+        border: '1px solid #fca5a5',
+        borderRadius: '8px',
+        padding: '16px',
         margin: '20px',
         color: '#dc2626'
       }}>
         ❌ Erro: {error}
-        <button 
-          onClick={carregarDados} 
-          style={{ 
-            marginLeft: '10px', 
-            padding: '4px 8px', 
-            backgroundColor: '#dc2626', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            cursor: 'pointer' 
+        <button
+          onClick={carregarDados}
+          style={{
+            marginLeft: '10px',
+            padding: '4px 8px',
+            backgroundColor: '#dc2626',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
           }}
         >
           Tentar Novamente
@@ -364,27 +376,27 @@ const FluxoLucroDashboard: React.FC = () => {
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       {/* Header */}
       <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ 
-          fontSize: '2rem', 
-          fontWeight: '700', 
-          color: '#111827', 
-          margin: '0 0 8px 0' 
+        <h1 style={{
+          fontSize: '2rem',
+          fontWeight: '700',
+          color: '#111827',
+          margin: '0 0 8px 0'
         }}>
           💰 Dashboard de Fluxo de Caixa Previsto
         </h1>
-        <p style={{ 
-          fontSize: '1rem', 
-          color: '#6b7280', 
-          margin: 0 
+        <p style={{
+          fontSize: '1rem',
+          color: '#6b7280',
+          margin: 0
         }}>
           Análise completa de performance financeira e projeções de fluxo de caixa
         </p>
       </div>
 
       {/* Navegação por Tabs */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '8px', 
+      <div style={{
+        display: 'flex',
+        gap: '8px',
         marginBottom: '24px',
         borderBottom: '2px solid #e5e7eb'
       }}>
@@ -420,31 +432,31 @@ const FluxoLucroDashboard: React.FC = () => {
       {activeTab === 'dashboard' && dashboardData && (
         <div>
           {/* Alerta quando não há dados */}
-          {parseValue(dashboardData.saldo_inicial) === 0 && 
-           parseValue(dashboardData.totalizadores.entradas_realizadas) === 0 && 
-           parseValue(dashboardData.totalizadores.saidas_realizadas) === 0 && (
-            <div style={{
-              backgroundColor: '#fffbeb',
-              border: '1px solid #f59e0b',
-              borderRadius: '8px',
-              padding: '16px',
-              marginBottom: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}>
-              <span style={{ fontSize: '1.5rem' }}>ℹ️</span>
-              <div>
-                <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#92400e' }}>
-                  Período sem dados financeiros
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#78350f', marginTop: '2px' }}>
-                  O período atual ({formatDate(dashboardData.periodo.inicio)} - {formatDate(dashboardData.periodo.fim)}) não possui movimentações registradas.
-                  Para ver dados reais, selecione um período com transações financeiras.
+          {parseValue(dashboardData.saldo_inicial) === 0 &&
+            parseValue(dashboardData.totalizadores.entradas_realizadas) === 0 &&
+            parseValue(dashboardData.totalizadores.saidas_realizadas) === 0 && (
+              <div style={{
+                backgroundColor: '#fffbeb',
+                border: '1px solid #f59e0b',
+                borderRadius: '8px',
+                padding: '16px',
+                marginBottom: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>ℹ️</span>
+                <div>
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#92400e' }}>
+                    Período sem dados financeiros
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#78350f', marginTop: '2px' }}>
+                    O período atual ({formatDate(dashboardData.periodo.inicio)} - {formatDate(dashboardData.periodo.fim)}) não possui movimentações registradas.
+                    Para ver dados reais, selecione um período com transações financeiras.
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Cards de Resumo */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
@@ -502,15 +514,15 @@ const FluxoLucroDashboard: React.FC = () => {
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              margin: '0 0 16px 0', 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-              color: '#111827' 
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#111827'
             }}>
               💼 Totalizadores do Período
             </h3>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px' }}>
                 <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: '500' }}>
@@ -570,42 +582,42 @@ const FluxoLucroDashboard: React.FC = () => {
             </div>
 
             {/* Resumo Consolidado */}
-            {(parseValue(dashboardData.totalizadores.entradas_realizadas) > 0 || 
+            {(parseValue(dashboardData.totalizadores.entradas_realizadas) > 0 ||
               parseValue(dashboardData.totalizadores.saidas_realizadas) > 0) && (
-              <div style={{ 
-                marginTop: '20px', 
-                padding: '16px', 
-                backgroundColor: '#f8fafc', 
-                borderRadius: '8px',
-                borderLeft: '4px solid #3b82f6'
-              }}>
-                <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                  📊 Resumo Consolidado
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Resultado Realizado</div>
-                    <div style={{ 
-                      fontSize: '1rem', 
-                      fontWeight: '700',
-                      color: (parseValue(dashboardData.totalizadores.entradas_realizadas) - parseValue(dashboardData.totalizadores.saidas_realizadas)) >= 0 ? '#10b981' : '#ef4444'
-                    }}>
-                      {formatCurrency(parseValue(dashboardData.totalizadores.entradas_realizadas) - parseValue(dashboardData.totalizadores.saidas_realizadas))}
+                <div style={{
+                  marginTop: '20px',
+                  padding: '16px',
+                  backgroundColor: '#f8fafc',
+                  borderRadius: '8px',
+                  borderLeft: '4px solid #3b82f6'
+                }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                    📊 Resumo Consolidado
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Resultado Realizado</div>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: '700',
+                        color: (parseValue(dashboardData.totalizadores.entradas_realizadas) - parseValue(dashboardData.totalizadores.saidas_realizadas)) >= 0 ? '#10b981' : '#ef4444'
+                      }}>
+                        {formatCurrency(parseValue(dashboardData.totalizadores.entradas_realizadas) - parseValue(dashboardData.totalizadores.saidas_realizadas))}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Resultado Previsto</div>
+                      <div style={{
+                        fontSize: '1rem',
+                        fontWeight: '700',
+                        color: (parseValue(dashboardData.totalizadores.entradas_previstas) - parseValue(dashboardData.totalizadores.saidas_previstas)) >= 0 ? '#3b82f6' : '#7c3aed'
+                      }}>
+                        {formatCurrency(parseValue(dashboardData.totalizadores.entradas_previstas) - parseValue(dashboardData.totalizadores.saidas_previstas))}
+                      </div>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Resultado Previsto</div>
-                    <div style={{ 
-                      fontSize: '1rem', 
-                      fontWeight: '700',
-                      color: (parseValue(dashboardData.totalizadores.entradas_previstas) - parseValue(dashboardData.totalizadores.saidas_previstas)) >= 0 ? '#3b82f6' : '#7c3aed'
-                    }}>
-                      {formatCurrency(parseValue(dashboardData.totalizadores.entradas_previstas) - parseValue(dashboardData.totalizadores.saidas_previstas))}
-                    </div>
-                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
 
           {/* Resumo por Mês */}
@@ -642,37 +654,37 @@ const FluxoLucroDashboard: React.FC = () => {
                         <td style={{ padding: '12px', fontSize: '0.875rem', color: '#111827' }}>
                           {formatarPeriodoSemana(semana)}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           fontWeight: '600',
                           color: '#059669'
                         }}>
                           {formatCurrency(parseValue(semana.total_entradas))}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           fontWeight: '600',
                           color: '#dc2626'
                         }}>
                           {formatCurrency(parseValue(semana.total_saidas))}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           fontWeight: '700',
                           color: parseValue(semana.saldo_realizado) >= 0 ? '#059669' : '#dc2626'
                         }}>
                           {formatCurrency(parseValue(semana.saldo_realizado))}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           fontWeight: '700',
                           color: parseValue(semana.saldo_projetado) >= 0 ? '#3b82f6' : '#7c3aed'
                         }}>
@@ -751,9 +763,9 @@ const FluxoLucroDashboard: React.FC = () => {
               <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', marginBottom: '5px' }}>
                 💰 Resultado do Mês
               </div>
-              <div style={{ 
-                fontSize: '1.5rem', 
-                fontWeight: '700', 
+              <div style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
                 color: indicadoresData.mes_atual.resultado >= 0 ? '#10b981' : '#ef4444'
               }}>
                 {formatCurrency(indicadoresData.mes_atual.resultado)}
@@ -769,15 +781,15 @@ const FluxoLucroDashboard: React.FC = () => {
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              margin: '0 0 16px 0', 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-              color: '#111827' 
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#111827'
             }}>
               💧 Análise de Liquidez
             </h3>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px' }}>
                 <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: '500' }}>
@@ -811,11 +823,11 @@ const FluxoLucroDashboard: React.FC = () => {
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              margin: '0 0 16px 0', 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-              color: '#111827' 
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#111827'
             }}>
               🚨 Alertas Inteligentes ({alertasData.quantidade_alertas})
             </h3>
@@ -829,26 +841,25 @@ const FluxoLucroDashboard: React.FC = () => {
                   <div key={index} style={{
                     padding: '16px',
                     borderRadius: '8px',
-                    borderLeft: `4px solid ${
-                      alerta.severidade === 'alta' ? '#ef4444' :
+                    borderLeft: `4px solid ${alerta.severidade === 'alta' ? '#ef4444' :
                       alerta.severidade === 'media' ? '#f59e0b' : '#10b981'
-                    }`,
-                    backgroundColor: 
+                      }`,
+                    backgroundColor:
                       alerta.severidade === 'alta' ? '#fef2f2' :
-                      alerta.severidade === 'media' ? '#fffbeb' : '#f0fdf4'
+                        alerta.severidade === 'media' ? '#fffbeb' : '#f0fdf4'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                       <span style={{ fontSize: '1.25rem' }}>
                         {alerta.severidade === 'alta' ? '🔴' :
-                         alerta.severidade === 'media' ? '🟡' : '🟢'}
+                          alerta.severidade === 'media' ? '🟡' : '🟢'}
                       </span>
                       <span style={{
                         fontSize: '0.75rem',
                         fontWeight: '600',
                         textTransform: 'uppercase',
-                        color: 
+                        color:
                           alerta.severidade === 'alta' ? '#dc2626' :
-                          alerta.severidade === 'media' ? '#d97706' : '#059669'
+                            alerta.severidade === 'media' ? '#d97706' : '#059669'
                       }}>
                         {alerta.tipo.replace('_', ' ')} - {alerta.severidade}
                       </span>
@@ -881,15 +892,15 @@ const FluxoLucroDashboard: React.FC = () => {
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              margin: '0 0 16px 0', 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-              color: '#111827' 
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#111827'
             }}>
               📋 Estatísticas Gerais
             </h3>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px' }}>
                 <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: '500' }}>
@@ -941,11 +952,11 @@ const FluxoLucroDashboard: React.FC = () => {
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              margin: '0 0 16px 0', 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-              color: '#111827' 
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#111827'
             }}>
               🔮 Projeção de Fluxo de Caixa - {projecaoData.periodo_projecao}
             </h3>
@@ -971,36 +982,36 @@ const FluxoLucroDashboard: React.FC = () => {
                         <td style={{ padding: '12px', fontSize: '0.875rem', color: '#111827' }}>
                           {getMonthName(mes.mes)}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           color: '#6b7280'
                         }}>
                           {formatCurrency(mes.saldo_inicial)}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           fontWeight: '600',
                           color: '#059669'
                         }}>
                           {formatCurrency(mes.entradas_previstas)}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           fontWeight: '600',
                           color: '#dc2626'
                         }}>
                           {formatCurrency(mes.saidas_previstas)}
                         </td>
-                        <td style={{ 
-                          padding: '12px', 
+                        <td style={{
+                          padding: '12px',
                           textAlign: 'right',
-                          fontSize: '0.875rem', 
+                          fontSize: '0.875rem',
                           fontWeight: '700',
                           color: mes.saldo_final >= 0 ? '#059669' : '#dc2626'
                         }}>
@@ -1064,9 +1075,9 @@ const FluxoLucroDashboard: React.FC = () => {
               <div style={{ fontSize: '0.875rem', color: '#6b7280', fontWeight: '500', marginBottom: '5px' }}>
                 ⚡ Resultado Operacional
               </div>
-              <div style={{ 
-                fontSize: '1.5rem', 
-                fontWeight: '700', 
+              <div style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
                 color: dreData.resultados.resultado_operacional >= 0 ? '#10b981' : '#ef4444'
               }}>
                 {formatCurrency(dreData.resultados.resultado_operacional)}
@@ -1085,15 +1096,15 @@ const FluxoLucroDashboard: React.FC = () => {
             marginBottom: '24px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ 
-              margin: '0 0 16px 0', 
-              fontSize: '1.125rem', 
-              fontWeight: '600', 
-              color: '#111827' 
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '1.125rem',
+              fontWeight: '600',
+              color: '#111827'
             }}>
               📈 Indicadores Operacionais
             </h3>
-            
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px' }}>
                 <div style={{ fontSize: '0.875rem', color: '#166534', fontWeight: '500' }}>

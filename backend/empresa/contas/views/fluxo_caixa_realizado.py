@@ -8,12 +8,15 @@ ViewSet para consulta do fluxo de caixa.
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Sum, Count, Q, Value, DecimalField
+from django.db.models import Sum, Count, Q, Value, DecimalField, F, DateTimeField, Case, When
 from django.db.models.functions import TruncMonth, TruncDay, Coalesce
 from datetime import datetime, date
 import time
 
 from ..models.access import ContasPagar, ContasReceber, ContratosLocacao
+from .dre_views import DREView
+from datetime import timedelta
+from decimal import Decimal
 
 
 class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
@@ -46,14 +49,6 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
         if not data_inicio or not data_fim:
             return Response({'error': 'Parâmetros data inválidos'}, status=400)
 
-        # Filtros Base CP
-        filters_cp = {
-            'data_pagamento__isnull': False,
-            'data_pagamento__date__gte': data_inicio,
-            'data_pagamento__date__lte': data_fim,
-            'status': 'P'
-        }
-        
         # Filtro de Especificação (Pagar)
         queries_pagar = Q()
         if specs_pagar:
@@ -64,23 +59,17 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             if specs_pagar:
                 queries_pagar |= Q(fornecedor__especificacao__in=specs_pagar)
 
-        # Contas a Pagar (Saídas realizadas)
-        contas_pagar = ContasPagar.objects.filter(
+        contas_pagar = ContasPagar.objects.annotate(
+            data_efetiva=Coalesce('data_pagamento', 'vencimento')
+        ).filter(
             queries_pagar,
-            **filters_cp
+            data_efetiva__date__range=[data_inicio, data_fim],
+            status='P'
         ).select_related('fornecedor').values(
-            'id', 'data_pagamento', 'valor_pago', 
+            'id', 'data_efetiva', 'valor_total_pago', 'valor',
             'fornecedor__nome', 'historico', 'forma_pagamento', 'fornecedor__especificacao'
         )
 
-        # Filtros Base CR
-        filters_cr = {
-            'data_pagamento__isnull': False,
-            'data_pagamento__date__gte': data_inicio,
-            'data_pagamento__date__lte': data_fim,
-            'status': 'P'
-        }
-        
         # Filtro de Especificação (Receber)
         queries_receber = Q()
         if specs_receber:
@@ -92,6 +81,9 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 queries_receber |= Q(cliente__especificacao__in=specs_receber)
 
         # Filtro de Origem (Contrato vs Venda)
+        filters_cr = {} 
+        qs_receber = ContasReceber.objects.filter(queries_receber, **filters_cr)
+
         if origem_receita:
             # IDs de clientes com contratos ativos (fim >= hoje ou indefinido?)
             hoje = date.today()
@@ -104,15 +96,16 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
                 q_origem |= Q(cliente_id__in=clientes_com_contrato)
             if 'VENDA' in origem_receita:
                 q_origem |= Q(~Q(cliente_id__in=clientes_com_contrato))
-                
-        qs_receber = ContasReceber.objects.filter(queries_receber, **filters_cr)
-        
-        if origem_receita:
+            
             qs_receber = qs_receber.filter(q_origem)
 
-        # Contas a Receber (Entradas realizadas)
-        contas_receber = qs_receber.select_related('cliente').values(
-            'id', 'data_pagamento', 'recebido',
+        contas_receber = qs_receber.annotate(
+            data_efetiva=Coalesce('data_pagamento', 'vencimento')
+        ).filter(
+            data_efetiva__date__range=[data_inicio, data_fim],
+            status='P'
+        ).select_related('cliente').values(
+            'id', 'data_efetiva', 'valor_total_pago', 'valor',
             'cliente__nome', 'historico', 'forma_pagamento', 'cliente__especificacao'
         )
 
@@ -122,8 +115,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             movimentacoes.append({
                 'id': f"cp_{conta['id']}",
                 'tipo': 'saida',
-                'data': conta['data_pagamento'],
-                'valor': float(conta['valor_pago'] or 0),
+                'data': conta['data_efetiva'],
+                'valor': float(conta['valor_total_pago'] or conta['valor'] or 0),
                 'contraparte': conta['fornecedor__nome'] or 'Fornecedor não informado',
                 'historico': conta['historico'] or '',
                 'forma_pagamento': conta['forma_pagamento'] or '',
@@ -134,8 +127,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             movimentacoes.append({
                 'id': f"cr_{conta['id']}",
                 'tipo': 'entrada',
-                'data': conta['data_pagamento'],
-                'valor': float(conta['recebido'] or 0),
+                'data': conta['data_efetiva'],
+                'valor': float(conta['valor_total_pago'] or conta['valor'] or 0),
                 'contraparte': conta['cliente__nome'] or 'Cliente não informado',
                 'historico': conta['historico'] or '',
                 'forma_pagamento': conta['forma_pagamento'] or '',
@@ -454,10 +447,8 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def resumo_mensal(self, request):
         """
-        Resumo mensal do fluxo de caixa realizado com classificações:
-        - Entradas: Contrato vs Vendas
-        - Saídas: Fixas vs Variáveis
-        Otimizado com agregação no banco de dados.
+        Retorna resumo mensal baseado na metodologia do DRE (Competência para Receitas, Caixa para Despesas + CMV).
+        Reutiliza a lógica do DREView para garantir consistência.
         """
         data_inicio = self.parse_date(request.query_params.get('data_inicio'))
         data_fim = self.parse_date(request.query_params.get('data_fim'))
@@ -465,141 +456,118 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
         if not data_inicio or not data_fim:
             return Response({'error': 'Parâmetros data inválidos'}, status=400)
 
-        from django.db.models import Case, When, Value, DecimalField
-        from django.db.models.functions import Coalesce
-        from ..models.access import ContratosLocacao
-
-        # Obter IDs de clientes com contratos (uma única query)
-        clientes_com_contrato = list(
-            ContratosLocacao.objects.filter(
-                cliente__isnull=False
-            ).values_list('cliente_id', flat=True).distinct()
-        )
-
-        # Agregação de Contas a Receber com classificação por contrato
-        receber_mensal = ContasReceber.objects.filter(
-            data_pagamento__isnull=False,
-            data_pagamento__date__gte=data_inicio,
-            data_pagamento__date__lte=data_fim,
-            status='P'
-        ).annotate(
-            mes=TruncMonth('data_pagamento'),
-            valor_contrato=Case(
-                When(cliente_id__in=clientes_com_contrato, then='recebido'),
-                default=Value(0),
-                output_field=DecimalField()
-            ),
-            valor_vendas=Case(
-                When(cliente_id__in=clientes_com_contrato, then=Value(0)),
-                default='recebido',
-                output_field=DecimalField()
-            )
-        ).values('mes').annotate(
-            entradas_contrato=Coalesce(Sum('valor_contrato'), Value(0), output_field=DecimalField()),
-            entradas_vendas=Coalesce(Sum('valor_vendas'), Value(0), output_field=DecimalField()),
-            total_entradas=Coalesce(Sum('recebido'), Value(0), output_field=DecimalField())
-        )
-
-        # Para saídas, precisamos fazer a classificação em Python porque
-        # a lógica de palavras-chave não pode ser feita eficientemente no ORM
-        # Mas podemos otimizar buscando todos os fornecedores de uma vez
+        # Ajustar para o primeiro dia do mês inicial
+        current_date = data_inicio.replace(day=1)
         
-        # Agregação de Contas a Pagar por mês (sem classificação ainda)
-        pagar_mensal = ContasPagar.objects.filter(
-            data_pagamento__isnull=False,
-            data_pagamento__date__gte=data_inicio,
-            data_pagamento__date__lte=data_fim,
-            status='P'
-        ).annotate(
-            mes=TruncMonth('data_pagamento')
-        ).values('mes').annotate(
-            total_saidas=Coalesce(Sum('valor_pago'), Value(0), output_field=DecimalField()),
-            quantidade=Count('id')
-        )
-
-        # Para classificar saídas fixas/variáveis, precisamos de uma query separada
-        # Primeiro, identificamos fornecedores e seus totais
-        KEYWORDS_FIXOS = ['FOLHA', 'PROLABORE', 'PRO-LABORE', 'ALUGUEL', 'SALARIO', 'SALÁRIO', 
-                         'INSS', 'FGTS', 'CONTADOR', 'CONTABILIDADE', 'LUZ', 'ENERGIA', 
-                         'ÁGUA', 'AGUA', 'TELEFONE', 'INTERNET', 'SEGURO']
-
-        # Buscar totais por fornecedor por mês
-        saidas_por_fornecedor = ContasPagar.objects.filter(
-            data_pagamento__isnull=False,
-            data_pagamento__date__gte=data_inicio,
-            data_pagamento__date__lte=data_fim,
-            status='P'
-        ).annotate(
-            mes=TruncMonth('data_pagamento')
-        ).values('mes', 'fornecedor__nome').annotate(
-            total=Sum('valor_pago')
-        )
-
-        # Classificar saídas fixas/variáveis
-        saidas_classificadas = {}
-        for item in saidas_por_fornecedor:
-            mes = item['mes']
-            if mes not in saidas_classificadas:
-                saidas_classificadas[mes] = {'saidas_fixas': 0, 'saidas_variaveis': 0}
-            
-            fornecedor_nome = (item['fornecedor__nome'] or '').upper()
-            valor = float(item['total'] or 0)
-            is_fixo = any(keyword in fornecedor_nome for keyword in KEYWORDS_FIXOS)
-            
-            if is_fixo:
-                saidas_classificadas[mes]['saidas_fixas'] += valor
-            else:
-                saidas_classificadas[mes]['saidas_variaveis'] += valor
-
-        # Combinar resultados
-        meses_dict = {}
-        
-        for item in receber_mensal:
-            mes = item['mes']
-            meses_dict[mes] = {
-                'mes': mes,
-                'entradas_contrato': float(item['entradas_contrato'] or 0),
-                'entradas_vendas': float(item['entradas_vendas'] or 0),
-                'total_entradas': float(item['total_entradas'] or 0),
-                'saidas_fixas': 0, 'saidas_variaveis': 0, 'total_saidas': 0, 'saldo': 0
-            }
-
-        for item in pagar_mensal:
-            mes = item['mes']
-            if mes not in meses_dict:
-                meses_dict[mes] = {
-                    'mes': mes,
-                    'entradas_contrato': 0, 'entradas_vendas': 0, 'total_entradas': 0,
-                    'saidas_fixas': 0, 'saidas_variaveis': 0, 'total_saidas': 0, 'saldo': 0
-                }
-            meses_dict[mes]['total_saidas'] = float(item['total_saidas'] or 0)
-            
-            # Adicionar classificação de saídas
-            if mes in saidas_classificadas:
-                meses_dict[mes]['saidas_fixas'] = saidas_classificadas[mes]['saidas_fixas']
-                meses_dict[mes]['saidas_variaveis'] = saidas_classificadas[mes]['saidas_variaveis']
-
-        # Calcular saldos e ordenar
         meses_list = []
-        for mes, dados in sorted(meses_dict.items()):
-            dados['saldo'] = dados['total_entradas'] - dados['total_saidas']
-            meses_list.append(dados)
 
+        while current_date <= data_fim:
+            # Definir intervalo do mês corrente
+            # Próximo mês
+            next_month = (current_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+            month_end = next_month - timedelta(days=1)
+            
+            # Instanciar DREView e configurar para sem impostos (comparação direta)
+            dre_view = DREView()
+            dre_view.PERCENTUAL_IMPOSTOS = Decimal(0)
+            
+            # Calcular DRE para este mês
+            dre_data = dre_view._calcular_dre(current_date, month_end)
+            
+            # Mapear dados para o formato ResumoMensal
+            # Receitas (Competência)
+            entradas_contrato = Decimal(str(dre_data.get('faturamento_servicos_contratos', 0)))
+            # Vendas = Vendas Mercadorias + Serviços Avulsos
+            entradas_vendas = Decimal(str(dre_data.get('faturamento_vendas', 0))) + Decimal(str(dre_data.get('faturamento_servicos_avulsos', 0)))
+            total_entradas = Decimal(str(dre_data.get('faturamento_bruto', 0)))
+            
+            # Despesas (Caixa + CMV)
+            # DREView já calcula custos fixos e variáveis baseados em ContasPagar (Caixa)
+            # --- Filtragem de Categorias (Backend-side) ---
+            # Obter listas de exclusão da query string
+            exclude_fixed = request.query_params.get('exclude_fixed', '').split(',')
+            exclude_variable = request.query_params.get('exclude_variable', '').split(',')
+            exclude_fixed = [c.strip() for c in exclude_fixed if c.strip()]
+            exclude_variable = [c.strip() for c in exclude_variable if c.strip()]
+            
+            # Recalcular Custos Fixos
+            base_fixos = Decimal(str(dre_data.get('custos_fixos', 0)))
+            detalhe_fixos = dre_data.get('detalhe_custos_fixos', [])
+            
+            valor_excluido_fixo = Decimal(0)
+            for item in detalhe_fixos:
+                if item['categoria'] in exclude_fixed:
+                    valor_excluido_fixo += Decimal(str(item.get('valor', 0)))
+            
+            saidas_fixas = base_fixos - valor_excluido_fixo
+            if saidas_fixas < 0: saidas_fixas = Decimal(0)
+
+            # Recalcular Custos Variáveis (Operacionais)
+            base_variaveis = Decimal(str(dre_data.get('custos_variaveis', 0)))
+            detalhe_variaveis = dre_data.get('detalhe_custos_variaveis', [])
+            
+            valor_excluido_variavel = Decimal(0)
+            for item in detalhe_variaveis:
+                if item['categoria'] in exclude_variable:
+                    valor_excluido_variavel += Decimal(str(item.get('valor', 0)))
+            
+            custos_variaveis_operacionais = base_variaveis - valor_excluido_variavel
+            if custos_variaveis_operacionais < 0: custos_variaveis_operacionais = Decimal(0)
+            
+            # CMV e Totais
+            cmv = Decimal(str(dre_data.get('cmv', 0)))
+            saidas_variaveis = custos_variaveis_operacionais + cmv
+            total_saidas = saidas_fixas + saidas_variaveis
+            
+            # Resultado (Recalculado após filtros)
+            saldo = Decimal(str(total_entradas)) - cmv - saidas_fixas - custos_variaveis_operacionais
+
+            # Detalhamento de categorias para o frontend
+            detalhe_fixos_v3 = {item['categoria']: float(item.get('valor', 0)) for item in detalhe_fixos if item['categoria'] not in exclude_fixed}
+            detalhe_variaveis_v3 = {item['categoria']: float(item.get('valor', 0)) for item in detalhe_variaveis if item['categoria'] not in exclude_variable}
+
+            meses_list.append({
+                'mes': current_date.isoformat(), 
+                'entradas_contrato': float(entradas_contrato),
+                'entradas_vendas': float(entradas_vendas),
+                'total_entradas': float(total_entradas),
+                'saidas_fixas': float(saidas_fixas),
+                'saidas_variaveis': float(saidas_variaveis),
+                'cmv': float(cmv),
+                'custos_variaveis': float(custos_variaveis_operacionais),
+                'total_saidas': float(total_saidas),
+                'saldo': float(saldo),
+                'detalhe_fixos': detalhe_fixos_v3,
+                'detalhe_variaveis': detalhe_variaveis_v3
+            })
+
+            
+            current_date = next_month
+
+        # Calcular totais
         totais = {
             'entradas_contrato': sum(m['entradas_contrato'] for m in meses_list),
             'entradas_vendas': sum(m['entradas_vendas'] for m in meses_list),
             'total_entradas': sum(m['total_entradas'] for m in meses_list),
             'saidas_fixas': sum(m['saidas_fixas'] for m in meses_list),
             'saidas_variaveis': sum(m['saidas_variaveis'] for m in meses_list),
+            'cmv': sum(m['cmv'] for m in meses_list),
+            'custos_variaveis': sum(m['custos_variaveis'] for m in meses_list),
             'total_saidas': sum(m['total_saidas'] for m in meses_list),
             'saldo_liquido': sum(m['saldo'] for m in meses_list)
         }
 
+        # Coletar todas as categorias únicas que apareceram no período
+        all_fixed_cats = sorted(list(set(cat for m in meses_list for cat in m['detalhe_fixos'].keys())))
+        all_variable_cats = sorted(list(set(cat for m in meses_list for cat in m['detalhe_variaveis'].keys())))
+
         return Response({
-            'periodo': {'data_inicio': str(data_inicio), 'data_fim': str(data_fim)},
             'totais': totais,
-            'meses': meses_list
+            'meses': meses_list,
+            'categorias_fixas': all_fixed_cats,
+            'categorias_variaveis': all_variable_cats
         })
+
 
     @action(detail=False, methods=['get'])
     def resumo_diario(self, request):
@@ -615,15 +583,21 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
         dias_dict = {}
 
         # Contas a Pagar (Saídas)
-        pagar_diario = ContasPagar.objects.filter(
-            data_pagamento__isnull=False,
-            data_pagamento__date__gte=data_inicio,
-            data_pagamento__date__lte=data_fim,
+        pagar_diario = ContasPagar.objects.annotate(
+            data_efetiva=Coalesce('data_pagamento', 'vencimento', output_field=DateTimeField())
+        ).filter(
+            data_efetiva__date__gte=data_inicio,
+            data_efetiva__date__lte=data_fim,
             status='P'
         ).annotate(
-            dia=TruncDay('data_pagamento')
+            dia=TruncDay('data_efetiva'),
+            valor_final=Case(
+                When(valor_total_pago__gt=0, then=F('valor_total_pago')),
+                default=F('valor'),
+                output_field=DecimalField()
+            )
         ).values('dia').annotate(
-            total=Sum('valor_pago'),
+            total=Sum('valor_final'),
             quantidade=Count('id')
         )
 
@@ -635,15 +609,21 @@ class FluxoCaixaRealizadoViewSet(viewsets.ViewSet):
             dias_dict[dia]['qtd_saidas'] += item['quantidade']
 
         # Contas a Receber (Entradas)
-        receber_diario = ContasReceber.objects.filter(
-            data_pagamento__isnull=False,
-            data_pagamento__date__gte=data_inicio,
-            data_pagamento__date__lte=data_fim,
+        receber_diario = ContasReceber.objects.annotate(
+            data_efetiva=Coalesce('data_pagamento', 'vencimento', output_field=DateTimeField())
+        ).filter(
+            data_efetiva__date__gte=data_inicio,
+            data_efetiva__date__lte=data_fim,
             status='P'
         ).annotate(
-            dia=TruncDay('data_pagamento')
+            dia=TruncDay('data_efetiva'),
+            valor_final=Case(
+                When(valor_total_pago__gt=0, then=F('valor_total_pago')),
+                default=F('valor'),
+                output_field=DecimalField()
+            )
         ).values('dia').annotate(
-            total=Sum('recebido'),
+            total=Sum('valor_final'),
             quantidade=Count('id')
         )
 

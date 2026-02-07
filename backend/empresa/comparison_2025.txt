@@ -1,0 +1,27 @@
+Chaves no dre_data: ['faturamento_bruto', 'faturamento_vendas', 'faturamento_servicos_contratos', 'faturamento_servicos_avulsos', 'lista_vendas', 'lista_servicos_contratos', 'lista_servicos_avulsos', 'impostos_vendas', 'percentual_impostos', 'estoque_inicio', 'compras_periodo', 'estoque_fim', 'cmv', 'cmv_vendas', 'cmv_contratos', 'cmv_outros', 'lista_cmv', 'lista_cmv_vendas', 'lista_cmv_contratos', 'lista_cmv_outros', 'lucro_bruto', 'margem_bruta_percent', 'custos_fixos', 'custos_variaveis', 'detalhe_custos_fixos', 'detalhe_custos_variaveis', 'despesas_operacionais', 'resultado_liquido', 'margem_liquida_percent']
+--- Comparação Anual 2025: Visão Geral (DRE) vs Resumo Mensal ---
+
+[DRE 2025]
+  Receita:    713623.14
+  Saídas:     1063531.3145
+    - Fixas:     213726.13
+    - Variáveis: 849805.1845 (Var: 614317.28 + CMV: 235487.9045)
+  Resultado:  -349908.1745
+
+[Resumo Mensal 2025]
+  Receita:    713623.14
+  Saídas:     1063531.3145
+    - Fixas:     213726.13
+    - Variáveis: 849805.1845 (Var: 614317.28 + CMV: 235487.9045)
+  Resultado:  -349908.1745
+
+[Diferenças]
+  Receita:    0.00
+  Saídas:     0.0000
+    - Fixas:     0.00
+    - Variáveis Total: 0.0000
+      - Custos Var:    0.00
+      - CMV:           0.0000
+  Resultado:  0.0000
+
+✅ RESULTADO: Compatibilidade Total!

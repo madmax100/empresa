@@ -790,9 +790,18 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
     def estatisticas(self, request):
         """Retorna estatísticas gerais do fluxo de caixa"""
         try:
-            hoje = date.today()
-            inicio_mes = hoje.replace(day=1)
-            fim_mes = (inicio_mes + relativedelta(months=1)) - timedelta(days=1)
+            # Permite filtrar por período específico. Se não informado, usa mês atual.
+            data_inicial = request.query_params.get('data_inicial')
+            data_final = request.query_params.get('data_final')
+            
+            if data_inicial and data_final:
+                hoje = datetime.strptime(data_final, '%Y-%m-%d').date() # Data de referência para cálculos relativos
+                inicio_mes = datetime.strptime(data_inicial, '%Y-%m-%d').date()
+                fim_mes = datetime.strptime(data_final, '%Y-%m-%d').date()
+            else:
+                hoje = date.today()
+                inicio_mes = hoje.replace(day=1)
+                fim_mes = (inicio_mes + relativedelta(months=1)) - timedelta(days=1)
             
             # Totais do mês atual
             lancamentos_mes = self.get_queryset().filter(
@@ -804,8 +813,9 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
                 saidas=Sum('valor', filter=Q(tipo='saida'))
             )
             
-            # Média dos últimos 6 meses
-            seis_meses_atras = hoje - relativedelta(months=6)
+            # Média dos últimos 6 meses (baseado na data final)
+            data_final_date = hoje if hoje < date.today() else date.today()
+            seis_meses_atras = data_final_date - relativedelta(months=6)
             lancamentos_6_meses = self.get_queryset().filter(
                 data__gte=seis_meses_atras,
                 realizado=True
@@ -864,7 +874,12 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
     def alertas_inteligentes(self, request):
         """Gera alertas inteligentes baseados na análise dos dados"""
         try:
-            hoje = date.today()
+            # Pega a data de referência (hoje ou data final do filtro)
+            data_ref_str = request.query_params.get('data_final')
+            if data_ref_str:
+                hoje = datetime.strptime(data_ref_str, '%Y-%m-%d').date()
+            else:
+                hoje = date.today()
             
             alertas = []
             
@@ -1006,25 +1021,38 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
     def indicadores(self, request):
         """Calcula principais indicadores financeiros"""
         try:
+            data_inicial_str = request.query_params.get('data_inicial')
+            data_final_str = request.query_params.get('data_final')
+
             hoje = date.today()
-            mes_atual = hoje.replace(day=1)
-            mes_seguinte = (mes_atual + timedelta(days=32)).replace(day=1)
+            
+            if data_inicial_str:
+                mes_atual = datetime.strptime(data_inicial_str, '%Y-%m-%d').date()
+            else:
+                mes_atual = hoje.replace(day=1)
+
+            if data_final_str:
+                mes_seguinte = datetime.strptime(data_final_str, '%Y-%m-%d').date() + timedelta(days=1)
+                # Para fins de comparação mensal, ajustamos para pegar o range correto se for um mês fechado
+            else:
+                mes_seguinte = (mes_atual + timedelta(days=32)).replace(day=1)
+            
             mes_anterior = (mes_atual - timedelta(days=1)).replace(day=1)
 
             # Calcula liquidez
             contas_pagar = self.get_queryset().filter(
                 tipo='saida',
-                data__range=[hoje, mes_seguinte],
+                data__range=[mes_atual, mes_seguinte - timedelta(days=1)], # Ajustado para usar o período selecionado
                 realizado=False
             ).aggregate(total=Sum('valor'))['total'] or Decimal('0')
 
             contas_receber = self.get_queryset().filter(
                 tipo='entrada',
-                data__range=[hoje, mes_seguinte],
+                data__range=[mes_atual, mes_seguinte - timedelta(days=1)], # Ajustado para usar o período selecionado
                 realizado=False
             ).aggregate(total=Sum('valor'))['total'] or Decimal('0')
 
-            saldo_atual = self._obter_saldo_inicial(hoje)
+            saldo_atual = self._obter_saldo_inicial(mes_atual) # Saldo no início do período
             indice_liquidez = (
                 (float(saldo_atual) + float(contas_receber)) / float(contas_pagar) 
                 if contas_pagar and contas_pagar > 0 else float('inf')
@@ -1268,62 +1296,101 @@ class FluxoCaixaViewSet(viewsets.ModelViewSet):
             return Decimal('0')
 
     def _sincronizar_contas_com_fluxo(self, data_inicial, data_final):
-        """Sincroniza contas a pagar e receber com o fluxo de caixa"""
+        """Sincroniza contas a pagar, receber e notas fiscais com o fluxo de caixa"""
+        from ..models.access import NotasFiscaisEntrada, NotasFiscaisSaida
+        from django.db.models import Q
+        
         try:
-            # Busca contas a pagar não pagas no período
+            print(f"DEBUG: Starting sync for {data_inicial} to {data_final}")
+            
+            # 1. Busca contas a pagar (Abertas e Pagas)
             contas_pagar = ContasPagar.objects.filter(
-                vencimento__date__range=[data_inicial, data_final],
-                status='A'  # Apenas contas abertas
+                Q(vencimento__date__range=[data_inicial, data_final]) |
+                Q(data_pagamento__date__range=[data_inicial, data_final]),
             )
             
-            # Busca contas a receber não pagas no período
+            # 2. Busca contas a receber (Abertas e Pagas)
             contas_receber = ContasReceber.objects.filter(
-                vencimento__date__range=[data_inicial, data_final],
-                status='A'  # Apenas contas abertas
+                Q(vencimento__date__range=[data_inicial, data_final]) |
+                Q(data_pagamento__date__range=[data_inicial, data_final]),
             )
-            
-            # Remove lançamentos automáticos anteriores do período (para evitar duplicatas)
-            FluxoCaixaLancamento.objects.filter(
+
+            # 3. Limpa lançamentos AUTOMÁTICOS do período para evitar duplicidade e permitir regeneração
+            deleted_count, _ = FluxoCaixaLancamento.objects.filter(
                 data__range=[data_inicial, data_final],
-                fonte_tipo__in=['contas_pagar', 'contas_receber']
+                fonte_tipo__in=['contas_pagar', 'contas_receber', 'nfe', 'nfs']
             ).delete()
+            print(f"DEBUG: Deleted {deleted_count} old entries.")
             
-            # Cria lançamentos para contas a pagar
+            new_objects = []
+
+            # Sincroniza Contas a Pagar
+            count_cp = 0
             for conta in contas_pagar:
-                FluxoCaixaLancamento.objects.get_or_create(
-                    fonte_tipo='contas_pagar',
-                    fonte_id=conta.id,
-                    defaults={
-                        'data': conta.vencimento.date(),
-                        'valor': conta.valor,
-                        'tipo': 'saida',
-                        'descricao': f'Conta a Pagar - {conta.fornecedor.nome if conta.fornecedor else "Sem fornecedor"}',
-                        'categoria': 'Contas a Pagar',
-                        'realizado': False,
-                        'observacoes': conta.historico or f'Vencimento: {conta.vencimento.strftime("%d/%m/%Y")}'
-                    }
-                )
-            
-            # Cria lançamentos para contas a receber
-            for conta in contas_receber:
-                FluxoCaixaLancamento.objects.get_or_create(
-                    fonte_tipo='contas_receber',
-                    fonte_id=conta.id,
-                    defaults={
-                        'data': conta.vencimento.date(),
-                        'valor': conta.valor,
-                        'tipo': 'entrada',
-                        'descricao': f'Conta a Receber - {conta.cliente.nome if conta.cliente else "Sem cliente"}',
-                        'categoria': 'Contas a Receber',
-                        'realizado': False,
-                        'observacoes': conta.historico or f'Vencimento: {conta.vencimento.strftime("%d/%m/%Y")}'
-                    }
-                )
+                # Se paga, usa data de pagamento. Se aberta, usa vencimento.
+                data_lancamento = conta.data_pagamento.date() if conta.status == 'P' and conta.data_pagamento else conta.vencimento.date()
+                if not data_lancamento: continue # Safety check
                 
-            print(f"Sincronizadas {contas_pagar.count()} contas a pagar e {contas_receber.count()} contas a receber")
+                # Só processa se a data definida cair no período solicitado
+                if not (data_inicial <= data_lancamento <= data_final):
+                    continue
+
+                new_objects.append(FluxoCaixaLancamento(
+                    fonte_tipo='contas_pagar',
+                    fonte_id=str(conta.id),
+                    data=data_lancamento,
+                    valor=conta.valor_total_pago if conta.status == 'P' and conta.valor_total_pago else conta.valor,
+                    tipo='saida',
+                    descricao=f'Conta a Pagar - {conta.fornecedor.nome if conta.fornecedor else "Sem fornecedor"}',
+                    categoria='Contas a Pagar',
+                    realizado=(conta.status == 'P'),
+                    observacoes=conta.historico or f'Vencimento: {conta.vencimento.strftime("%d/%m/%Y")}' if conta.vencimento else '',
+                    fornecedor=conta.fornecedor
+                ))
+                count_cp += 1
+            
+            # Sincroniza Contas a Receber
+            count_cr = 0
+            for conta in contas_receber:
+                data_lancamento = conta.data_pagamento.date() if conta.status == 'P' and conta.data_pagamento else conta.vencimento.date()
+                if not data_lancamento: continue
+
+                if not (data_inicial <= data_lancamento <= data_final):
+                    continue
+
+                new_objects.append(FluxoCaixaLancamento(
+                    fonte_tipo='contas_receber',
+                    fonte_id=str(conta.id),
+                    data=data_lancamento,
+                    valor=conta.valor_total_pago if conta.status == 'P' and conta.valor_total_pago else conta.valor,
+                    tipo='entrada',
+                    descricao=f'Conta a Receber - {conta.cliente.nome if conta.cliente else "Sem cliente"}',
+                    categoria='Contas a Receber',
+                    realizado=(conta.status == 'P'),
+                    observacoes=conta.historico or f'Vencimento: {conta.vencimento.strftime("%d/%m/%Y")}' if conta.vencimento else '',
+                    cliente=conta.cliente
+                ))
+                count_cr += 1
+
+
+            # SKIPPING NFe/NFS synchronization to avoid double counting with Accounts Payable/Receivable.
+            # Entries are deleted above but not regenerated.
+            
+            # Bulk Create
+            if new_objects:
+                FluxoCaixaLancamento.objects.bulk_create(new_objects)
+                
+            print(f"DEBUG: Sync complete. Created {len(new_objects)} entries.")
+            print(f"  Distribution by source:")
+            print(f"  nfe: 0 (Disabled)")
+            print(f"  nfs: 0 (Disabled)")
+            print(f"  contas_pagar: {count_cp}")
+            print(f"  contas_receber: {count_cr}")
             
         except Exception as e:
             print(f"Erro na sincronização: {str(e)}")
+            import traceback
+            traceback.print_exc()
 
     @action(detail=False, methods=['get'])
     def dashboard(self, request):

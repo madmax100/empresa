@@ -9,7 +9,8 @@ import {
   Info,
   Wallet,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Filter
 } from 'lucide-react';
 
 // Interface para item de invoice no modal
@@ -103,6 +104,36 @@ interface CicloCaixa {
   analise: string;
 }
 
+interface ResumoMensalItem {
+  mes: string;
+  entradas_contrato: number;
+  entradas_vendas: number;
+  total_entradas: number;
+  saidas_fixas: number;
+  saidas_variaveis: number;
+  total_saidas: number;
+  saldo: number;
+  detalhe_fixos: Record<string, number>;
+  detalhe_variaveis: Record<string, number>;
+}
+
+
+interface ResumoMensalData {
+  totais: {
+    entradas_contrato: number;
+    entradas_vendas: number;
+    total_entradas: number;
+    saidas_fixas: number;
+    saidas_variaveis: number;
+    total_saidas: number;
+    saldo_liquido: number;
+  };
+  meses: ResumoMensalItem[];
+  categorias_fixas: string[];
+  categorias_variaveis: string[];
+}
+
+
 interface DREResponse {
   periodo: {
     inicio: string;
@@ -124,8 +155,13 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
 
   // Estado de dados
   const [data, setData] = useState<DREResponse | null>(null);
+  const [resumoMensal, setResumoMensal] = useState<ResumoMensalData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'visao_geral' | 'resumo_mensal'>('visao_geral');
+  const [expandFixas, setExpandFixas] = useState(false);
+  const [expandVariaveis, setExpandVariaveis] = useState(false);
+
 
   // Estado do modal de detalhes
   const [modalOpen, setModalOpen] = useState(false);
@@ -138,12 +174,26 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
   const [selectedVariable, setSelectedVariable] = useState<string[]>([]);
 
   // Inicializar seleção quando os dados chegarem
+  // Inicializar seleção quando os dados chegarem
   useEffect(() => {
-    if (data?.dre?.detalhe_custos_fixos) {
-      setSelectedFixed(data.dre.detalhe_custos_fixos.map(c => c.categoria));
-    }
-    if (data?.dre?.detalhe_custos_variaveis) {
-      setSelectedVariable(data.dre.detalhe_custos_variaveis.map(c => c.categoria));
+    if (data?.dre) {
+      // Fixos: Selecionar todos por padrão
+      if (data.dre.detalhe_custos_fixos) {
+        // Só atualizar se estiver vazio (primeira carga ou reset)
+        if (selectedFixed.length === 0) {
+          setSelectedFixed(data.dre.detalhe_custos_fixos.map(c => c.categoria));
+        }
+      }
+      // Variáveis: Selecionar todos exceto "Mercadorias" e "Empréstimos"
+      if (data.dre.detalhe_custos_variaveis) {
+        if (selectedVariable.length === 0) {
+          const excluded = ['Mercadorias', 'Mercadoria', 'Empréstimos', 'Empréstimo'];
+          const defaults = data.dre.detalhe_custos_variaveis
+            .map(c => c.categoria)
+            .filter(c => !excluded.includes(c));
+          setSelectedVariable(defaults);
+        }
+      }
     }
   }, [data]);
 
@@ -160,7 +210,7 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
     );
   };
 
-  // Cálculos dinâmicos baseados na seleção
+  // Cálculos dinâmicos baseados na seleção (Frontend - Visão Geral)
   const calculatedFixedCosts = data?.dre?.detalhe_custos_fixos
     .filter(c => selectedFixed.includes(c.categoria))
     .reduce((sum, c) => sum + c.valor, 0) || 0;
@@ -178,6 +228,46 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
   const calculatedNetMargin = data?.dre?.faturamento_bruto
     ? (calculatedNetResult / data.dre.faturamento_bruto) * 100
     : 0;
+
+  // --- FETCHING RESUMO MENSAL SEPARATELY ---
+  // Quando os filtros mudam, recarregar apenas o Resumo Mensal
+  useEffect(() => {
+    // Evitar chamar se não tiver dados iniciais ou se estiver carregando tudo
+    if (!data || loading) return;
+
+    const fetchResumo = async () => {
+      try {
+        // Usar caminhos relativos para evitar problemas de porta/host
+        const params = new URLSearchParams();
+        if (dataInicio) params.append('data_inicio', dataInicio);
+        if (dataFim) params.append('data_fim', dataFim);
+
+        // Calcular Exclusões (com verificação de existência)
+        const allFixed = data.dre?.detalhe_custos_fixos?.map(c => c.categoria) || [];
+        const allVariable = data.dre?.detalhe_custos_variaveis?.map(c => c.categoria) || [];
+
+        const excludeFixed = allFixed.filter(c => !selectedFixed.includes(c));
+        const excludeVariable = allVariable.filter(c => !selectedVariable.includes(c));
+
+        if (excludeFixed.length) params.append('exclude_fixed', excludeFixed.join(','));
+        if (excludeVariable.length) params.append('exclude_variable', excludeVariable.join(','));
+
+        const res = await fetch(`/api/fluxo-caixa-realizado/resumo_mensal/?${params.toString()}`);
+        if (res.ok) {
+          const resumoData = await res.json();
+          setResumoMensal(resumoData);
+        } else {
+          console.error("Erro na resposta do resumo mensal:", res.status);
+        }
+      } catch (e) {
+        console.error("Erro ao atualizar resumo mensal", e);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchResumo, 500); // Debounce
+    return () => clearTimeout(timeoutId);
+
+  }, [selectedFixed, selectedVariable, data, dataInicio, dataFim]); // data dependency for base categories
 
   // Função para abrir modal
   const openModal = (title: string, items: any[], type: 'default' | 'cmv' | 'custos' = 'default') => {
@@ -212,6 +302,7 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
       background: '#f8fafc',
       card: '#ffffff',
       border: '#e2e8f0',
+      sidebar: '#ffffff',
     },
     shadows: {
       sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
@@ -408,19 +499,29 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
     return '#64748b'; // gray
   };
 
-  // Buscar dados do DRE
-  const fetchDRE = useCallback(async () => {
+  // Buscar dados (DRE + Resumo Mensal)
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        `/api/dre/?data_inicio=${dataInicio}&data_fim=${dataFim}`
-      );
-      if (!response.ok) {
-        throw new Error('Erro ao carregar DRE');
+      const params = new URLSearchParams();
+      if (dataInicio) params.append('data_inicio', dataInicio);
+      if (dataFim) params.append('data_fim', dataFim);
+
+      const [dreRes, resumoRes] = await Promise.all([
+        fetch(`/api/dre/?${params.toString()}`),
+        fetch(`/api/fluxo-caixa-realizado/resumo_mensal/?${params.toString()}`)
+      ]);
+
+      if (!dreRes.ok) throw new Error('Erro ao carregar DRE');
+      const dreData = await dreRes.json();
+      setData(dreData);
+
+      if (resumoRes.ok) {
+        const resumoData = await resumoRes.json();
+        setResumoMensal(resumoData);
       }
-      const result = await response.json();
-      setData(result);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
@@ -429,8 +530,8 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
   }, [dataInicio, dataFim]);
 
   useEffect(() => {
-    fetchDRE();
-  }, [fetchDRE]);
+    fetchData();
+  }, [fetchData]);
 
   // Loading state
   if (loading) {
@@ -481,468 +582,738 @@ const GerenciaDashboard: React.FC<GerenciaDashboardProps> = ({ dataInicio, dataF
       color: theme.colors.primary
     }}>
 
-      {/* HEADER & FILTERS */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', flexWrap: 'wrap', gap: '20px' }}>
-        <div>
-          <h1 style={{ fontSize: '28px', fontWeight: '800', color: theme.colors.primary, margin: 0 }}>
-            Painel de Gerência
-          </h1>
-          <p style={{ margin: '8px 0 0', color: theme.colors.secondary }}>
-            Visão geral financeira e operacional
-          </p>
-        </div>
+      <div style={{ display: 'flex', gap: '24px' }}>
 
+        {/* SIDEBAR FILTERS */}
+        <div style={{ width: '280px', flexShrink: 0 }}>
+          <div style={{
+            backgroundColor: theme.colors.card,
+            borderRadius: theme.radius,
+            padding: '20px',
+            boxShadow: theme.shadows.sm,
+            border: `1px solid ${theme.colors.border}`,
+            position: 'sticky',
+            top: '20px'
+          }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '700', color: theme.colors.primary, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Filter size={18} /> Filtros de Custo
+            </h3>
 
-      </div>
-
-      {/* HERO STATS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '40px' }}>
-        <StatCard
-          label="Faturamento Bruto"
-          value={formatCurrency(dre?.faturamento_bruto || 0)}
-          icon={<TrendingUp size={20} />}
-          color={theme.colors.accent}
-          trend="up"
-          trendValue="Receita Total"
-          subValue="do período"
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: theme.colors.secondary }}>Vendas</span>
-              <span style={{ fontWeight: '600', color: theme.colors.primary }}>{formatCurrency(dre?.faturamento_vendas || 0)}</span>
+            {/* Filtros de Custos Fixos */}
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: theme.colors.secondary, marginBottom: '8px', textTransform: 'uppercase' }}>
+                Custos Fixos
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '300px', overflowY: 'auto' }}>
+                {dre?.detalhe_custos_fixos?.length ? dre.detalhe_custos_fixos.map((cat, idx) => (
+                  <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', color: theme.colors.primary }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedFixed.includes(cat.categoria)}
+                      onChange={() => toggleFixed(cat.categoria)}
+                      style={{ cursor: 'pointer', accentColor: theme.colors.primary }}
+                    />
+                    <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={cat.categoria}>{cat.categoria}</span>
+                  </label>
+                )) : <div style={{ fontSize: '12px', color: theme.colors.secondary, fontStyle: 'italic' }}>Nenhum custo fixo</div>}
+              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: theme.colors.secondary }}>Contratos</span>
-              <span style={{ fontWeight: '600', color: theme.colors.primary }}>{formatCurrency(dre?.faturamento_servicos_contratos || 0)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
-              <span style={{ color: theme.colors.secondary }}>Outros</span>
-              <span style={{ fontWeight: '600', color: theme.colors.primary }}>{formatCurrency(dre?.faturamento_servicos_avulsos || 0)}</span>
+
+            {/* Filtros de Custos Variáveis */}
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: '600', color: theme.colors.secondary, marginBottom: '8px', textTransform: 'uppercase' }}>
+                Custos Variáveis
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '300px', overflowY: 'auto' }}>
+                {dre?.detalhe_custos_variaveis?.length ? dre.detalhe_custos_variaveis.map((cat, idx) => (
+                  <label key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', color: theme.colors.danger }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedVariable.includes(cat.categoria)}
+                      onChange={() => toggleVariable(cat.categoria)}
+                      style={{ cursor: 'pointer', accentColor: theme.colors.danger }}
+                    />
+                    <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={cat.categoria}>{cat.categoria}</span>
+                  </label>
+                )) : <div style={{ fontSize: '12px', color: theme.colors.secondary, fontStyle: 'italic' }}>Nenhum custo variável</div>}
+              </div>
+              <div style={{ marginTop: '12px', fontSize: '11px', color: theme.colors.secondary, lineHeight: '1.4' }}>
+                * "Mercadorias" e "Empréstimos" desmarcados por padrão a pedido.
+              </div>
             </div>
           </div>
-        </StatCard>
-        <StatCard
-          label="Lucro Líquido"
-          value={formatCurrency(calculatedNetResult)}
-          icon={calculatedNetResult >= 0 ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
-          color={calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger}
-          trend={calculatedNetResult >= 0 ? 'up' : 'down'}
-          trendValue={`Margem: ${calculatedNetMargin.toFixed(1)}%`}
-        />
+        </div>
 
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
-
-        {/* COLUNA ESQUERDA - DRE */}
-        <div>
-          <SectionHeader title="DRE" subtitle="Demonstrativo do Resultado do Exercício" icon={<Calculator size={24} color={theme.colors.accent} />} />
-
-          <ModernCard>
-            {/* FATURAMENTO */}
-            <div style={{ marginBottom: '24px' }}>
-              <DRELine
-                label="(+) Faturamento Bruto"
-                value={dre?.faturamento_bruto || 0}
-                bold large color={theme.colors.success}
-                highlight
-              />
-              <DRELine
-                label="Vendas (NF Saída)"
-                value={dre?.faturamento_vendas || 0}
-                indent={1}
-                action={() => dre?.lista_vendas && openModal('Vendas (NF Saída)', dre.lista_vendas)}
-              />
-              <DRELine
-                label="Serviços (Contratos)"
-                value={dre?.faturamento_servicos_contratos || 0}
-                indent={1}
-                action={() => dre?.lista_servicos_contratos && openModal('Serviços - Contratos', dre.lista_servicos_contratos)}
-              />
-              <DRELine
-                label="Serviços (Avulsos)"
-                value={dre?.faturamento_servicos_avulsos || 0}
-                indent={1}
-                action={() => dre?.lista_servicos_avulsos && openModal('Serviços - Avulsos', dre.lista_servicos_avulsos)}
-              />
+        {/* MAIN CONTENT AREA */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* HEADER & TABS moved here */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
+            <div>
+              <h1 style={{ fontSize: '28px', fontWeight: '800', color: theme.colors.primary, margin: 0 }}>
+                Painel de Gerência
+              </h1>
+              <p style={{ margin: '8px 0 0', color: theme.colors.secondary }}>
+                Visão geral financeira e operacional
+              </p>
             </div>
 
-            {/* DEDUÇÕES & CUSTOS */}
-            <div style={{ marginBottom: '24px' }}>
-
-              <DRELine
-                label="(-) CMV (Custo Mercadoria)"
-                value={-(dre?.cmv || 0)}
-                color={theme.colors.warning}
-                bold
-                action={() => dre?.lista_cmv && openModal('CMV - Detalhamento', dre.lista_cmv, 'cmv')}
-              />
-              <DRELine
-                label="Custos Vendas"
-                value={-(dre?.cmv_vendas || 0)}
-                indent={1}
-                color={theme.colors.secondary}
-                action={() => dre?.lista_cmv_vendas && openModal('CMV - Vendas', dre.lista_cmv_vendas, 'cmv')}
-              />
-              <DRELine
-                label="Custos Contratos"
-                value={-(dre?.cmv_contratos || 0)}
-                indent={1}
-                color={theme.colors.secondary}
-                action={() => dre?.lista_cmv_contratos && openModal('CMV - Contratos', dre.lista_cmv_contratos, 'cmv')}
-              />
-              <DRELine
-                label="Custos Outros"
-                value={-(dre?.cmv_outros || 0)}
-                indent={1}
-                color={theme.colors.secondary}
-                action={() => dre?.lista_cmv_outros && openModal('CMV - Outros', dre.lista_cmv_outros, 'cmv')}
-              />
+            {/* TABS */}
+            <div style={{ display: 'flex', gap: '16px', borderBottom: `1px solid ${theme.colors.border}` }}>
+              <button
+                onClick={() => setActiveTab('visao_geral')}
+                style={{
+                  padding: '8px 16px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: activeTab === 'visao_geral' ? `2px solid ${theme.colors.accent}` : '2px solid transparent',
+                  color: activeTab === 'visao_geral' ? theme.colors.accent : theme.colors.secondary,
+                  fontWeight: activeTab === 'visao_geral' ? '600' : '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Visão Geral (DRE)
+              </button>
+              <button
+                onClick={() => setActiveTab('resumo_mensal')}
+                style={{
+                  padding: '8px 16px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: activeTab === 'resumo_mensal' ? `2px solid ${theme.colors.accent}` : '2px solid transparent',
+                  color: activeTab === 'resumo_mensal' ? theme.colors.accent : theme.colors.secondary,
+                  fontWeight: activeTab === 'resumo_mensal' ? '600' : '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                Resumo Mensal
+              </button>
             </div>
+          </div>
 
-            {/* MARGEM BRUTA */}
-            <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: theme.colors.background, borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {activeTab === 'visao_geral' ? (
+            <>
+
+              {/* HERO STATS */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+                <StatCard
+                  label="Faturamento Bruto"
+                  value={formatCurrency(dre?.faturamento_bruto || 0)}
+                  icon={<TrendingUp size={20} />}
+                  color={theme.colors.accent}
+                  trend="up"
+                  trendValue="Receita Total"
+                  subValue="do período"
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                      <span style={{ color: theme.colors.secondary }}>Vendas</span>
+                      <span style={{ fontWeight: '600', color: theme.colors.primary }}>{formatCurrency(dre?.faturamento_vendas || 0)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                      <span style={{ color: theme.colors.secondary }}>Contratos</span>
+                      <span style={{ fontWeight: '600', color: theme.colors.primary }}>{formatCurrency(dre?.faturamento_servicos_contratos || 0)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                      <span style={{ color: theme.colors.secondary }}>Outros</span>
+                      <span style={{ fontWeight: '600', color: theme.colors.primary }}>{formatCurrency(dre?.faturamento_servicos_avulsos || 0)}</span>
+                    </div>
+                  </div>
+                </StatCard>
+                <StatCard
+                  label="Lucro Líquido"
+                  value={formatCurrency(calculatedNetResult)}
+                  icon={calculatedNetResult >= 0 ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
+                  color={calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger}
+                  trend={calculatedNetResult >= 0 ? 'up' : 'down'}
+                  trendValue={`Margem: ${calculatedNetMargin.toFixed(1)}%`}
+                />
+
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '32px' }}>
+
+                {/* COLUNA ESQUERDA - DRE */}
                 <div>
-                  <div style={{ fontSize: '13px', color: theme.colors.secondary, fontWeight: '600', textTransform: 'uppercase' }}>Lucro Bruto (Faturamento - CMV)</div>
-                  <div style={{ fontSize: '24px', fontWeight: '700', color: theme.colors.primary }}>{formatCurrency((dre?.faturamento_bruto || 0) - (dre?.cmv || 0))}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '13px', color: theme.colors.secondary }}>Margem Bruta</div>
-                  <div style={{ fontSize: '16px', fontWeight: '700', color: theme.colors.primary }}>{(dre?.margem_bruta_percent || 0).toFixed(1)}%</div>
-                </div>
-              </div>
-            </div>
+                  <SectionHeader title="DRE" subtitle="Demonstrativo do Resultado do Exercício" icon={<Calculator size={24} color={theme.colors.accent} />} />
 
-            {/* DESPESAS OPERACIONAIS */}
-            <div style={{ marginBottom: '24px' }}>
-              <DRELine
-                label="(-) Despesas Operacionais (Calculado)"
-                value={-calculatedOperatingExpenses}
-                color={theme.colors.danger}
-                bold highlight
-              />
-
-              <div style={{ marginTop: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: theme.colors.secondary, marginBottom: '8px', paddingLeft: '8px' }}>
-                  <span>Custos Fixos (Selecionados)</span>
-                  <span>{formatCurrency(calculatedFixedCosts)}</span>
-                </div>
-                {/* Categorias Fixas Expandidas com Checkbox */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                  paddingLeft: '8px',
-                  marginBottom: '16px',
-                  maxHeight: '300px',
-                  overflowY: 'auto'
-                }}>
-                  {dre?.detalhe_custos_fixos?.map((cat, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: theme.colors.primary }}>
-                          <input
-                            type="checkbox"
-                            checked={selectedFixed.includes(cat.categoria)}
-                            onChange={() => toggleFixed(cat.categoria)}
-                            style={{ cursor: 'pointer', accentColor: theme.colors.primary }}
-                          />
-                          {cat.categoria}
-                        </label>
-                        <button
-                          onClick={() => cat.itens && openModal(cat.categoria, cat.itens, 'detalhe_custo')}
-                          style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
-                          title="Ver detalhes"
-                        >
-                          <Info size={14} color={theme.colors.secondary} />
-                        </button>
-                      </div>
-                      <span style={{ color: selectedFixed.includes(cat.categoria) ? theme.colors.secondary : '#cbd5e1' }}>
-                        {formatCurrency(cat.valor)}
-                      </span>
+                  <ModernCard>
+                    {/* FATURAMENTO */}
+                    <div style={{ marginBottom: '24px' }}>
+                      <DRELine
+                        label="(+) Faturamento Bruto"
+                        value={dre?.faturamento_bruto || 0}
+                        bold large color={theme.colors.success}
+                        highlight
+                      />
+                      <DRELine
+                        label="Vendas (NF Saída)"
+                        value={dre?.faturamento_vendas || 0}
+                        indent={1}
+                        action={() => dre?.lista_vendas && openModal('Vendas (NF Saída)', dre.lista_vendas)}
+                      />
+                      <DRELine
+                        label="Serviços (Contratos)"
+                        value={dre?.faturamento_servicos_contratos || 0}
+                        indent={1}
+                        action={() => dre?.lista_servicos_contratos && openModal('Serviços - Contratos', dre.lista_servicos_contratos)}
+                      />
+                      <DRELine
+                        label="Serviços (Avulsos)"
+                        value={dre?.faturamento_servicos_avulsos || 0}
+                        indent={1}
+                        action={() => dre?.lista_servicos_avulsos && openModal('Serviços - Avulsos', dre.lista_servicos_avulsos)}
+                      />
                     </div>
-                  ))}
-                  {!dre?.detalhe_custos_fixos?.length && <div style={{ fontSize: '12px', color: theme.colors.secondary, fontStyle: 'italic' }}>Nenhum custo fixo registrado.</div>}
-                </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: theme.colors.secondary, marginBottom: '8px', paddingLeft: '8px' }}>
-                  <span>Custos Variáveis (Selecionados)</span>
-                  <span>{formatCurrency(calculatedVariableCosts)}</span>
-                </div>
-                {/* Categorias Variáveis Expandidas com Checkbox */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '2px',
-                  paddingLeft: '8px',
-                  maxHeight: '300px',
-                  overflowY: 'auto'
-                }}>
-                  {dre?.detalhe_custos_variaveis?.map((cat, idx) => (
-                    <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: theme.colors.danger }}>
-                          <input
-                            type="checkbox"
-                            checked={selectedVariable.includes(cat.categoria)}
-                            onChange={() => toggleVariable(cat.categoria)}
-                            style={{ cursor: 'pointer', accentColor: theme.colors.danger }}
-                          />
-                          {cat.categoria}
-                        </label>
-                        <button
-                          onClick={() => cat.itens && openModal(cat.categoria, cat.itens, 'detalhe_custo')}
-                          style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
-                          title="Ver detalhes"
-                        >
-                          <Info size={14} color={theme.colors.secondary} />
-                        </button>
-                      </div>
-                      <span style={{ color: selectedVariable.includes(cat.categoria) ? theme.colors.danger : '#cbd5e1' }}>
-                        {formatCurrency(cat.valor)}
-                      </span>
+                    {/* DEDUÇÕES & CUSTOS */}
+                    <div style={{ marginBottom: '24px' }}>
+
+                      <DRELine
+                        label="(-) CMV (Custo Mercadoria)"
+                        value={-(dre?.cmv || 0)}
+                        color={theme.colors.warning}
+                        bold
+                        action={() => dre?.lista_cmv && openModal('CMV - Detalhamento', dre.lista_cmv, 'cmv')}
+                      />
+                      <DRELine
+                        label="Custos Vendas"
+                        value={-(dre?.cmv_vendas || 0)}
+                        indent={1}
+                        color={theme.colors.secondary}
+                        action={() => dre?.lista_cmv_vendas && openModal('CMV - Vendas', dre.lista_cmv_vendas, 'cmv')}
+                      />
+                      <DRELine
+                        label="Custos Contratos"
+                        value={-(dre?.cmv_contratos || 0)}
+                        indent={1}
+                        color={theme.colors.secondary}
+                        action={() => dre?.lista_cmv_contratos && openModal('CMV - Contratos', dre.lista_cmv_contratos, 'cmv')}
+                      />
+                      <DRELine
+                        label="Custos Outros"
+                        value={-(dre?.cmv_outros || 0)}
+                        indent={1}
+                        color={theme.colors.secondary}
+                        action={() => dre?.lista_cmv_outros && openModal('CMV - Outros', dre.lista_cmv_outros, 'cmv')}
+                      />
                     </div>
-                  ))}
-                  {!dre?.detalhe_custos_variaveis?.length && <div style={{ fontSize: '12px', color: theme.colors.secondary, fontStyle: 'italic' }}>Nenhum custo variável registrado.</div>}
+
+                    {/* MARGEM BRUTA */}
+                    <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: theme.colors.background, borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '13px', color: theme.colors.secondary, fontWeight: '600', textTransform: 'uppercase' }}>Lucro Bruto (Faturamento - CMV)</div>
+                          <div style={{ fontSize: '24px', fontWeight: '700', color: theme.colors.primary }}>{formatCurrency((dre?.faturamento_bruto || 0) - (dre?.cmv || 0))}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '13px', color: theme.colors.secondary }}>Margem Bruta</div>
+                          <div style={{ fontSize: '16px', fontWeight: '700', color: theme.colors.primary }}>{(dre?.margem_bruta_percent || 0).toFixed(1)}%</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* DESPESAS OPERACIONAIS */}
+                    <div style={{ marginBottom: '24px' }}>
+                      <DRELine
+                        label="(-) Despesas Operacionais (Calculado)"
+                        value={-calculatedOperatingExpenses}
+                        color={theme.colors.danger}
+                        bold highlight
+                      />
+
+                      <div style={{ marginTop: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: theme.colors.secondary, marginBottom: '8px', paddingLeft: '8px' }}>
+                          <span>Custos Fixos (Selecionados)</span>
+                          <span>{formatCurrency(calculatedFixedCosts)}</span>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '2px',
+                          paddingLeft: '8px',
+                          marginBottom: '16px',
+                          maxHeight: '300px',
+                          overflowY: 'auto'
+                        }}>
+                          {dre?.detalhe_custos_fixos
+                            ?.filter(cat => selectedFixed.includes(cat.categoria))
+                            .map((cat, idx) => (
+                              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ color: theme.colors.primary }}>
+                                    {cat.categoria}
+                                  </span>
+                                  <button
+                                    onClick={() => cat.itens && openModal(cat.categoria, cat.itens, 'detalhe_custo')}
+                                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
+                                    title="Ver detalhes"
+                                  >
+                                    <Info size={14} color={theme.colors.secondary} />
+                                  </button>
+                                </div>
+                                <span style={{ color: theme.colors.secondary }}>
+                                  {formatCurrency(cat.valor)}
+                                </span>
+                              </div>
+                            ))}
+                          {!calculatedFixedCosts && <div style={{ fontSize: '12px', color: theme.colors.secondary, fontStyle: 'italic' }}>Nenhum custo fixo selecionado.</div>}
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: theme.colors.secondary, marginBottom: '8px', paddingLeft: '8px' }}>
+                          <span>Custos Variáveis (Selecionados)</span>
+                          <span>{formatCurrency(calculatedVariableCosts)}</span>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '2px',
+                          paddingLeft: '8px',
+                          maxHeight: '300px',
+                          overflowY: 'auto'
+                        }}>
+                          {dre?.detalhe_custos_variaveis
+                            ?.filter(cat => selectedVariable.includes(cat.categoria))
+                            .map((cat, idx) => (
+                              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', padding: '4px 0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ color: theme.colors.danger }}>
+                                    {cat.categoria}
+                                  </span>
+                                  <button
+                                    onClick={() => cat.itens && openModal(cat.categoria, cat.itens, 'detalhe_custo')}
+                                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '2px', display: 'flex', alignItems: 'center' }}
+                                    title="Ver detalhes"
+                                  >
+                                    <Info size={14} color={theme.colors.secondary} />
+                                  </button>
+                                </div>
+                                <span style={{ color: theme.colors.danger }}>
+                                  {formatCurrency(cat.valor)}
+                                </span>
+                              </div>
+                            ))}
+                          {!calculatedVariableCosts && <div style={{ fontSize: '12px', color: theme.colors.secondary, fontStyle: 'italic' }}>Nenhum custo variável selecionado.</div>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* RESULTADO FINAL */}
+                    <div style={{
+                      marginTop: '16px',
+                      padding: '20px',
+                      backgroundColor: calculatedNetResult >= 0 ? theme.colors.successBg : theme.colors.dangerBg,
+                      borderRadius: '8px',
+                      border: `1px solid ${calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger}40`,
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Resultado Líquido (Lucro/Prejuízo)
+                      </div>
+                      <div style={{ fontSize: '32px', fontWeight: '800', margin: '8px 0', color: calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger }}>
+                        {formatCurrency(calculatedNetResult)}
+                      </div>
+                      <div style={{ fontSize: '14px', color: theme.colors.secondary }}>
+                        Margem Líquida: <strong>{calculatedNetMargin.toFixed(1)}%</strong>
+                      </div>
+                    </div>
+                    <div style={{
+                      marginTop: '16px',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      backgroundColor: '#f1f5f9',
+                      fontSize: '12px',
+                      color: theme.colors.secondary,
+                      lineHeight: '1.5',
+                      textAlign: 'left'
+                    }}>
+                      <strong>Nota:</strong> O DRE utiliza o regime de competência. O CMV é calculado: Estoque Inicial + Compras - Estoque Final. Os impostos são estimados em {(dre?.percentual_impostos || 0).toFixed(0)}%.
+                    </div>
+
+                  </ModernCard>
                 </div>
               </div>
-            </div>
-
-            {/* RESULTADO FINAL */}
-            <div style={{
-              marginTop: '16px',
-              padding: '20px',
-              backgroundColor: calculatedNetResult >= 0 ? theme.colors.successBg : theme.colors.dangerBg,
-              borderRadius: '8px',
-              border: `1px solid ${calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger}40`,
-              textAlign: 'center'
+            </>
+          ) : (
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200" style={{
+              backgroundColor: theme.colors.card,
+              borderRadius: '16px',
+              padding: '24px',
+              boxShadow: theme.shadows.card,
+              border: `1px solid ${theme.colors.border}`
             }}>
-              <div style={{ fontSize: '14px', fontWeight: '600', color: calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Resultado Líquido (Lucro/Prejuízo)
-              </div>
-              <div style={{ fontSize: '32px', fontWeight: '800', margin: '8px 0', color: calculatedNetResult >= 0 ? theme.colors.success : theme.colors.danger }}>
-                {formatCurrency(calculatedNetResult)}
-              </div>
-              <div style={{ fontSize: '14px', color: theme.colors.secondary }}>
-                Margem Líquida: <strong>{calculatedNetMargin.toFixed(1)}%</strong>
-              </div>
-            </div>
-            <div style={{
-              marginTop: '16px',
-              padding: '16px',
-              borderRadius: '8px',
-              backgroundColor: '#f1f5f9',
-              fontSize: '12px',
-              color: theme.colors.secondary,
-              lineHeight: '1.5',
-              textAlign: 'left'
-            }}>
-              <strong>Nota:</strong> O DRE utiliza o regime de competência. O CMV é calculado: Estoque Inicial + Compras - Estoque Final. Os impostos são estimados em {(dre?.percentual_impostos || 0).toFixed(0)}%.
-            </div>
+              <SectionHeader title="Resumo Mensal Detalhado" icon={<TrendingUp size={24} color={theme.colors.accent} />} />
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                  <thead style={{ backgroundColor: '#f8fafc', color: theme.colors.secondary, textTransform: 'uppercase', fontSize: '11px' }}>
+                    <tr>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600' }}>Mês</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '600', color: theme.colors.success }}>Rec. Contratos</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '600', color: theme.colors.success }}>Rec. Vendas</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: theme.colors.success, backgroundColor: '#f0fdf4' }}>Total Receitas</th>
 
-          </ModernCard>
+                      {/* Custos Fixos EXPANDABLE */}
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '600', color: theme.colors.danger, borderLeft: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                          <span>Desp. Fixas</span>
+                          <button
+                            onClick={() => setExpandFixas(!expandFixas)}
+                            style={{ padding: '2px 4px', fontSize: '10px', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '4px', cursor: 'pointer', color: theme.colors.danger }}
+                          >
+                            {expandFixas ? '«' : '»'}
+                          </button>
+                        </div>
+                      </th>
+                      {expandFixas && resumoMensal?.categorias_fixas.map(cat => (
+                        <th key={cat} style={{ padding: '12px 8px', textAlign: 'right', fontWeight: '400', color: '#7f1d1d', fontSize: '10px', backgroundColor: '#fff5f5' }}>
+                          {cat}
+                        </th>
+                      ))}
+
+                      {/* Custos Variáveis EXPANDABLE */}
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '600', color: theme.colors.danger, borderLeft: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                          <span>Desp. Variáveis</span>
+                          <button
+                            onClick={() => setExpandVariaveis(!expandVariaveis)}
+                            style={{ padding: '2px 4px', fontSize: '10px', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '4px', cursor: 'pointer', color: theme.colors.danger }}
+                          >
+                            {expandVariaveis ? '«' : '»'}
+                          </button>
+                        </div>
+                      </th>
+                      {expandVariaveis && resumoMensal?.categorias_variaveis.map(cat => (
+                        <th key={cat} style={{ padding: '12px 8px', textAlign: 'right', fontWeight: '400', color: '#7f1d1d', fontSize: '10px', backgroundColor: '#fff5f5' }}>
+                          {cat}
+                        </th>
+                      ))}
+
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: theme.colors.danger, backgroundColor: '#fef2f2', borderLeft: '1px solid #e2e8f0' }}>Total Saídas</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700' }}>Resultado</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right' }}>Margem %</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {resumoMensal?.meses.map((mes, idx) => {
+                      const margem = mes.total_entradas > 0
+                        ? ((mes.saldo / mes.total_entradas) * 100)
+                        : 0;
+
+                      return (
+                        <tr key={idx} style={{ borderBottom: `1px solid ${theme.colors.border}` }}>
+                          <td style={{ padding: '12px 16px', fontWeight: '500' }}>
+                            {new Date(mes.mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' })}
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                            {mes.entradas_contrato.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                            {mes.entradas_vendas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: theme.colors.success, backgroundColor: '#f0fdf4' }}>
+                            {mes.total_entradas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+
+                          {/* Coluna Principal Fixa */}
+                          <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.danger, borderLeft: '1px solid #f1f5f9' }}>
+                            {mes.saidas_fixas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+                          {/* Colunas Detalhadas Fixas */}
+                          {expandFixas && resumoMensal?.categorias_fixas.map(cat => (
+                            <td key={cat} style={{ padding: '12px 8px', textAlign: 'right', color: '#991b1b', fontSize: '11px', backgroundColor: '#fffafa' }}>
+                              {(mes.detalhe_fixos[cat] || 0) > 0 ? mes.detalhe_fixos[cat].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-'}
+                            </td>
+                          ))}
+
+                          {/* Coluna Principal Variável */}
+                          <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.danger, borderLeft: '1px solid #f1f5f9' }}>
+                            {mes.saidas_variaveis.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+                          {/* Colunas Detalhadas Variáveis */}
+                          {expandVariaveis && resumoMensal?.categorias_variaveis.map(cat => (
+                            <td key={cat} style={{ padding: '12px 8px', textAlign: 'right', color: '#991b1b', fontSize: '11px', backgroundColor: '#fffafa' }}>
+                              {(mes.detalhe_variaveis[cat] || 0) > 0 ? mes.detalhe_variaveis[cat].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-'}
+                            </td>
+                          ))}
+
+                          <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: theme.colors.danger, backgroundColor: '#fef2f2', borderLeft: '1px solid #f1f5f9' }}>
+                            {mes.total_saidas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: mes.saldo >= 0 ? theme.colors.success : theme.colors.danger, borderLeft: '1px solid #f1f5f9' }}>
+                            {mes.saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '500', color: margem >= 0 ? theme.colors.success : theme.colors.danger }}>
+                            {margem.toFixed(1)}%
+                          </td>
+                        </tr>
+                      );
+
+                    })}
+                    {/* Linha de Totais */}
+                    {resumoMensal?.totais && (
+                      <tr style={{ backgroundColor: '#f1f5f9', fontWeight: '700', borderTop: '2px solid #cbd5e1' }}>
+                        <td style={{ padding: '12px 16px' }}>TOTAL</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.success }}>
+                          {resumoMensal.totais.entradas_contrato.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.success }}>
+                          {resumoMensal.totais.entradas_vendas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.success }}>
+                          {resumoMensal.totais.total_entradas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+
+                        {/* Totais Fixos */}
+                        <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.danger }}>
+                          {resumoMensal.totais.saidas_fixas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                        {expandFixas && resumoMensal.categorias_fixas.map(cat => {
+                          const totalCat = resumoMensal.meses.reduce((sum, m) => sum + (m.detalhe_fixos[cat] || 0), 0);
+                          return (
+                            <td key={cat} style={{ padding: '12px 8px', textAlign: 'right', color: '#991b1b', fontSize: '11px' }}>
+                              {totalCat.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </td>
+                          );
+                        })}
+
+                        {/* Totais Variáveis */}
+                        <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.danger }}>
+                          {resumoMensal.totais.saidas_variaveis.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                        {expandVariaveis && resumoMensal.categorias_variaveis.map(cat => {
+                          const totalCat = resumoMensal.meses.reduce((sum, m) => sum + (m.detalhe_variaveis[cat] || 0), 0);
+                          return (
+                            <td key={cat} style={{ padding: '12px 8px', textAlign: 'right', color: '#991b1b', fontSize: '11px' }}>
+                              {totalCat.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </td>
+                          );
+                        })}
+
+                        <td style={{ padding: '12px 16px', textAlign: 'right', color: theme.colors.danger }}>
+                          {resumoMensal.totais.total_saidas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right', color: resumoMensal.totais.saldo_liquido >= 0 ? theme.colors.success : theme.colors.danger }}>
+                          {resumoMensal.totais.saldo_liquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                          {(resumoMensal.totais.total_entradas > 0
+                            ? ((resumoMensal.totais.saldo_liquido / resumoMensal.totais.total_entradas) * 100)
+                            : 0).toFixed(1)}%
+                        </td>
+                      </tr>
+                    )}
+
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Modal de Detalhes */}
-      {modalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.6)',
-          backdropFilter: 'blur(4px)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 1000
-        }} onClick={() => setModalOpen(false)}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: theme.colors.card,
-              borderRadius: '16px',
-              padding: '0',
-              maxWidth: '900px',
-              width: '90%',
-              maxHeight: '85vh',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: theme.shadows.lg,
-              border: `1px solid ${theme.colors.border}`,
-              animation: 'slideIn 0.2s ease-out'
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '20px 24px',
-              borderBottom: `1px solid ${theme.colors.border}`
-            }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: theme.colors.primary, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '4px', height: '24px', backgroundColor: theme.colors.accent, borderRadius: '2px' }} />
-                {modalTitle}
-              </h3>
-              <button
-                onClick={() => setModalOpen(false)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: theme.colors.secondary,
-                  cursor: 'pointer',
-                  padding: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '50%',
-                  transition: 'background 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <span style={{ fontSize: '24px', lineHeight: '1' }}>×</span>
-              </button>
-            </div>
-
-            <div style={{ overflow: 'auto', padding: '0' }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: '13px'
+      {
+        modalOpen && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }} onClick={() => setModalOpen(false)}>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                backgroundColor: theme.colors.card,
+                borderRadius: '16px',
+                padding: '0',
+                maxWidth: '900px',
+                width: '90%',
+                maxHeight: '85vh',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: theme.shadows.lg,
+                border: `1px solid ${theme.colors.border}`,
+                animation: 'slideIn 0.2s ease-out'
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '20px 24px',
+                borderBottom: `1px solid ${theme.colors.border}`
               }}>
-                <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f8fafc', zIndex: 10 }}>
-                  <tr>
-                    {modalType === 'cmv' ? (
-                      <>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Tipo</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Operação</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>NF</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Cliente</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Item</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Qtd</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Custo Total</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Venda Total</th>
-                      </>
-                    ) : modalType === 'detalhe_custo' ? (
-                      <>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Data</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Descrição</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Valor</th>
-                      </>
-                    ) : modalType === 'custos' ? (
-                      <>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Categoria</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Valor Total</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Principais Itens</th>
-                      </>
-                    ) : (
-                      <>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>NF</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Data</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Cliente</th>
-                        <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Valor</th>
-                      </>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {modalItems.map((item, idx) => (
-                    <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: theme.colors.primary, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '4px', height: '24px', backgroundColor: theme.colors.accent, borderRadius: '2px' }} />
+                  {modalTitle}
+                </h3>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: theme.colors.secondary,
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <span style={{ fontSize: '24px', lineHeight: '1' }}>×</span>
+                </button>
+              </div>
+
+              <div style={{ overflow: 'auto', padding: '0' }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  fontSize: '13px'
+                }}>
+                  <thead style={{ position: 'sticky', top: 0, backgroundColor: '#f8fafc', zIndex: 10 }}>
+                    <tr>
                       {modalType === 'cmv' ? (
                         <>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>
-                            <span style={{
-                              fontSize: '10px',
-                              fontWeight: '700',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              backgroundColor: item.tipo === 'VENDA' ? '#dbeafe' : item.tipo === 'CONTRATO' ? '#dcfce7' : '#f3f4f6',
-                              color: item.tipo === 'VENDA' ? '#1e40af' : item.tipo === 'CONTRATO' ? '#166534' : '#374151'
-                            }}>
-                              {item.tipo}
-                            </span>
-                          </td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontSize: '11px', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.operacao}>
-                            {item.operacao}
-                          </td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}>{item.nota_fiscal}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.cliente}>{item.cliente}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.produto}>{item.produto}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right' }}>{item.quantidade}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '500', color: theme.colors.danger }}>{formatCurrency(item.custo_total)}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '500', color: theme.colors.success }}>{formatCurrency(item.preco_venda_total)}</td>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Tipo</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Operação</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>NF</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Cliente</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Item</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Qtd</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Custo Total</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Venda Total</th>
                         </>
                       ) : modalType === 'detalhe_custo' ? (
                         <>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>{item.data}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.descricao}>{item.descricao}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(item.valor)}</td>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Data</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Descrição</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Valor</th>
                         </>
                       ) : modalType === 'custos' ? (
                         <>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontWeight: '600', color: theme.colors.primary }}>{item.categoria}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: 'bold', fontFamily: "'JetBrains Mono', monospace" }}>{formatCurrency(item.valor)}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontSize: '12px', color: theme.colors.secondary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
-                            {item.itens ? (
-                              <>
-                                {item.itens.slice(0, 3).map((i: any) => i.descricao.split(' - ')[0]).join(', ')}
-                                {item.itens.length > 3 && '...'}
-                              </>
-                            ) : '-'}
-                          </td>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Categoria</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Valor Total</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Principais Itens</th>
                         </>
                       ) : (
                         <>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontFamily: "'JetBrains Mono', monospace" }}>{item.numero}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>{item.data}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>{item.cliente}</td>
-                          <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '600', color: theme.colors.primary }}>
-                            {formatCurrency(item.valor)}
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>NF</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Data</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'left', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Cliente</th>
+                          <th style={{ padding: '12px 16px', textAlign: 'right', borderBottom: `1px solid ${theme.colors.border}`, color: theme.colors.secondary, fontWeight: '600' }}>Valor</th>
+                        </>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {modalItems.map((item, idx) => (
+                      <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#f8fafc' }}>
+                        {modalType === 'cmv' ? (
+                          <>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>
+                              <span style={{
+                                fontSize: '10px',
+                                fontWeight: '700',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                backgroundColor: item.tipo === 'VENDA' ? '#dbeafe' : item.tipo === 'CONTRATO' ? '#dcfce7' : '#f3f4f6',
+                                color: item.tipo === 'VENDA' ? '#1e40af' : item.tipo === 'CONTRATO' ? '#166534' : '#374151'
+                              }}>
+                                {item.tipo}
+                              </span>
+                            </td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontSize: '11px', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.operacao}>
+                              {item.operacao}
+                            </td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}>{item.nota_fiscal}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.cliente}>{item.cliente}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.produto}>{item.produto}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right' }}>{item.quantidade}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '500', color: theme.colors.danger }}>{formatCurrency(item.custo_total)}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '500', color: theme.colors.success }}>{formatCurrency(item.preco_venda_total)}</td>
+                          </>
+                        ) : modalType === 'detalhe_custo' ? (
+                          <>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>{item.data}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={item.descricao}>{item.descricao}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(item.valor)}</td>
+                          </>
+                        ) : modalType === 'custos' ? (
+                          <>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontWeight: '600', color: theme.colors.primary }}>{item.categoria}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: 'bold', fontFamily: "'JetBrains Mono', monospace" }}>{formatCurrency(item.valor)}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontSize: '12px', color: theme.colors.secondary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
+                              {item.itens ? (
+                                <>
+                                  {item.itens.slice(0, 3).map((i: any) => i.descricao.split(' - ')[0]).join(', ')}
+                                  {item.itens.length > 3 && '...'}
+                                </>
+                              ) : '-'}
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, fontFamily: "'JetBrains Mono', monospace" }}>{item.numero}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>{item.data}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}` }}>{item.cliente}</td>
+                            <td style={{ padding: '10px 16px', borderBottom: `1px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '600', color: theme.colors.primary }}>
+                              {formatCurrency(item.valor)}
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot style={{ position: 'sticky', bottom: 0, backgroundColor: '#f1f5f9', zIndex: 10 }}>
+                    <tr>
+                      {modalType === 'cmv' ? (
+                        <>
+                          <td colSpan={5} style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.secondary }}>TOTAIS:</td>
+                          <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.danger, fontSize: '14px' }}>
+                            {formatCurrency(modalItems.reduce((sum, item) => sum + (item.custo_total || 0), 0))}
+                          </td>
+                          <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.success, fontSize: '14px' }}>
+                            {formatCurrency(modalItems.reduce((sum, item) => sum + (item.preco_venda_total || 0), 0))}
+                          </td>
+                        </>
+                      ) : modalType === 'custos' ? (
+                        <>
+                          <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.secondary }}>TOTAL GERAL:</td>
+                          <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', fontSize: '15px' }}>{formatCurrency(modalItems.reduce((acc, curr) => acc + curr.valor, 0))}</td>
+                          <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}` }}></td>
+                        </>
+                      ) : (
+                        <>
+                          <td colSpan={3} style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.secondary }}>TOTAL:</td>
+                          <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', fontSize: '15px', color: theme.colors.primary }}>
+                            {formatCurrency(modalItems.reduce((sum, item) => sum + item.valor, 0))}
                           </td>
                         </>
                       )}
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot style={{ position: 'sticky', bottom: 0, backgroundColor: '#f1f5f9', zIndex: 10 }}>
-                  <tr>
-                    {modalType === 'cmv' ? (
-                      <>
-                        <td colSpan={5} style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.secondary }}>TOTAIS:</td>
-                        <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.danger, fontSize: '14px' }}>
-                          {formatCurrency(modalItems.reduce((sum, item) => sum + (item.custo_total || 0), 0))}
-                        </td>
-                        <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.success, fontSize: '14px' }}>
-                          {formatCurrency(modalItems.reduce((sum, item) => sum + (item.preco_venda_total || 0), 0))}
-                        </td>
-                      </>
-                    ) : modalType === 'custos' ? (
-                      <>
-                        <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.secondary }}>TOTAL GERAL:</td>
-                        <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', fontSize: '15px' }}>{formatCurrency(modalItems.reduce((acc, curr) => acc + curr.valor, 0))}</td>
-                        <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}` }}></td>
-                      </>
-                    ) : (
-                      <>
-                        <td colSpan={3} style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', color: theme.colors.secondary }}>TOTAL:</td>
-                        <td style={{ padding: '12px 16px', borderTop: `2px solid ${theme.colors.border}`, textAlign: 'right', fontWeight: '700', fontSize: '15px', color: theme.colors.primary }}>
-                          {formatCurrency(modalItems.reduce((sum, item) => sum + item.valor, 0))}
-                        </td>
-                      </>
-                    )}
-                  </tr>
-                </tfoot>
-              </table>
+                  </tfoot>
+                </table>
+              </div>
             </div>
           </div>
-        </div>
-      )
+        )
       }
-    </div >
+    </div>
   );
 };
 
