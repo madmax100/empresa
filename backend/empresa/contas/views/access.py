@@ -959,6 +959,14 @@ class ItensPropostaCRMViewSet(viewsets.ModelViewSet):
     queryset = ItensPropostaCRM.objects.all()
     serializer_class = ItensPropostaCRMSerializer
 
+class CampanhasCRMViewSet(viewsets.ModelViewSet):
+    queryset = CampanhasCRM.objects.all()
+    serializer_class = CampanhasCRMSerializer
+
+class LeadsCRMViewSet(viewsets.ModelViewSet):
+    queryset = LeadsCRM.objects.all()
+    serializer_class = LeadsCRMSerializer
+
 class LocaisEstoqueViewSet(viewsets.ModelViewSet):
     queryset = LocaisEstoque.objects.all()
     serializer_class = LocaisEstoqueSerializer

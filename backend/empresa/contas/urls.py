@@ -82,6 +82,7 @@ from .views.vendas_views import (
 )
 from .views.crm_views import (
     CRMAtividadeConcluirView,
+    CRMLeadConverterView,
     CRMOportunidadeFecharView,
     CRMOportunidadeMoverEtapaView,
     CRMPropostaRegistrarView,
@@ -124,6 +125,8 @@ router.register(r'oportunidades-crm', OportunidadesCRMViewSet)
 router.register(r'atividades-crm', AtividadesCRMViewSet)
 router.register(r'propostas-crm', PropostasCRMViewSet)
 router.register(r'itens-proposta-crm', ItensPropostaCRMViewSet)
+router.register(r'campanhas-crm', CampanhasCRMViewSet)
+router.register(r'leads-crm', LeadsCRMViewSet)
 router.register(r'locais_estoque', LocaisEstoqueViewSet)
 router.register(r'lotes', LotesViewSet)
 router.register(r'marcas', MarcasViewSet)
@@ -243,6 +246,7 @@ urlpatterns = [
     path('crm/oportunidades/fechar/', CRMOportunidadeFecharView.as_view(), name='crm-oportunidade-fechar'),
     path('crm/atividades/concluir/', CRMAtividadeConcluirView.as_view(), name='crm-atividade-concluir'),
     path('crm/propostas/registrar/', CRMPropostaRegistrarView.as_view(), name='crm-proposta-registrar'),
+    path('crm/leads/converter/', CRMLeadConverterView.as_view(), name='crm-lead-converter'),
     
     path('', include(router.urls)),
 ]

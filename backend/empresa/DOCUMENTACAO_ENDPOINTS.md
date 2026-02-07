@@ -383,6 +383,20 @@ GET /contas/produtos/composicao/123/
 - **PUT** `/contas/atividades-crm/{id}/` - Atualiza atividade
 - **DELETE** `/contas/atividades-crm/{id}/` - Remove atividade
 
+#### **Campanhas**
+- **GET** `/contas/campanhas-crm/` - Lista campanhas
+- **POST** `/contas/campanhas-crm/` - Cria campanha
+- **GET** `/contas/campanhas-crm/{id}/` - Busca campanha
+- **PUT** `/contas/campanhas-crm/{id}/` - Atualiza campanha
+- **DELETE** `/contas/campanhas-crm/{id}/` - Remove campanha
+
+#### **Leads**
+- **GET** `/contas/leads-crm/` - Lista leads
+- **POST** `/contas/leads-crm/` - Cria lead
+- **GET** `/contas/leads-crm/{id}/` - Busca lead
+- **PUT** `/contas/leads-crm/{id}/` - Atualiza lead
+- **DELETE** `/contas/leads-crm/{id}/` - Remove lead
+
 #### **Propostas**
 - **GET** `/contas/propostas-crm/` - Lista propostas
 - **POST** `/contas/propostas-crm/` - Cria proposta
@@ -402,6 +416,7 @@ GET /contas/produtos/composicao/123/
 - **POST** `/contas/crm/oportunidades/fechar/` - Fecha oportunidade (ganha/perdida/cancelada)
 - **POST** `/contas/crm/atividades/concluir/` - Conclui atividade
 - **POST** `/contas/crm/propostas/registrar/` - Registra proposta com itens
+- **POST** `/contas/crm/leads/converter/` - Converte lead em oportunidade
 
 #### **Exemplos de payloads**
 **Mover etapa**
@@ -442,6 +457,15 @@ GET /contas/produtos/composicao/123/
       "desconto": "0.00"
     }
   ]
+}
+```
+
+**Converter lead**
+```json
+{
+  "lead_id": 10,
+  "titulo": "Oportunidade - cliente X",
+  "etapa_id": 3
 }
 ```
 

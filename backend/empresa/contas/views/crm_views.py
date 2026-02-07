@@ -10,6 +10,8 @@ from ..models.access import (
     AtividadesCRM,
     EtapasFunil,
     ItensPropostaCRM,
+    FunisVenda,
+    LeadsCRM,
     OportunidadesCRM,
     PropostasCRM,
 )
@@ -139,5 +141,44 @@ class CRMPropostaRegistrarView(APIView):
 
         return Response(
             {'proposta_id': proposta.id, 'valor_total': float(proposta.valor_total)},
+            status=status.HTTP_201_CREATED
+        )
+
+
+class CRMLeadConverterView(APIView):
+    """Converte lead em oportunidade."""
+
+    def post(self, request, *args, **kwargs):
+        lead_id = request.data.get('lead_id')
+        titulo = request.data.get('titulo')
+        etapa_id = request.data.get('etapa_id')
+        funil_id = request.data.get('funil_id')
+
+        if not lead_id or not titulo:
+            return Response({'error': 'Informe lead_id e titulo.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        lead = LeadsCRM.objects.filter(id=lead_id).first()
+        if not lead:
+            return Response({'error': 'Lead não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        etapa = EtapasFunil.objects.filter(id=etapa_id).first() if etapa_id else None
+        funil = etapa.funil if etapa else (FunisVenda.objects.filter(id=funil_id).first() if funil_id else None)
+
+        with transaction.atomic():
+            oportunidade = OportunidadesCRM.objects.create(
+                titulo=titulo,
+                contato=lead.nome,
+                origem=lead.origem,
+                funil=funil,
+                etapa=etapa,
+                responsavel=lead.responsavel,
+                status='ABERTA'
+            )
+            lead.status = 'CONVERTIDO'
+            lead.data_ultima_interacao = timezone.now()
+            lead.save(update_fields=['status', 'data_ultima_interacao'])
+
+        return Response(
+            {'lead_id': lead.id, 'oportunidade_id': oportunidade.id},
             status=status.HTTP_201_CREATED
         )

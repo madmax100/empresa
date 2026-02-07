@@ -3046,6 +3046,98 @@ class ItensPropostaCRM(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+
+
+class CampanhasCRM(models.Model):
+    STATUS_CHOICES = [
+        ('PLANEJADA', 'Planejada'),
+        ('ATIVA', 'Ativa'),
+        ('PAUSADA', 'Pausada'),
+        ('ENCERRADA', 'Encerrada'),
+    ]
+
+    nome = models.CharField(max_length=150)
+    canal = models.CharField(max_length=100, null=True, blank=True)
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+    custo_previsto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    custo_realizado = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PLANEJADA'
+    )
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'campanhas_crm'
+        verbose_name = 'Campanha'
+        verbose_name_plural = 'Campanhas'
+        ordering = ['-data_inicio', '-id']
+        indexes = [
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return self.nome
+
+
+class LeadsCRM(models.Model):
+    STATUS_CHOICES = [
+        ('NOVO', 'Novo'),
+        ('QUALIFICADO', 'Qualificado'),
+        ('CONVERTIDO', 'Convertido'),
+        ('PERDIDO', 'Perdido'),
+    ]
+
+    nome = models.CharField(max_length=150)
+    email = models.EmailField(null=True, blank=True)
+    telefone = models.CharField(max_length=30, null=True, blank=True)
+    origem = models.CharField(max_length=100, null=True, blank=True)
+    campanha = models.ForeignKey(
+        'CampanhasCRM',
+        on_delete=models.SET_NULL,
+        related_name='leads',
+        null=True,
+        blank=True
+    )
+    responsavel = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='leads',
+        null=True,
+        blank=True
+    )
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_ultima_interacao = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='NOVO'
+    )
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'leads_crm'
+        verbose_name = 'Lead'
+        verbose_name_plural = 'Leads'
+        ordering = ['-data_criacao', '-id']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['campanha']),
+            models.Index(fields=['responsavel']),
+        ]
+
+    def __str__(self):
+        return self.nome
 class NotasFiscaisServico(models.Model):
     # Identificação
     numero_nota = models.CharField(

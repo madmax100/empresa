@@ -227,6 +227,18 @@ class ItensPropostaCRMSerializer(serializers.ModelSerializer):
         model = ItensPropostaCRM
         fields = '__all__'
 
+
+class CampanhasCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampanhasCRM
+        fields = '__all__'
+
+
+class LeadsCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeadsCRM
+        fields = '__all__'
+
         
 class LocaisEstoqueSerializer(serializers.ModelSerializer):
     class Meta:
