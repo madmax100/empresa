@@ -12,6 +12,15 @@ from .views.dre_views import DREView
 from .views.access import *
 from .views.access import suprimentos_por_contrato
 from .views.comparativo_estoque import ComparativoEstoqueView
+from .views.compras_views import (
+    ComprasResumoView,
+    ComprasCadastroView,
+    ComprasContaPagarView,
+    ComprasBaixaContaPagarView,
+    ComprasDetalheView,
+    ComprasListaView,
+    ComprasCancelarContaPagarView,
+)
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
@@ -76,7 +85,13 @@ urlpatterns = [
     # DRE - Demonstrativo de Resultados
     path('dre/', DREView.as_view(), name='dre'),
     path('estoque-comparativo/', ComparativoEstoqueView.as_view(), name='estoque-comparativo'),
+    path('compras/resumo/', ComprasResumoView.as_view(), name='compras-resumo'),
+    path('compras/registrar/', ComprasCadastroView.as_view(), name='compras-registrar'),
+    path('compras/conta-pagar/', ComprasContaPagarView.as_view(), name='compras-conta-pagar'),
+    path('compras/conta-pagar/baixar/', ComprasBaixaContaPagarView.as_view(), name='compras-conta-pagar-baixar'),
+    path('compras/detalhe/<int:nota_id>/', ComprasDetalheView.as_view(), name='compras-detalhe'),
+    path('compras/', ComprasListaView.as_view(), name='compras-lista'),
+    path('compras/conta-pagar/cancelar/', ComprasCancelarContaPagarView.as_view(), name='compras-conta-pagar-cancelar'),
     
     path('', include(router.urls)),
 ]
-
