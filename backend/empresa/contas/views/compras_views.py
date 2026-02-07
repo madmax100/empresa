@@ -281,6 +281,154 @@ class ComprasCadastroView(APIView):
         )
 
 
+class ComprasAtualizarView(APIView):
+    """Atualiza uma compra (NF de entrada + itens)."""
+
+    @staticmethod
+    def _decimal(value, default='0.00'):
+        if value is None or value == '':
+            return Decimal(default)
+        return Decimal(str(value))
+
+    def put(self, request, nota_id, *args, **kwargs):
+        payload = request.data or {}
+        nota_data = payload.get('nota') or {}
+        itens_data = payload.get('itens') or []
+
+        if not nota_data:
+            return Response(
+                {'error': 'Informe os dados da nota em nota.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not itens_data:
+            return Response(
+                {'error': 'Informe ao menos um item em itens.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            nota = NotasFiscaisEntrada.objects.get(id=nota_id)
+        except NotasFiscaisEntrada.DoesNotExist:
+            return Response(
+                {'error': 'Nota fiscal de entrada não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        numero_nota = nota_data.get('numero_nota')
+        fornecedor_id = nota_data.get('fornecedor_id')
+        data_emissao = nota_data.get('data_emissao')
+
+        if not numero_nota or not fornecedor_id or not data_emissao:
+            return Response(
+                {'error': 'numero_nota, fornecedor_id e data_emissao são obrigatórios.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        for item in itens_data:
+            if not item.get('produto_id'):
+                return Response(
+                    {'error': 'Cada item deve possuir produto_id.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        with transaction.atomic():
+            nota.numero_nota = numero_nota
+            nota.serie_nota = nota_data.get('serie_nota')
+            nota.fornecedor_id = fornecedor_id
+            nota.Produto_id = nota_data.get('Produto_id')
+            nota.frete_id = nota_data.get('frete_id')
+            nota.tipo_frete = nota_data.get('tipo_frete')
+            nota.data_emissao = nota_data.get('data_emissao')
+            nota.data_entrada = nota_data.get('data_entrada')
+            nota.valor_produtos = self._decimal(nota_data.get('valor_produtos'))
+            nota.base_calculo_icms = self._decimal(nota_data.get('base_calculo_icms'))
+            nota.valor_icms = self._decimal(nota_data.get('valor_icms'))
+            nota.valor_ipi = self._decimal(nota_data.get('valor_ipi'))
+            nota.valor_icms_st = self._decimal(nota_data.get('valor_icms_st'))
+            nota.base_calculo_st = self._decimal(nota_data.get('base_calculo_st'))
+            nota.valor_desconto = self._decimal(nota_data.get('valor_desconto'))
+            nota.valor_frete = self._decimal(nota_data.get('valor_frete'))
+            nota.outras_despesas = self._decimal(nota_data.get('outras_despesas'))
+            nota.outros_encargos = self._decimal(nota_data.get('outros_encargos'))
+            nota.valor_total = self._decimal(nota_data.get('valor_total'))
+            nota.chave_nfe = nota_data.get('chave_nfe')
+            nota.protocolo = nota_data.get('protocolo')
+            nota.natureza_operacao = nota_data.get('natureza_operacao')
+            nota.cfop = nota_data.get('cfop')
+            nota.forma_pagamento = nota_data.get('forma_pagamento')
+            nota.condicoes_pagamento = nota_data.get('condicoes_pagamento')
+            nota.parcelas = nota_data.get('parcelas')
+            nota.operacao = nota_data.get('operacao')
+            nota.comprador = nota_data.get('comprador')
+            nota.operador = nota_data.get('operador')
+            nota.observacao = nota_data.get('observacao')
+
+            nota.itens.all().delete()
+
+            total_produtos = Decimal('0.00')
+            total_itens = Decimal('0.00')
+
+            for item in itens_data:
+                produto_id = item.get('produto_id')
+                quantidade = self._decimal(item.get('quantidade'), default='0.0000')
+                valor_unitario = self._decimal(item.get('valor_unitario'))
+                valor_total = self._decimal(item.get('valor_total'))
+
+                if valor_total == Decimal('0.00'):
+                    valor_total = quantidade * valor_unitario
+
+                ItensNfEntrada.objects.create(
+                    nota_fiscal=nota,
+                    data=item.get('data'),
+                    produto_id=produto_id,
+                    quantidade=quantidade,
+                    valor_unitario=valor_unitario,
+                    valor_total=valor_total,
+                    percentual_ipi=self._decimal(item.get('percentual_ipi')),
+                    status=item.get('status'),
+                    aliquota=self._decimal(item.get('aliquota')),
+                    desconto=self._decimal(item.get('desconto')),
+                    cfop=item.get('cfop'),
+                    base_substituicao=self._decimal(item.get('base_substituicao')),
+                    icms_substituicao=self._decimal(item.get('icms_substituicao')),
+                    outras_despesas=self._decimal(item.get('outras_despesas')),
+                    frete=self._decimal(item.get('frete')),
+                    aliquota_substituicao=self._decimal(item.get('aliquota_substituicao')),
+                    ncm=item.get('ncm'),
+                    controle=item.get('controle')
+                )
+
+                total_produtos += valor_total
+                total_itens += quantidade
+
+            if nota.valor_produtos == Decimal('0.00'):
+                nota.valor_produtos = total_produtos
+            if nota.valor_total == Decimal('0.00'):
+                nota.valor_total = (
+                    total_produtos
+                    + nota.valor_frete
+                    + nota.valor_ipi
+                    + nota.valor_icms_st
+                    + nota.outras_despesas
+                    + nota.outros_encargos
+                    - nota.valor_desconto
+                )
+
+            nota.save()
+
+        return Response(
+            {
+                'id': nota.id,
+                'numero_nota': nota.numero_nota,
+                'fornecedor_id': nota.fornecedor_id,
+                'valor_total': float(nota.valor_total or 0),
+                'quantidade_itens': float(total_itens)
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasContaPagarView(APIView):
     """Gera uma conta a pagar vinculada à nota fiscal de entrada."""
 

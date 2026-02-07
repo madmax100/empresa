@@ -15,6 +15,7 @@ from .views.comparativo_estoque import ComparativoEstoqueView
 from .views.compras_views import (
     ComprasResumoView,
     ComprasCadastroView,
+    ComprasAtualizarView,
     ComprasContaPagarView,
     ComprasBaixaContaPagarView,
     ComprasDetalheView,
@@ -87,6 +88,7 @@ urlpatterns = [
     path('estoque-comparativo/', ComparativoEstoqueView.as_view(), name='estoque-comparativo'),
     path('compras/resumo/', ComprasResumoView.as_view(), name='compras-resumo'),
     path('compras/registrar/', ComprasCadastroView.as_view(), name='compras-registrar'),
+    path('compras/atualizar/<int:nota_id>/', ComprasAtualizarView.as_view(), name='compras-atualizar'),
     path('compras/conta-pagar/', ComprasContaPagarView.as_view(), name='compras-conta-pagar'),
     path('compras/conta-pagar/baixar/', ComprasBaixaContaPagarView.as_view(), name='compras-conta-pagar-baixar'),
     path('compras/detalhe/<int:nota_id>/', ComprasDetalheView.as_view(), name='compras-detalhe'),
