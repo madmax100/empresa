@@ -1491,6 +1491,55 @@ class ComprasBaixaContaPagarView(APIView):
         )
 
 
+class ComprasEstornoContaPagarView(APIView):
+    """Estorna a baixa/pagamento de uma conta a pagar."""
+
+    def post(self, request, *args, **kwargs):
+        payload = request.data or {}
+        conta_id = payload.get('conta_id')
+
+        if not conta_id:
+            return Response(
+                {'error': 'conta_id é obrigatório.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            conta = ContasPagar.objects.select_related('fornecedor').get(id=conta_id)
+        except ContasPagar.DoesNotExist:
+            return Response(
+                {'error': 'Conta a pagar não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if conta.status != 'P':
+            return Response(
+                {'error': 'Conta a pagar não está paga e não pode ser estornada.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            conta.status = 'A'
+            conta.data_pagamento = None
+            conta.valor_pago = Decimal('0.00')
+            conta.valor_total_pago = Decimal('0.00')
+            conta.juros = Decimal('0.00')
+            conta.tarifas = Decimal('0.00')
+            conta.save()
+
+        return Response(
+            {
+                'id': conta.id,
+                'fornecedor_id': conta.fornecedor_id,
+                'valor_pago': float(conta.valor_pago or 0),
+                'valor_total_pago': float(conta.valor_total_pago or 0),
+                'data_pagamento': conta.data_pagamento,
+                'status': conta.status
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasDetalheView(APIView):
     """Retorna detalhes de uma nota fiscal de entrada com seus itens."""
 
