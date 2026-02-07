@@ -765,6 +765,84 @@ class ComprasContaPagarAgingView(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 
+class ComprasContaPagarAtrasadasView(APIView):
+    """Lista contas a pagar vencidas com filtros opcionais."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_referencia = self._parse_date(request.query_params.get('data_referencia'))
+        fornecedor_id = request.query_params.get('fornecedor_id')
+        dias_min = request.query_params.get('dias_min')
+        dias_max = request.query_params.get('dias_max')
+
+        if not data_referencia:
+            data_referencia = timezone.now().date()
+
+        try:
+            dias_min = int(dias_min) if dias_min not in (None, '') else None
+            dias_max = int(dias_max) if dias_max not in (None, '') else None
+        except ValueError:
+            return Response(
+                {'error': 'dias_min e dias_max devem ser números inteiros.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        contas = ContasPagar.objects.select_related('fornecedor').filter(
+            status='A',
+            vencimento__date__lt=data_referencia
+        )
+
+        if fornecedor_id:
+            contas = contas.filter(fornecedor_id=fornecedor_id)
+
+        response = []
+        for conta in contas.order_by('vencimento')[:500]:
+            vencimento = conta.vencimento.date() if conta.vencimento else None
+            if not vencimento:
+                continue
+            dias_atraso = (data_referencia - vencimento).days
+
+            if dias_min is not None and dias_atraso < dias_min:
+                continue
+            if dias_max is not None and dias_atraso > dias_max:
+                continue
+
+            response.append(
+                {
+                    'id': conta.id,
+                    'fornecedor_id': conta.fornecedor_id,
+                    'fornecedor_nome': conta.fornecedor.nome if conta.fornecedor else None,
+                    'data_emissao': conta.data,
+                    'vencimento': conta.vencimento,
+                    'valor': self._to_float(conta.valor),
+                    'dias_atraso': dias_atraso,
+                    'status': conta.status
+                }
+            )
+
+        return Response(
+            {
+                'data_referencia': data_referencia.isoformat(),
+                'fornecedor_id': fornecedor_id,
+                'quantidade': len(response),
+                'contas': response
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasDevolucaoView(APIView):
     """Registra devolução de itens de uma compra."""
 
