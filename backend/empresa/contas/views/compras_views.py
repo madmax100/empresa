@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django.db import transaction
@@ -697,6 +697,116 @@ class ComprasContaPagarView(APIView):
                 'valor': float(conta.valor or 0),
                 'vencimento': conta.vencimento,
                 'status': conta.status
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
+class ComprasParcelasContaPagarView(APIView):
+    """Gera parcelas de contas a pagar vinculadas à nota fiscal de entrada."""
+
+    @staticmethod
+    def _decimal(value, default='0.00'):
+        if value is None or value == '':
+            return Decimal(default)
+        return Decimal(str(value))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def post(self, request, *args, **kwargs):
+        payload = request.data or {}
+        nota_id = payload.get('nota_id')
+        numero_parcelas = payload.get('numero_parcelas')
+        primeiro_vencimento = self._parse_date(payload.get('primeiro_vencimento'))
+        intervalo_dias = int(payload.get('intervalo_dias') or 30)
+
+        if not nota_id or not numero_parcelas or not primeiro_vencimento:
+            return Response(
+                {'error': 'nota_id, numero_parcelas e primeiro_vencimento são obrigatórios.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            numero_parcelas = int(numero_parcelas)
+        except (TypeError, ValueError):
+            return Response(
+                {'error': 'numero_parcelas deve ser um número inteiro.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if numero_parcelas <= 0:
+            return Response(
+                {'error': 'numero_parcelas deve ser maior que zero.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if intervalo_dias <= 0:
+            return Response(
+                {'error': 'intervalo_dias deve ser maior que zero.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            nota = NotasFiscaisEntrada.objects.select_related('fornecedor').get(id=nota_id)
+        except NotasFiscaisEntrada.DoesNotExist:
+            return Response(
+                {'error': 'Nota fiscal de entrada não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        valor_total = self._decimal(payload.get('valor_total'), default=str(nota.valor_total or Decimal('0.00')))
+        valor_parcela = (valor_total / Decimal(str(numero_parcelas))).quantize(Decimal('0.01'))
+        historico_base = payload.get('historico') or f'NF Entrada {nota.numero_nota}'
+
+        parcelas = []
+        valor_acumulado = Decimal('0.00')
+
+        with transaction.atomic():
+            for parcela_num in range(1, numero_parcelas + 1):
+                vencimento = primeiro_vencimento + timedelta(days=intervalo_dias * (parcela_num - 1))
+                valor = valor_parcela
+
+                if parcela_num == numero_parcelas:
+                    valor = valor_total - valor_acumulado
+
+                conta = ContasPagar.objects.create(
+                    data=payload.get('data_emissao') or nota.data_emissao,
+                    vencimento=vencimento,
+                    valor=valor,
+                    fornecedor=nota.fornecedor,
+                    historico=f'{historico_base} - Parcela {parcela_num}/{numero_parcelas}',
+                    forma_pagamento=payload.get('forma_pagamento'),
+                    condicoes=payload.get('condicoes'),
+                    numero_duplicata=payload.get('numero_duplicata'),
+                    status=payload.get('status') or 'A',
+                    conta_id=payload.get('conta_id')
+                )
+
+                parcelas.append(
+                    {
+                        'id': conta.id,
+                        'parcela': parcela_num,
+                        'vencimento': conta.vencimento,
+                        'valor': float(conta.valor or 0),
+                        'status': conta.status
+                    }
+                )
+
+                valor_acumulado += valor
+
+        return Response(
+            {
+                'nota_id': nota.id,
+                'fornecedor_id': nota.fornecedor_id,
+                'valor_total': float(valor_total),
+                'parcelas': parcelas
             },
             status=status.HTTP_201_CREATED
         )
