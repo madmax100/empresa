@@ -996,6 +996,73 @@ class ComprasContaPagarPagasResumoView(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 
+class ComprasContaPagarFluxoView(APIView):
+    """Resumo de contas a pagar por faixas de vencimento futuras."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_referencia = self._parse_date(request.query_params.get('data_referencia'))
+        fornecedor_id = request.query_params.get('fornecedor_id')
+
+        if not data_referencia:
+            data_referencia = timezone.now().date()
+
+        contas = ContasPagar.objects.select_related('fornecedor').filter(status='A')
+
+        if fornecedor_id:
+            contas = contas.filter(fornecedor_id=fornecedor_id)
+
+        def _intervalo(dias_inicio, dias_fim):
+            data_inicio = data_referencia + timedelta(days=dias_inicio)
+            data_fim = data_referencia + timedelta(days=dias_fim)
+            agregado = contas.filter(
+                vencimento__date__gte=data_inicio,
+                vencimento__date__lte=data_fim
+            ).aggregate(valor_total=Sum('valor'), quantidade=Count('id'))
+            return {
+                'data_inicio': data_inicio.isoformat(),
+                'data_fim': data_fim.isoformat(),
+                'quantidade': agregado['quantidade'] or 0,
+                'valor_total': self._to_float(agregado['valor_total'])
+            }
+
+        response = {
+            'data_referencia': data_referencia.isoformat(),
+            'fornecedor_id': fornecedor_id,
+            'faixas': {
+                '0_7': _intervalo(0, 7),
+                '8_15': _intervalo(8, 15),
+                '16_30': _intervalo(16, 30),
+                '31_60': _intervalo(31, 60),
+                '61_90': _intervalo(61, 90),
+                '91_mais': {
+                    'data_inicio': (data_referencia + timedelta(days=91)).isoformat(),
+                    'quantidade': contas.filter(
+                        vencimento__date__gte=data_referencia + timedelta(days=91)
+                    ).count(),
+                    'valor_total': self._to_float(
+                        contas.filter(vencimento__date__gte=data_referencia + timedelta(days=91))
+                        .aggregate(valor_total=Sum('valor'))['valor_total']
+                    )
+                }
+            }
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
 class ComprasDevolucaoView(APIView):
     """Registra devolução de itens de uma compra."""
 
