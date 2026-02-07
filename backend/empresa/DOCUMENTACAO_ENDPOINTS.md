@@ -262,6 +262,8 @@ GET /contas/produtos/composicao/123/
 - **GET** `/contas/vendas/devolucao/lista/` - Lista devoluções de venda
 - **POST** `/contas/vendas/devolucao/cancelar/` - Cancela devolução de venda
 - **GET** `/contas/vendas/devolucao/saldo/{nota_id}/` - Saldo disponível para devolução
+- **POST** `/contas/vendas/comissoes/gerar/` - Gera comissão para pedido
+- **GET** `/contas/vendas/comissoes/resumo/` - Resumo de comissões por período
 
 #### **Exemplos de payloads**
 **Registrar pedido**
@@ -327,6 +329,14 @@ GET /contas/produtos/composicao/123/
       "quantidade": "1.00"
     }
   ]
+}
+```
+
+**Gerar comissão**
+```json
+{
+  "pedido_id": 55,
+  "percentual": "5.00"
 }
 ```
 

@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ..models.access import (
+    ComissoesVenda,
     ContasReceber,
     ItensNfSaida,
     ItensPedidoVenda,
@@ -854,3 +855,64 @@ class VendasDevolucaoSaldoView(APIView):
             })
 
         return Response({'nota_id': nota_id, 'saldos': saldo_itens})
+
+
+class VendasComissaoGerarView(APIView):
+    def post(self, request, *args, **kwargs):
+        pedido_id = request.data.get('pedido_id')
+        percentual = request.data.get('percentual')
+        pedido = PedidosVenda.objects.filter(id=pedido_id).first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        if not percentual:
+            return Response({'error': 'Informe o percentual de comissão.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        percentual = Decimal(str(percentual))
+        valor_base = pedido.valor_total or Decimal('0.00')
+
+        comissao = ComissoesVenda.objects.create(
+            pedido=pedido,
+            vendedor=pedido.vendedor,
+            percentual=percentual,
+            valor_base=valor_base,
+            data_lancamento=timezone.now(),
+            status='ABERTA'
+        )
+
+        return Response({'message': 'Comissão gerada com sucesso.', 'comissao_id': comissao.id})
+
+
+class VendasComissaoResumoView(APIView):
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+        vendedor_id = request.query_params.get('vendedor_id')
+        status_filtro = request.query_params.get('status')
+
+        comissoes = ComissoesVenda.objects.all()
+        if vendedor_id:
+            comissoes = comissoes.filter(vendedor_id=vendedor_id)
+        if status_filtro:
+            comissoes = comissoes.filter(status=status_filtro)
+        if data_inicio and data_fim:
+            comissoes = comissoes.filter(
+                data_lancamento__date__gte=data_inicio,
+                data_lancamento__date__lte=data_fim
+            )
+
+        resumo = comissoes.aggregate(
+            total_comissoes=Count('id'),
+            valor_total=Sum('valor_comissao')
+        )
+        resumo['valor_total'] = float(resumo['valor_total'] or Decimal('0.00'))
+
+        return Response({'resumo': resumo})
