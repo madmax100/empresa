@@ -664,3 +664,193 @@ class VendasEstornoFaturamentoView(APIView):
             pedido.save()
 
         return Response({'message': 'Faturamento estornado com sucesso.'})
+
+
+class VendasDevolucaoView(APIView):
+    @staticmethod
+    def _parse_datetime(value):
+        if not value:
+            return None
+        if isinstance(value, datetime):
+            return value
+        try:
+            return datetime.fromisoformat(value)
+        except (TypeError, ValueError):
+            return None
+
+    def post(self, request, *args, **kwargs):
+        payload = request.data
+        nota_id = payload.get('nota_id')
+        itens = payload.get('itens', [])
+        local_id = payload.get('local_id')
+        data_movimentacao = self._parse_datetime(payload.get('data_movimentacao')) or timezone.now()
+        tipo_movimentacao_id = payload.get('tipo_movimentacao_id')
+
+        if not nota_id or not itens:
+            return Response(
+                {'error': 'Informe nota_id e itens.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        nota = NotasFiscaisSaida.objects.filter(id=nota_id).first()
+        if not nota:
+            return Response({'error': 'Nota fiscal de saída não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        tipo_movimentacao = None
+        if tipo_movimentacao_id:
+            tipo_movimentacao = TiposMovimentacaoEstoque.objects.filter(id=tipo_movimentacao_id).first()
+        if not tipo_movimentacao:
+            tipo_movimentacao = TiposMovimentacaoEstoque.objects.filter(tipo='E', ativo=True).first()
+
+        itens_nf = ItensNfSaida.objects.filter(nota_fiscal=nota)
+        itens_por_produto = {item.produto_id: item for item in itens_nf}
+
+        devolvidos = (
+            MovimentacoesEstoque.objects
+            .filter(nota_fiscal_saida=nota, documento_referencia__startswith='DEVOLUCAO')
+            .values('produto_id')
+            .annotate(quantidade_total=Sum('quantidade'))
+        )
+        devolvido_map = {row['produto_id']: row['quantidade_total'] or Decimal('0.0000') for row in devolvidos}
+
+        movimentos_criados = []
+
+        with transaction.atomic():
+            for item in itens:
+                produto_id = item.get('produto_id')
+                quantidade = Decimal(str(item.get('quantidade', '0.0000')))
+                if not produto_id or quantidade <= 0:
+                    return Response({'error': 'Itens inválidos.'}, status=status.HTTP_400_BAD_REQUEST)
+                if produto_id not in itens_por_produto:
+                    return Response({'error': f'Produto {produto_id} não pertence à nota.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                quantidade_vendida = itens_por_produto[produto_id].quantidade or Decimal('0.0000')
+                quantidade_devolvida = devolvido_map.get(produto_id, Decimal('0.0000'))
+                disponivel = quantidade_vendida - quantidade_devolvida
+                if quantidade > disponivel:
+                    return Response(
+                        {'error': f'Quantidade acima do disponível para devolução do produto {produto_id}.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                saldo = None
+                if local_id:
+                    saldo = SaldosEstoque.objects.filter(produto_id=produto_id, local_id=local_id).first()
+                custo_unitario = saldo.custo_medio if saldo else itens_por_produto[produto_id].valor_unitario
+
+                movimento = MovimentacoesEstoque.objects.create(
+                    data_movimentacao=data_movimentacao,
+                    tipo_movimentacao=tipo_movimentacao,
+                    produto_id=produto_id,
+                    local_destino_id=local_id,
+                    quantidade=quantidade,
+                    custo_unitario=custo_unitario,
+                    valor_total=quantidade * (custo_unitario or Decimal('0.00')),
+                    nota_fiscal_saida=nota,
+                    documento_referencia=f'DEVOLUCAO {nota.numero_nota}'
+                )
+                movimentos_criados.append(movimento.id)
+
+                _atualizar_saldo_estoque(
+                    produto_id=produto_id,
+                    local_id=local_id,
+                    delta_quantidade=quantidade,
+                    custo_unitario=custo_unitario,
+                    data_movimentacao=data_movimentacao
+                )
+
+        return Response({'message': 'Devolução registrada com sucesso.', 'movimentos': movimentos_criados})
+
+
+class VendasDevolucaoListaView(APIView):
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        nota_id = request.query_params.get('nota_id')
+        produto_id = request.query_params.get('produto_id')
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+
+        movimentos = MovimentacoesEstoque.objects.filter(documento_referencia__startswith='DEVOLUCAO')
+        if nota_id:
+            movimentos = movimentos.filter(nota_fiscal_saida_id=nota_id)
+        if produto_id:
+            movimentos = movimentos.filter(produto_id=produto_id)
+        if data_inicio and data_fim:
+            movimentos = movimentos.filter(
+                data_movimentacao__date__gte=data_inicio,
+                data_movimentacao__date__lte=data_fim
+            )
+
+        resultados = []
+        for mov in movimentos.select_related('produto', 'nota_fiscal_saida').order_by('-data_movimentacao')[:200]:
+            resultados.append({
+                'id': mov.id,
+                'nota_id': mov.nota_fiscal_saida_id,
+                'numero_nota': mov.nota_fiscal_saida.numero_nota if mov.nota_fiscal_saida else None,
+                'produto_id': mov.produto_id,
+                'produto_nome': getattr(mov.produto, 'nome', None),
+                'data_movimentacao': mov.data_movimentacao,
+                'quantidade': float(mov.quantidade or Decimal('0.0000')),
+                'custo_unitario': float(mov.custo_unitario or Decimal('0.0000')),
+            })
+
+        return Response({'resultados': resultados, 'total': movimentos.count()})
+
+
+class VendasDevolucaoCancelarView(APIView):
+    def post(self, request, *args, **kwargs):
+        movimento_id = request.data.get('movimento_id')
+        local_id = request.data.get('local_id')
+
+        movimento = MovimentacoesEstoque.objects.filter(id=movimento_id, documento_referencia__startswith='DEVOLUCAO').first()
+        if not movimento:
+            return Response({'error': 'Movimento de devolução não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        with transaction.atomic():
+            _atualizar_saldo_estoque(
+                produto_id=movimento.produto_id,
+                local_id=local_id,
+                delta_quantidade=-movimento.quantidade,
+                custo_unitario=movimento.custo_unitario,
+                data_movimentacao=timezone.now()
+            )
+            movimento.delete()
+
+        return Response({'message': 'Devolução cancelada com sucesso.'})
+
+
+class VendasDevolucaoSaldoView(APIView):
+    def get(self, request, nota_id, *args, **kwargs):
+        nota = NotasFiscaisSaida.objects.filter(id=nota_id).first()
+        if not nota:
+            return Response({'error': 'Nota fiscal de saída não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        itens_nf = ItensNfSaida.objects.filter(nota_fiscal=nota)
+        devolvidos = (
+            MovimentacoesEstoque.objects
+            .filter(nota_fiscal_saida=nota, documento_referencia__startswith='DEVOLUCAO')
+            .values('produto_id')
+            .annotate(quantidade_total=Sum('quantidade'))
+        )
+        devolvido_map = {row['produto_id']: row['quantidade_total'] or Decimal('0.0000') for row in devolvidos}
+
+        saldo_itens = []
+        for item in itens_nf:
+            devolvido = devolvido_map.get(item.produto_id, Decimal('0.0000'))
+            saldo_itens.append({
+                'produto_id': item.produto_id,
+                'produto_nome': getattr(item.produto, 'nome', None),
+                'quantidade_vendida': float(item.quantidade or Decimal('0.0000')),
+                'quantidade_devolvida': float(devolvido),
+                'quantidade_disponivel': float((item.quantidade or Decimal('0.0000')) - devolvido)
+            })
+
+        return Response({'nota_id': nota_id, 'saldos': saldo_itens})

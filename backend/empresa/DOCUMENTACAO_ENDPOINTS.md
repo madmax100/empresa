@@ -258,6 +258,10 @@ GET /contas/produtos/composicao/123/
 - **GET** `/contas/vendas/detalhe/{pedido_id}/` - Detalha pedido com itens
 - **POST** `/contas/vendas/atualizar/{pedido_id}/` - Atualiza pedido em rascunho
 - **POST** `/contas/vendas/faturamento/estornar/` - Estorna faturamento e devolve estoque
+- **POST** `/contas/vendas/devolucao/` - Registra devolução de venda
+- **GET** `/contas/vendas/devolucao/lista/` - Lista devoluções de venda
+- **POST** `/contas/vendas/devolucao/cancelar/` - Cancela devolução de venda
+- **GET** `/contas/vendas/devolucao/saldo/{nota_id}/` - Saldo disponível para devolução
 
 #### **Exemplos de payloads**
 **Registrar pedido**
@@ -309,6 +313,20 @@ GET /contas/produtos/composicao/123/
   "pedido_id": 55,
   "numero_nota": "NF-2025-0021",
   "local_id": 1
+}
+```
+
+**Registrar devolução**
+```json
+{
+  "nota_id": 321,
+  "local_id": 1,
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "1.00"
+    }
+  ]
 }
 ```
 
