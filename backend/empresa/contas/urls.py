@@ -38,6 +38,7 @@ from .views.compras_views import (
     ComprasCancelarContaPagarView,
 )
 from .views.produtos_views import (
+    ProdutosAlertasView,
     ProdutosComposicaoResumoView,
     ProdutosConversaoView,
     ProdutosPrecoView,
@@ -142,6 +143,7 @@ urlpatterns = [
     path('produtos/preco/', ProdutosPrecoView.as_view(), name='produtos-preco'),
     path('produtos/conversao/', ProdutosConversaoView.as_view(), name='produtos-conversao'),
     path('produtos/composicao/<int:produto_id>/', ProdutosComposicaoResumoView.as_view(), name='produtos-composicao-resumo'),
+    path('produtos/alertas/', ProdutosAlertasView.as_view(), name='produtos-alertas'),
     
     path('', include(router.urls)),
 ]

@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 from rest_framework import status
@@ -199,4 +200,39 @@ class ProdutosComposicaoResumoView(APIView):
             'produto_id': produto_id,
             'componentes': itens,
             'custo_estimado': float(custo_total),
+        })
+
+
+class ProdutosAlertasView(APIView):
+    """
+    Retorna alertas operacionais do cadastro de produtos.
+    """
+
+    def get(self, request):
+        limite = int(request.GET.get('limite', 50))
+        estoques_criticos = Produtos.objects.filter(
+            ativo=True,
+            estoque_minimo__isnull=False,
+            estoque_atual__lt=models.F('estoque_minimo'),
+        ).values('id', 'codigo', 'nome', 'estoque_atual', 'estoque_minimo')[:limite]
+
+        sem_preco = Produtos.objects.filter(
+            ativo=True,
+            preco_venda__isnull=True,
+        ).values('id', 'codigo', 'nome')[:limite]
+
+        sem_ean = Produtos.objects.filter(
+            ativo=True,
+        ).filter(Q(ean__isnull=True) | Q(ean__exact='')).values('id', 'codigo', 'nome')[:limite]
+
+        sem_sku = Produtos.objects.filter(
+            ativo=True,
+        ).filter(Q(sku__isnull=True) | Q(sku__exact='')).values('id', 'codigo', 'nome')[:limite]
+
+        return Response({
+            'limite': limite,
+            'estoque_critico': list(estoques_criticos),
+            'sem_preco_venda': list(sem_preco),
+            'sem_ean': list(sem_ean),
+            'sem_sku': list(sem_sku),
         })
