@@ -290,6 +290,72 @@ class ComprasContaPagarView(APIView):
             return Decimal(default)
         return Decimal(str(value))
 
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+        fornecedor_id = request.query_params.get('fornecedor_id')
+        status_param = request.query_params.get('status')
+
+        if (data_inicio and not data_fim) or (data_fim and not data_inicio):
+            return Response(
+                {'error': 'Informe data_inicio e data_fim no formato YYYY-MM-DD.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if data_inicio and data_fim and data_inicio > data_fim:
+            return Response(
+                {'error': 'A data_inicio não pode ser maior que data_fim.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        contas = ContasPagar.objects.select_related('fornecedor', 'conta')
+
+        if fornecedor_id:
+            contas = contas.filter(fornecedor_id=fornecedor_id)
+
+        if status_param:
+            contas = contas.filter(status=status_param)
+
+        if data_inicio and data_fim:
+            contas = contas.filter(
+                vencimento__date__gte=data_inicio,
+                vencimento__date__lte=data_fim
+            )
+
+        contas = contas.order_by('-vencimento')[:200]
+
+        response = [
+            {
+                'id': conta.id,
+                'fornecedor_id': conta.fornecedor_id,
+                'fornecedor_nome': conta.fornecedor.nome if conta.fornecedor else None,
+                'data_emissao': conta.data,
+                'vencimento': conta.vencimento,
+                'valor': self._to_float(conta.valor),
+                'valor_pago': self._to_float(conta.valor_pago),
+                'valor_total_pago': self._to_float(conta.valor_total_pago),
+                'forma_pagamento': conta.forma_pagamento,
+                'numero_duplicata': conta.numero_duplicata,
+                'status': conta.status
+            }
+            for conta in contas
+        ]
+
+        return Response(response, status=status.HTTP_200_OK)
+
     def post(self, request, *args, **kwargs):
         payload = request.data or {}
         nota_id = payload.get('nota_id')
@@ -366,6 +432,18 @@ class ComprasBaixaContaPagarView(APIView):
             return Response(
                 {'error': 'Conta a pagar não encontrada.'},
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+        if conta.status == 'C':
+            return Response(
+                {'error': 'Conta a pagar cancelada não pode ser paga.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if conta.status == 'P':
+            return Response(
+                {'error': 'Conta a pagar já está paga.'},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         valor_pago = self._decimal(payload.get('valor_pago'), default=str(conta.valor or Decimal('0.00')))
@@ -549,6 +627,18 @@ class ComprasCancelarContaPagarView(APIView):
             return Response(
                 {'error': 'Conta a pagar não encontrada.'},
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+        if conta.status == 'P':
+            return Response(
+                {'error': 'Conta a pagar já foi paga e não pode ser cancelada.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if conta.status == 'C':
+            return Response(
+                {'error': 'Conta a pagar já está cancelada.'},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         with transaction.atomic():
