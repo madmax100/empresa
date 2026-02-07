@@ -353,6 +353,100 @@ GET /contas/produtos/composicao/123/
 
 ---
 
+### **📣 CRM / Comercial**
+
+#### **Funis de Venda**
+- **GET** `/contas/funis-venda/` - Lista funis
+- **POST** `/contas/funis-venda/` - Cria funil
+- **GET** `/contas/funis-venda/{id}/` - Busca funil
+- **PUT** `/contas/funis-venda/{id}/` - Atualiza funil
+- **DELETE** `/contas/funis-venda/{id}/` - Remove funil
+
+#### **Etapas do Funil**
+- **GET** `/contas/etapas-funil/` - Lista etapas
+- **POST** `/contas/etapas-funil/` - Cria etapa
+- **GET** `/contas/etapas-funil/{id}/` - Busca etapa
+- **PUT** `/contas/etapas-funil/{id}/` - Atualiza etapa
+- **DELETE** `/contas/etapas-funil/{id}/` - Remove etapa
+
+#### **Oportunidades**
+- **GET** `/contas/oportunidades-crm/` - Lista oportunidades
+- **POST** `/contas/oportunidades-crm/` - Cria oportunidade
+- **GET** `/contas/oportunidades-crm/{id}/` - Busca oportunidade
+- **PUT** `/contas/oportunidades-crm/{id}/` - Atualiza oportunidade
+- **DELETE** `/contas/oportunidades-crm/{id}/` - Remove oportunidade
+
+#### **Atividades**
+- **GET** `/contas/atividades-crm/` - Lista atividades
+- **POST** `/contas/atividades-crm/` - Cria atividade
+- **GET** `/contas/atividades-crm/{id}/` - Busca atividade
+- **PUT** `/contas/atividades-crm/{id}/` - Atualiza atividade
+- **DELETE** `/contas/atividades-crm/{id}/` - Remove atividade
+
+#### **Propostas**
+- **GET** `/contas/propostas-crm/` - Lista propostas
+- **POST** `/contas/propostas-crm/` - Cria proposta
+- **GET** `/contas/propostas-crm/{id}/` - Busca proposta
+- **PUT** `/contas/propostas-crm/{id}/` - Atualiza proposta
+- **DELETE** `/contas/propostas-crm/{id}/` - Remove proposta
+
+#### **Itens de Proposta**
+- **GET** `/contas/itens-proposta-crm/` - Lista itens da proposta
+- **POST** `/contas/itens-proposta-crm/` - Cria item
+- **GET** `/contas/itens-proposta-crm/{id}/` - Busca item
+- **PUT** `/contas/itens-proposta-crm/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-proposta-crm/{id}/` - Remove item
+
+#### **Operações CRM**
+- **POST** `/contas/crm/oportunidades/mover-etapa/` - Move oportunidade para etapa
+- **POST** `/contas/crm/oportunidades/fechar/` - Fecha oportunidade (ganha/perdida/cancelada)
+- **POST** `/contas/crm/atividades/concluir/` - Conclui atividade
+- **POST** `/contas/crm/propostas/registrar/` - Registra proposta com itens
+
+#### **Exemplos de payloads**
+**Mover etapa**
+```json
+{
+  "oportunidade_id": 20,
+  "etapa_id": 3
+}
+```
+
+**Fechar oportunidade**
+```json
+{
+  "oportunidade_id": 20,
+  "status": "GANHA"
+}
+```
+
+**Concluir atividade**
+```json
+{
+  "atividade_id": 15
+}
+```
+
+**Registrar proposta**
+```json
+{
+  "oportunidade_id": 20,
+  "numero_proposta": "PROP-2025-001",
+  "validade": "2025-02-28",
+  "desconto": "50.00",
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "2",
+      "valor_unitario": "150.00",
+      "desconto": "0.00"
+    }
+  ]
+}
+```
+
+---
+
 ### **🛒 Gestão de Compras Avançadas**
 
 #### **Requisições de Compra**

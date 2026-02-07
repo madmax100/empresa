@@ -2778,6 +2778,274 @@ class ItensPedidoCompra(models.Model):
         self.clean()
         super().save(*args, **kwargs)
 
+
+class FunisVenda(models.Model):
+    nome = models.CharField(max_length=100)
+    descricao = models.TextField(null=True, blank=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'funis_venda'
+        verbose_name = 'Funil de Vendas'
+        verbose_name_plural = 'Funis de Venda'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
+class EtapasFunil(models.Model):
+    funil = models.ForeignKey(
+        'FunisVenda',
+        on_delete=models.CASCADE,
+        related_name='etapas'
+    )
+    nome = models.CharField(max_length=100)
+    ordem = models.PositiveIntegerField(default=0)
+    probabilidade = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'etapas_funil'
+        verbose_name = 'Etapa do Funil'
+        verbose_name_plural = 'Etapas do Funil'
+        ordering = ['funil', 'ordem']
+        indexes = [
+            models.Index(fields=['funil', 'ordem']),
+        ]
+
+    def __str__(self):
+        return f"{self.funil} - {self.nome}"
+
+
+class OportunidadesCRM(models.Model):
+    STATUS_CHOICES = [
+        ('ABERTA', 'Aberta'),
+        ('GANHA', 'Ganha'),
+        ('PERDIDA', 'Perdida'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+
+    titulo = models.CharField(max_length=150)
+    cliente = models.ForeignKey(
+        'Clientes',
+        on_delete=models.PROTECT,
+        related_name='oportunidades',
+        null=True,
+        blank=True
+    )
+    contato = models.CharField(max_length=120, null=True, blank=True)
+    origem = models.CharField(max_length=100, null=True, blank=True)
+    funil = models.ForeignKey(
+        'FunisVenda',
+        on_delete=models.SET_NULL,
+        related_name='oportunidades',
+        null=True,
+        blank=True
+    )
+    etapa = models.ForeignKey(
+        'EtapasFunil',
+        on_delete=models.SET_NULL,
+        related_name='oportunidades',
+        null=True,
+        blank=True
+    )
+    responsavel = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='oportunidades',
+        null=True,
+        blank=True
+    )
+    valor_estimado = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    probabilidade = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    data_prevista_fechamento = models.DateField(null=True, blank=True)
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ABERTA'
+    )
+    motivo_perda = models.CharField(max_length=200, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'oportunidades_crm'
+        verbose_name = 'Oportunidade'
+        verbose_name_plural = 'Oportunidades'
+        ordering = ['-data_criacao']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['cliente']),
+            models.Index(fields=['responsavel']),
+        ]
+
+    def __str__(self):
+        return self.titulo
+
+
+class AtividadesCRM(models.Model):
+    TIPO_CHOICES = [
+        ('LIGACAO', 'Ligação'),
+        ('EMAIL', 'E-mail'),
+        ('VISITA', 'Visita'),
+        ('REUNIAO', 'Reunião'),
+        ('TAREFA', 'Tarefa'),
+    ]
+
+    oportunidade = models.ForeignKey(
+        'OportunidadesCRM',
+        on_delete=models.CASCADE,
+        related_name='atividades'
+    )
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    titulo = models.CharField(max_length=150)
+    descricao = models.TextField(null=True, blank=True)
+    data_agendada = models.DateTimeField(null=True, blank=True)
+    data_conclusao = models.DateTimeField(null=True, blank=True)
+    responsavel = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='atividades_crm',
+        null=True,
+        blank=True
+    )
+    concluida = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'atividades_crm'
+        verbose_name = 'Atividade CRM'
+        verbose_name_plural = 'Atividades CRM'
+        ordering = ['-data_agendada', '-id']
+        indexes = [
+            models.Index(fields=['oportunidade']),
+            models.Index(fields=['responsavel']),
+        ]
+
+    def __str__(self):
+        return self.titulo
+
+
+class PropostasCRM(models.Model):
+    STATUS_CHOICES = [
+        ('RASCUNHO', 'Rascunho'),
+        ('ENVIADA', 'Enviada'),
+        ('ACEITA', 'Aceita'),
+        ('RECUSADA', 'Recusada'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+
+    oportunidade = models.ForeignKey(
+        'OportunidadesCRM',
+        on_delete=models.CASCADE,
+        related_name='propostas'
+    )
+    numero_proposta = models.CharField(max_length=30, null=True, blank=True)
+    data_emissao = models.DateTimeField(null=True, blank=True)
+    validade = models.DateField(null=True, blank=True)
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(null=True, blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='RASCUNHO'
+    )
+
+    class Meta:
+        db_table = 'propostas_crm'
+        verbose_name = 'Proposta'
+        verbose_name_plural = 'Propostas'
+        ordering = ['-data_emissao', '-id']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['numero_proposta']),
+        ]
+
+    def __str__(self):
+        return self.numero_proposta or str(self.id)
+
+    def clean(self):
+        self.valor_total = (self.valor_total or Decimal('0.00')) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ItensPropostaCRM(models.Model):
+    proposta = models.ForeignKey(
+        'PropostasCRM',
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_proposta_crm'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        default=Decimal('0.0000')
+    )
+    valor_unitario = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0.00')
+    )
+
+    class Meta:
+        db_table = 'itens_proposta_crm'
+        verbose_name = 'Item de Proposta'
+        verbose_name_plural = 'Itens de Proposta'
+        ordering = ['proposta', 'id']
+        indexes = [
+            models.Index(fields=['proposta', 'produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Proposta {self.proposta_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_unitario) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 class NotasFiscaisServico(models.Model):
     # Identificação
     numero_nota = models.CharField(

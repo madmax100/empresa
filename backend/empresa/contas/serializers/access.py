@@ -191,6 +191,42 @@ class ItensPedidoCompraSerializer(serializers.ModelSerializer):
         model = ItensPedidoCompra
         fields = '__all__'
 
+
+class FunisVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FunisVenda
+        fields = '__all__'
+
+
+class EtapasFunilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EtapasFunil
+        fields = '__all__'
+
+
+class OportunidadesCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OportunidadesCRM
+        fields = '__all__'
+
+
+class AtividadesCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AtividadesCRM
+        fields = '__all__'
+
+
+class PropostasCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropostasCRM
+        fields = '__all__'
+
+
+class ItensPropostaCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensPropostaCRM
+        fields = '__all__'
+
         
 class LocaisEstoqueSerializer(serializers.ModelSerializer):
     class Meta:

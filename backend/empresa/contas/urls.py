@@ -80,6 +80,12 @@ from .views.vendas_views import (
     VendasExpedicaoConfirmarView,
     VendasExpedicaoEstornoView,
 )
+from .views.crm_views import (
+    CRMAtividadeConcluirView,
+    CRMOportunidadeFecharView,
+    CRMOportunidadeMoverEtapaView,
+    CRMPropostaRegistrarView,
+)
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
@@ -112,6 +118,12 @@ router.register(r'cotacoes-compra', CotacoesCompraViewSet)
 router.register(r'itens-cotacao-compra', ItensCotacaoCompraViewSet)
 router.register(r'pedidos-compra', PedidosCompraViewSet)
 router.register(r'itens-pedido-compra', ItensPedidoCompraViewSet)
+router.register(r'funis-venda', FunisVendaViewSet)
+router.register(r'etapas-funil', EtapasFunilViewSet)
+router.register(r'oportunidades-crm', OportunidadesCRMViewSet)
+router.register(r'atividades-crm', AtividadesCRMViewSet)
+router.register(r'propostas-crm', PropostasCRMViewSet)
+router.register(r'itens-proposta-crm', ItensPropostaCRMViewSet)
 router.register(r'locais_estoque', LocaisEstoqueViewSet)
 router.register(r'lotes', LotesViewSet)
 router.register(r'marcas', MarcasViewSet)
@@ -227,6 +239,10 @@ urlpatterns = [
     path('vendas/expedicao/pendentes/', VendasExpedicaoPendentesView.as_view(), name='vendas-expedicao-pendentes'),
     path('vendas/expedicao/confirmar/', VendasExpedicaoConfirmarView.as_view(), name='vendas-expedicao-confirmar'),
     path('vendas/expedicao/estornar/', VendasExpedicaoEstornoView.as_view(), name='vendas-expedicao-estornar'),
+    path('crm/oportunidades/mover-etapa/', CRMOportunidadeMoverEtapaView.as_view(), name='crm-oportunidade-mover-etapa'),
+    path('crm/oportunidades/fechar/', CRMOportunidadeFecharView.as_view(), name='crm-oportunidade-fechar'),
+    path('crm/atividades/concluir/', CRMAtividadeConcluirView.as_view(), name='crm-atividade-concluir'),
+    path('crm/propostas/registrar/', CRMPropostaRegistrarView.as_view(), name='crm-proposta-registrar'),
     
     path('', include(router.urls)),
 ]

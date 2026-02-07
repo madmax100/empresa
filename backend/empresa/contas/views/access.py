@@ -935,6 +935,30 @@ class ItensPedidoCompraViewSet(viewsets.ModelViewSet):
     queryset = ItensPedidoCompra.objects.all()
     serializer_class = ItensPedidoCompraSerializer
 
+class FunisVendaViewSet(viewsets.ModelViewSet):
+    queryset = FunisVenda.objects.all()
+    serializer_class = FunisVendaSerializer
+
+class EtapasFunilViewSet(viewsets.ModelViewSet):
+    queryset = EtapasFunil.objects.all()
+    serializer_class = EtapasFunilSerializer
+
+class OportunidadesCRMViewSet(viewsets.ModelViewSet):
+    queryset = OportunidadesCRM.objects.all()
+    serializer_class = OportunidadesCRMSerializer
+
+class AtividadesCRMViewSet(viewsets.ModelViewSet):
+    queryset = AtividadesCRM.objects.all()
+    serializer_class = AtividadesCRMSerializer
+
+class PropostasCRMViewSet(viewsets.ModelViewSet):
+    queryset = PropostasCRM.objects.all()
+    serializer_class = PropostasCRMSerializer
+
+class ItensPropostaCRMViewSet(viewsets.ModelViewSet):
+    queryset = ItensPropostaCRM.objects.all()
+    serializer_class = ItensPropostaCRMSerializer
+
 class LocaisEstoqueViewSet(viewsets.ModelViewSet):
     queryset = LocaisEstoque.objects.all()
     serializer_class = LocaisEstoqueSerializer
