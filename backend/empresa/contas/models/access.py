@@ -1842,6 +1842,457 @@ class ItensNfSaida(models.Model):
         self.clean()
         super().save(*args, **kwargs)
 
+class OrcamentosVenda(models.Model):
+    STATUS_CHOICES = [
+        ('ABERTO', 'Aberto'),
+        ('APROVADO', 'Aprovado'),
+        ('REJEITADO', 'Rejeitado'),
+        ('EXPIRADO', 'Expirado'),
+        ('CONVERTIDO', 'Convertido'),
+    ]
+
+    numero_orcamento = models.CharField(
+        max_length=30,
+        verbose_name='Número do Orçamento',
+        null=True,
+        blank=True
+    )
+    cliente = models.ForeignKey(
+        'Clientes',
+        on_delete=models.PROTECT,
+        related_name='orcamentos_venda',
+        verbose_name='Cliente',
+        null=True,
+        blank=True
+    )
+    vendedor = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='orcamentos_venda',
+        verbose_name='Vendedor',
+        null=True,
+        blank=True
+    )
+    data_emissao = models.DateTimeField(
+        verbose_name='Data de Emissão',
+        null=True,
+        blank=True
+    )
+    validade = models.DateField(
+        verbose_name='Validade',
+        null=True,
+        blank=True
+    )
+    valor_produtos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor dos Produtos',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    frete = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Frete',
+        default=Decimal('0.00')
+    )
+    impostos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Impostos',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ABERTO',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'orcamentos_venda'
+        verbose_name = 'Orçamento de Venda'
+        verbose_name_plural = 'Orçamentos de Venda'
+        ordering = ['-data_emissao', '-id']
+        indexes = [
+            models.Index(fields=['numero_orcamento']),
+            models.Index(fields=['data_emissao']),
+            models.Index(fields=['cliente']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Orçamento {self.numero_orcamento or self.id} - {self.cliente}"
+
+    def clean(self):
+        self.valor_total = (
+            self.valor_produtos +
+            self.frete +
+            self.impostos -
+            self.desconto
+        )
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ItensOrcamentoVenda(models.Model):
+    orcamento = models.ForeignKey(
+        'OrcamentosVenda',
+        on_delete=models.CASCADE,
+        related_name='itens',
+        verbose_name='Orçamento'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_orcamento_venda',
+        verbose_name='Produto'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        verbose_name='Quantidade',
+        default=Decimal('0.0000')
+    )
+    valor_unitario = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Unitário',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+
+    class Meta:
+        db_table = 'itens_orcamento_venda'
+        verbose_name = 'Item do Orçamento'
+        verbose_name_plural = 'Itens do Orçamento'
+        ordering = ['orcamento', 'id']
+        indexes = [
+            models.Index(fields=['orcamento', 'produto']),
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Orçamento {self.orcamento_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_unitario) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class PedidosVenda(models.Model):
+    STATUS_CHOICES = [
+        ('RASCUNHO', 'Rascunho'),
+        ('APROVADO', 'Aprovado'),
+        ('FATURADO', 'Faturado'),
+        ('CANCELADO', 'Cancelado'),
+    ]
+
+    numero_pedido = models.CharField(
+        max_length=30,
+        verbose_name='Número do Pedido',
+        null=True,
+        blank=True
+    )
+    cliente = models.ForeignKey(
+        'Clientes',
+        on_delete=models.PROTECT,
+        related_name='pedidos_venda',
+        verbose_name='Cliente',
+        null=True,
+        blank=True
+    )
+    vendedor = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='pedidos_venda',
+        verbose_name='Vendedor',
+        null=True,
+        blank=True
+    )
+    orcamento = models.ForeignKey(
+        'OrcamentosVenda',
+        on_delete=models.SET_NULL,
+        related_name='pedidos_venda',
+        verbose_name='Orçamento',
+        null=True,
+        blank=True
+    )
+    data_emissao = models.DateTimeField(
+        verbose_name='Data de Emissão',
+        null=True,
+        blank=True
+    )
+    data_aprovacao = models.DateTimeField(
+        verbose_name='Data de Aprovação',
+        null=True,
+        blank=True
+    )
+    data_faturamento = models.DateTimeField(
+        verbose_name='Data de Faturamento',
+        null=True,
+        blank=True
+    )
+    forma_pagamento = models.CharField(
+        max_length=50,
+        verbose_name='Forma de Pagamento',
+        null=True,
+        blank=True
+    )
+    condicoes_pagamento = models.CharField(
+        max_length=100,
+        verbose_name='Condições de Pagamento',
+        null=True,
+        blank=True
+    )
+    prazo_entrega = models.CharField(
+        max_length=100,
+        verbose_name='Prazo de Entrega',
+        null=True,
+        blank=True
+    )
+    valor_produtos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor dos Produtos',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    frete = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Frete',
+        default=Decimal('0.00')
+    )
+    impostos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Impostos',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='RASCUNHO',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'pedidos_venda'
+        verbose_name = 'Pedido de Venda'
+        verbose_name_plural = 'Pedidos de Venda'
+        ordering = ['-data_emissao', '-id']
+        indexes = [
+            models.Index(fields=['numero_pedido']),
+            models.Index(fields=['data_emissao']),
+            models.Index(fields=['cliente']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Pedido {self.numero_pedido or self.id} - {self.cliente}"
+
+    def clean(self):
+        self.valor_total = (
+            self.valor_produtos +
+            self.frete +
+            self.impostos -
+            self.desconto
+        )
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ItensPedidoVenda(models.Model):
+    pedido = models.ForeignKey(
+        'PedidosVenda',
+        on_delete=models.CASCADE,
+        related_name='itens',
+        verbose_name='Pedido'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_pedido_venda',
+        verbose_name='Produto'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        verbose_name='Quantidade',
+        default=Decimal('0.0000')
+    )
+    valor_unitario = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Unitário',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+
+    class Meta:
+        db_table = 'itens_pedido_venda'
+        verbose_name = 'Item do Pedido'
+        verbose_name_plural = 'Itens do Pedido'
+        ordering = ['pedido', 'id']
+        indexes = [
+            models.Index(fields=['pedido', 'produto']),
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Pedido {self.pedido_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_unitario) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ComissoesVenda(models.Model):
+    STATUS_CHOICES = [
+        ('ABERTA', 'Aberta'),
+        ('PAGA', 'Paga'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+
+    pedido = models.ForeignKey(
+        'PedidosVenda',
+        on_delete=models.CASCADE,
+        related_name='comissoes',
+        verbose_name='Pedido'
+    )
+    vendedor = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='comissoes_venda',
+        verbose_name='Vendedor'
+    )
+    percentual = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        verbose_name='Percentual',
+        default=Decimal('0.00')
+    )
+    valor_base = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Base',
+        default=Decimal('0.00')
+    )
+    valor_comissao = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Comissão',
+        default=Decimal('0.00')
+    )
+    data_lancamento = models.DateTimeField(
+        verbose_name='Data de Lançamento',
+        null=True,
+        blank=True
+    )
+    data_pagamento = models.DateTimeField(
+        verbose_name='Data de Pagamento',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ABERTA',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'comissoes_venda'
+        verbose_name = 'Comissão de Venda'
+        verbose_name_plural = 'Comissões de Venda'
+        ordering = ['-data_lancamento', '-id']
+        indexes = [
+            models.Index(fields=['pedido']),
+            models.Index(fields=['vendedor']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Comissão {self.id} - Pedido {self.pedido_id}"
+
+    def clean(self):
+        if self.valor_base and self.percentual:
+            self.valor_comissao = (self.valor_base * self.percentual) / Decimal('100.00')
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
 class NotasFiscaisServico(models.Model):
     # Identificação
     numero_nota = models.CharField(

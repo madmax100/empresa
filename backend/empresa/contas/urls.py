@@ -46,6 +46,13 @@ from .views.produtos_views import (
     ProdutosPrecoView,
     ProdutosSubstitutosView,
 )
+from .views.vendas_views import (
+    VendasAprovarView,
+    VendasCadastroView,
+    VendasCancelarView,
+    VendasConverterOrcamentoView,
+    VendasFaturarView,
+)
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
@@ -67,6 +74,11 @@ router.register(r'inventarios', InventariosViewSet)
 router.register(r'itens_contrato_locacao', ItensContratoLocacaoViewSet)
 router.register(r'itens_nf_entrada', ItensNfEntradaViewSet)
 router.register(r'itens_nf_saida', ItensNfSaidaViewSet)
+router.register(r'orcamentos-venda', OrcamentosVendaViewSet)
+router.register(r'itens-orcamento-venda', ItensOrcamentoVendaViewSet)
+router.register(r'pedidos-venda', PedidosVendaViewSet)
+router.register(r'itens-pedido-venda', ItensPedidoVendaViewSet)
+router.register(r'comissoes-venda', ComissoesVendaViewSet)
 router.register(r'locais_estoque', LocaisEstoqueViewSet)
 router.register(r'lotes', LotesViewSet)
 router.register(r'marcas', MarcasViewSet)
@@ -150,6 +162,11 @@ urlpatterns = [
     path('produtos/ficha/<int:produto_id>/', ProdutosFichaTecnicaView.as_view(), name='produtos-ficha-tecnica'),
     path('produtos/historico-preco/<int:produto_id>/', ProdutosHistoricoPrecoView.as_view(), name='produtos-historico-preco'),
     path('produtos/substitutos/<int:produto_id>/', ProdutosSubstitutosView.as_view(), name='produtos-substitutos'),
+    path('vendas/registrar/', VendasCadastroView.as_view(), name='vendas-registrar'),
+    path('vendas/aprovar/', VendasAprovarView.as_view(), name='vendas-aprovar'),
+    path('vendas/faturar/', VendasFaturarView.as_view(), name='vendas-faturar'),
+    path('vendas/cancelar/', VendasCancelarView.as_view(), name='vendas-cancelar'),
+    path('vendas/orcamento/converter/', VendasConverterOrcamentoView.as_view(), name='vendas-orcamento-converter'),
     
     path('', include(router.urls)),
 ]

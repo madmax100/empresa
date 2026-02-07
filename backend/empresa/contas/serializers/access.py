@@ -126,6 +126,35 @@ class ItensNfEntradaSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 
+class OrcamentosVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrcamentosVenda
+        fields = '__all__'
+
+
+class ItensOrcamentoVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensOrcamentoVenda
+        fields = '__all__'
+
+
+class PedidosVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PedidosVenda
+        fields = '__all__'
+
+
+class ItensPedidoVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensPedidoVenda
+        fields = '__all__'
+
+
+class ComissoesVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ComissoesVenda
+        fields = '__all__'
+
         
 class LocaisEstoqueSerializer(serializers.ModelSerializer):
     class Meta:

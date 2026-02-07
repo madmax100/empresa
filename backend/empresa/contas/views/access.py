@@ -9,9 +9,9 @@ from datetime import date, timedelta, datetime
 import time
 
 
-from ..models.access import Categorias, CategoriasProdutos, Clientes, ContagensInventario, ContasPagar, ContasReceber, ContratosLocacao, CustosAdicionaisFrete, Despesas, Empresas, Fornecedores, Fretes, Funcionarios, Grupos, HistoricoRastreamento, Inventarios, ItensContratoLocacao, ItensNfEntrada, ItensNfSaida, LocaisEstoque, Lotes, Marcas, MovimentacoesEstoque, NotasFiscaisEntrada, NotasFiscaisSaida, OcorrenciasFrete, PagamentosFuncionarios, PosicoesEstoque, Produtos, RegioesEntrega, SaldosEstoque, TabelasFrete, TiposMovimentacaoEstoque, Transportadoras
+from ..models.access import Categorias, CategoriasProdutos, Clientes, ComissoesVenda, ContagensInventario, ContasPagar, ContasReceber, ContratosLocacao, CustosAdicionaisFrete, Despesas, Empresas, Fornecedores, Fretes, Funcionarios, Grupos, HistoricoRastreamento, Inventarios, ItensContratoLocacao, ItensNfEntrada, ItensNfSaida, ItensOrcamentoVenda, ItensPedidoVenda, LocaisEstoque, Lotes, Marcas, MovimentacoesEstoque, NotasFiscaisEntrada, NotasFiscaisSaida, OcorrenciasFrete, OrcamentosVenda, PagamentosFuncionarios, PedidosVenda, PosicoesEstoque, Produtos, RegioesEntrega, SaldosEstoque, TabelasFrete, TiposMovimentacaoEstoque, Transportadoras
 
-from ..serializers.access import ItemContratoLocacaoSerializer, ProdutoSerializer, CategoriaSerializer, CategoriasProdutosSerializer, ClienteSerializer, ContagensInventarioSerializer, ContasPagarSerializer, ContasReceberSerializer, ContratoLocacaoSerializer, CustosAdicionaisFreteSerializer, DespesasSerializer, EmpresasSerializer, FornecedoresSerializer, FretesSerializer, FuncionariosSerializer, GruposSerializer, HistoricoRastreamentoSerializer, InventariosSerializer, ItensNfEntradaSerializer, ItensNfSaidaSerializer, LocaisEstoqueSerializer, LotesSerializer, MarcasSerializer, MovimentacoesEstoqueSerializer, NotasFiscaisEntradaSerializer, NotasFiscaisSaidaSerializer, OcorrenciasFreteSerializer, PagamentosFuncionariosSerializer, PosicoesEstoqueSerializer, RegioesEntregaSerializer, SaldosEstoqueSerializer, TabelasFreteSerializer, TiposMovimentacaoEstoqueSerializer, TransportadorasSerializer
+from ..serializers.access import ComissoesVendaSerializer, ItemContratoLocacaoSerializer, ProdutoSerializer, CategoriaSerializer, CategoriasProdutosSerializer, ClienteSerializer, ContagensInventarioSerializer, ContasPagarSerializer, ContasReceberSerializer, ContratoLocacaoSerializer, CustosAdicionaisFreteSerializer, DespesasSerializer, EmpresasSerializer, FornecedoresSerializer, FretesSerializer, FuncionariosSerializer, GruposSerializer, HistoricoRastreamentoSerializer, InventariosSerializer, ItensNfEntradaSerializer, ItensNfSaidaSerializer, ItensOrcamentoVendaSerializer, ItensPedidoVendaSerializer, LocaisEstoqueSerializer, LotesSerializer, MarcasSerializer, MovimentacoesEstoqueSerializer, NotasFiscaisEntradaSerializer, NotasFiscaisSaidaSerializer, OcorrenciasFreteSerializer, OrcamentosVendaSerializer, PagamentosFuncionariosSerializer, PedidosVendaSerializer, PosicoesEstoqueSerializer, RegioesEntregaSerializer, SaldosEstoqueSerializer, TabelasFreteSerializer, TiposMovimentacaoEstoqueSerializer, TransportadorasSerializer
 
 class CategoriasViewSet(viewsets.ModelViewSet):
     queryset = Categorias.objects.all()
@@ -890,6 +890,26 @@ class ItensNfEntradaViewSet(viewsets.ModelViewSet):
 class ItensNfSaidaViewSet(viewsets.ModelViewSet):
     queryset = ItensNfSaida.objects.all()
     serializer_class = ItensNfSaidaSerializer
+
+class OrcamentosVendaViewSet(viewsets.ModelViewSet):
+    queryset = OrcamentosVenda.objects.all()
+    serializer_class = OrcamentosVendaSerializer
+
+class ItensOrcamentoVendaViewSet(viewsets.ModelViewSet):
+    queryset = ItensOrcamentoVenda.objects.all()
+    serializer_class = ItensOrcamentoVendaSerializer
+
+class PedidosVendaViewSet(viewsets.ModelViewSet):
+    queryset = PedidosVenda.objects.all()
+    serializer_class = PedidosVendaSerializer
+
+class ItensPedidoVendaViewSet(viewsets.ModelViewSet):
+    queryset = ItensPedidoVenda.objects.all()
+    serializer_class = ItensPedidoVendaSerializer
+
+class ComissoesVendaViewSet(viewsets.ModelViewSet):
+    queryset = ComissoesVenda.objects.all()
+    serializer_class = ComissoesVendaSerializer
     
 class LocaisEstoqueViewSet(viewsets.ModelViewSet):
     queryset = LocaisEstoque.objects.all()

@@ -206,6 +206,84 @@ GET /contas/produtos/composicao/123/
 
 ---
 
+### **🛒 Gestão de Vendas**
+
+#### **Orçamentos de Venda**
+- **GET** `/contas/orcamentos-venda/` - Lista orçamentos de venda
+- **POST** `/contas/orcamentos-venda/` - Cria novo orçamento
+- **GET** `/contas/orcamentos-venda/{id}/` - Busca orçamento específico
+- **PUT** `/contas/orcamentos-venda/{id}/` - Atualiza orçamento
+- **DELETE** `/contas/orcamentos-venda/{id}/` - Remove orçamento
+
+#### **Itens do Orçamento**
+- **GET** `/contas/itens-orcamento-venda/` - Lista itens do orçamento
+- **POST** `/contas/itens-orcamento-venda/` - Cria item do orçamento
+- **GET** `/contas/itens-orcamento-venda/{id}/` - Busca item específico
+- **PUT** `/contas/itens-orcamento-venda/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-orcamento-venda/{id}/` - Remove item
+
+#### **Pedidos de Venda**
+- **GET** `/contas/pedidos-venda/` - Lista pedidos de venda
+- **POST** `/contas/pedidos-venda/` - Cria pedido de venda
+- **GET** `/contas/pedidos-venda/{id}/` - Busca pedido específico
+- **PUT** `/contas/pedidos-venda/{id}/` - Atualiza pedido
+- **DELETE** `/contas/pedidos-venda/{id}/` - Remove pedido
+
+#### **Itens do Pedido**
+- **GET** `/contas/itens-pedido-venda/` - Lista itens do pedido
+- **POST** `/contas/itens-pedido-venda/` - Cria item do pedido
+- **GET** `/contas/itens-pedido-venda/{id}/` - Busca item específico
+- **PUT** `/contas/itens-pedido-venda/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-pedido-venda/{id}/` - Remove item
+
+#### **Comissões de Venda**
+- **GET** `/contas/comissoes-venda/` - Lista comissões
+- **POST** `/contas/comissoes-venda/` - Cria comissão
+- **GET** `/contas/comissoes-venda/{id}/` - Busca comissão
+- **PUT** `/contas/comissoes-venda/{id}/` - Atualiza comissão
+- **DELETE** `/contas/comissoes-venda/{id}/` - Remove comissão
+
+#### **Operações de Vendas**
+- **POST** `/contas/vendas/registrar/` - Cria pedido com itens
+- **POST** `/contas/vendas/aprovar/` - Aprova pedido
+- **POST** `/contas/vendas/faturar/` - Fatura pedido (NF de saída + contas a receber + estoque)
+- **POST** `/contas/vendas/cancelar/` - Cancela pedido não faturado
+- **POST** `/contas/vendas/orcamento/converter/` - Converte orçamento em pedido
+
+#### **Exemplos de payloads**
+**Registrar pedido**
+```json
+{
+  "numero_pedido": "PV-2025-001",
+  "cliente_id": 10,
+  "vendedor_id": 3,
+  "forma_pagamento": "Boleto",
+  "condicoes_pagamento": "30 dias",
+  "frete": "50.00",
+  "desconto": "10.00",
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "2",
+      "valor_unitario": "150.00",
+      "desconto": "0.00"
+    }
+  ]
+}
+```
+
+**Faturar pedido**
+```json
+{
+  "pedido_id": 55,
+  "numero_nota": "NF-2025-0021",
+  "vencimento": "2025-02-10T00:00:00",
+  "local_id": 1
+}
+```
+
+---
+
 ### **📋 Gestão Financeira**
 
 #### **Categorias**
