@@ -687,6 +687,28 @@ class ComprasDetalheView(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 
+class ComprasCancelarNotaView(APIView):
+    """Cancela/exclui uma nota fiscal de entrada e seus itens."""
+
+    def delete(self, request, nota_id, *args, **kwargs):
+        try:
+            nota = NotasFiscaisEntrada.objects.get(id=nota_id)
+        except NotasFiscaisEntrada.DoesNotExist:
+            return Response(
+                {'error': 'Nota fiscal de entrada não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        with transaction.atomic():
+            nota.itens.all().delete()
+            nota.delete()
+
+        return Response(
+            {'id': nota_id, 'status': 'cancelada'},
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasListaView(APIView):
     """Lista notas fiscais de entrada com filtros básicos."""
 

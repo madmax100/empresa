@@ -19,6 +19,7 @@ from .views.compras_views import (
     ComprasContaPagarView,
     ComprasBaixaContaPagarView,
     ComprasDetalheView,
+    ComprasCancelarNotaView,
     ComprasListaView,
     ComprasCancelarContaPagarView,
 )
@@ -92,6 +93,7 @@ urlpatterns = [
     path('compras/conta-pagar/', ComprasContaPagarView.as_view(), name='compras-conta-pagar'),
     path('compras/conta-pagar/baixar/', ComprasBaixaContaPagarView.as_view(), name='compras-conta-pagar-baixar'),
     path('compras/detalhe/<int:nota_id>/', ComprasDetalheView.as_view(), name='compras-detalhe'),
+    path('compras/cancelar/<int:nota_id>/', ComprasCancelarNotaView.as_view(), name='compras-cancelar'),
     path('compras/', ComprasListaView.as_view(), name='compras-lista'),
     path('compras/conta-pagar/cancelar/', ComprasCancelarContaPagarView.as_view(), name='compras-conta-pagar-cancelar'),
     
