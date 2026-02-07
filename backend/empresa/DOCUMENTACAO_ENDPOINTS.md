@@ -255,6 +255,9 @@ GET /contas/produtos/composicao/123/
 - **POST** `/contas/vendas/conta-receber/estornar/` - Estorna baixa de conta a receber
 - **GET** `/contas/vendas/conta-receber/aging/` - Aging de contas a receber
 - **GET** `/contas/vendas/conta-receber/atrasadas/` - Lista contas a receber atrasadas
+- **GET** `/contas/vendas/detalhe/{pedido_id}/` - Detalha pedido com itens
+- **POST** `/contas/vendas/atualizar/{pedido_id}/` - Atualiza pedido em rascunho
+- **POST** `/contas/vendas/faturamento/estornar/` - Estorna faturamento e devolve estoque
 
 #### **Exemplos de payloads**
 **Registrar pedido**
@@ -297,6 +300,15 @@ GET /contas/produtos/composicao/123/
   "juros": "0.00",
   "tarifas": "0.00",
   "desconto": "0.00"
+}
+```
+
+**Estornar faturamento**
+```json
+{
+  "pedido_id": 55,
+  "numero_nota": "NF-2025-0021",
+  "local_id": 1
 }
 ```
 

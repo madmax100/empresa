@@ -524,3 +524,143 @@ class VendasContaReceberAtrasadasView(APIView):
             })
 
         return Response({'resultados': resultados, 'total': contas.count()})
+
+
+class VendasDetalheView(APIView):
+    def get(self, request, pedido_id, *args, **kwargs):
+        pedido = (
+            PedidosVenda.objects
+            .filter(id=pedido_id)
+            .select_related('cliente', 'vendedor')
+            .prefetch_related('itens__produto')
+            .first()
+        )
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        itens = []
+        for item in pedido.itens.all():
+            itens.append({
+                'id': item.id,
+                'produto_id': item.produto_id,
+                'produto_nome': getattr(item.produto, 'nome', None),
+                'quantidade': float(item.quantidade or Decimal('0.0000')),
+                'valor_unitario': float(item.valor_unitario or Decimal('0.00')),
+                'desconto': float(item.desconto or Decimal('0.00')),
+                'valor_total': float(item.valor_total or Decimal('0.00')),
+            })
+
+        return Response({
+            'pedido': {
+                'id': pedido.id,
+                'numero_pedido': pedido.numero_pedido,
+                'data_emissao': pedido.data_emissao,
+                'cliente_id': pedido.cliente_id,
+                'cliente_nome': getattr(pedido.cliente, 'nome', None),
+                'vendedor_id': pedido.vendedor_id,
+                'status': pedido.status,
+                'valor_produtos': float(pedido.valor_produtos or Decimal('0.00')),
+                'desconto': float(pedido.desconto or Decimal('0.00')),
+                'frete': float(pedido.frete or Decimal('0.00')),
+                'impostos': float(pedido.impostos or Decimal('0.00')),
+                'valor_total': float(pedido.valor_total or Decimal('0.00')),
+                'observacoes': pedido.observacoes,
+            },
+            'itens': itens
+        })
+
+
+class VendasAtualizarView(APIView):
+    def post(self, request, pedido_id, *args, **kwargs):
+        payload = request.data
+        itens = payload.get('itens', [])
+
+        pedido = PedidosVenda.objects.filter(id=pedido_id).prefetch_related('itens').first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        if pedido.status != 'RASCUNHO':
+            return Response(
+                {'error': 'Apenas pedidos em rascunho podem ser atualizados.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not itens:
+            return Response({'error': 'Informe ao menos um item.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            pedido.forma_pagamento = payload.get('forma_pagamento', pedido.forma_pagamento)
+            pedido.condicoes_pagamento = payload.get('condicoes_pagamento', pedido.condicoes_pagamento)
+            pedido.prazo_entrega = payload.get('prazo_entrega', pedido.prazo_entrega)
+            pedido.desconto = Decimal(str(payload.get('desconto', pedido.desconto or '0.00')))
+            pedido.frete = Decimal(str(payload.get('frete', pedido.frete or '0.00')))
+            pedido.impostos = Decimal(str(payload.get('impostos', pedido.impostos or '0.00')))
+            pedido.observacoes = payload.get('observacoes', pedido.observacoes)
+            pedido.itens.all().delete()
+
+            valor_produtos = Decimal('0.00')
+            for item in itens:
+                quantidade = Decimal(str(item.get('quantidade', '0.0000')))
+                valor_unitario = Decimal(str(item.get('valor_unitario', '0.00')))
+                desconto_item = Decimal(str(item.get('desconto', '0.00')))
+                valor_total_item = (quantidade * valor_unitario) - desconto_item
+                valor_produtos += valor_total_item
+
+                ItensPedidoVenda.objects.create(
+                    pedido=pedido,
+                    produto_id=item.get('produto_id'),
+                    quantidade=quantidade,
+                    valor_unitario=valor_unitario,
+                    desconto=desconto_item,
+                    valor_total=valor_total_item
+                )
+
+            pedido.valor_produtos = valor_produtos
+            pedido.save()
+
+        return Response({'message': 'Pedido atualizado com sucesso.'})
+
+
+class VendasEstornoFaturamentoView(APIView):
+    def post(self, request, *args, **kwargs):
+        pedido_id = request.data.get('pedido_id')
+        local_id = request.data.get('local_id')
+        pedido = PedidosVenda.objects.filter(id=pedido_id).first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        if pedido.status != 'FATURADO':
+            return Response({'error': 'Apenas pedidos faturados podem ser estornados.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        numero_nota = request.data.get('numero_nota')
+        if numero_nota:
+            nota = NotasFiscaisSaida.objects.filter(cliente=pedido.cliente, numero_nota=numero_nota).first()
+        else:
+            nota = NotasFiscaisSaida.objects.filter(cliente=pedido.cliente).order_by('-data').first()
+        if not nota:
+            return Response({'error': 'Nota fiscal de saída não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        with transaction.atomic():
+            itens_nf = ItensNfSaida.objects.filter(nota_fiscal=nota)
+            for item in itens_nf:
+                saldo = None
+                if local_id:
+                    saldo = SaldosEstoque.objects.filter(produto=item.produto, local_id=local_id).first()
+                custo_unitario = saldo.custo_medio if saldo else item.valor_unitario
+
+                _atualizar_saldo_estoque(
+                    produto_id=item.produto_id,
+                    local_id=local_id,
+                    delta_quantidade=item.quantidade,
+                    custo_unitario=custo_unitario,
+                    data_movimentacao=timezone.now()
+                )
+
+            MovimentacoesEstoque.objects.filter(nota_fiscal_saida=nota).delete()
+            itens_nf.delete()
+            ContasReceber.objects.filter(documento=nota.numero_nota).delete()
+            nota.delete()
+
+            pedido.status = 'APROVADO'
+            pedido.data_faturamento = None
+            pedido.save()
+
+        return Response({'message': 'Faturamento estornado com sucesso.'})
