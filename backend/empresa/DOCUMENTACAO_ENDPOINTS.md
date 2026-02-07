@@ -174,6 +174,9 @@ http://localhost:8000
 #### **Alertas Operacionais**
 - **GET** `/contas/produtos/alertas/` - Retorna alertas (estoque crítico, sem preço, sem EAN/SKU)
 
+#### **Ficha Técnica do Produto**
+- **GET** `/contas/produtos/ficha/{produto_id}/` - Consolida dados de cadastro (fiscal, variações, composição, substitutos e custos)
+
 #### **Exemplos de payloads**
 **Preço efetivo**
 ```json

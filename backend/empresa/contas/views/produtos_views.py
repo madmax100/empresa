@@ -11,10 +11,13 @@ from ..models.access import (
     PoliticaDesconto,
     ProdutoComposicao,
     ProdutoConversaoUnidade,
+    ProdutoFiscal,
+    ProdutoCustoLocal,
     Produtos,
     TabelaPrecoItem,
     ProdutoHistoricoPreco,
     ProdutoSubstituto,
+    ProdutoVariacao,
 )
 
 
@@ -297,4 +300,47 @@ class ProdutosSubstitutosView(APIView):
         return Response({
             'produto_id': produto_id,
             'substitutos': itens,
+        })
+
+
+class ProdutosFichaTecnicaView(APIView):
+    """
+    Consolida informações de cadastro do produto (fiscal, variações, composição, substitutos e custos).
+    """
+
+    def get(self, request, produto_id):
+        try:
+            produto = Produtos.objects.get(id=produto_id)
+        except Produtos.DoesNotExist:
+            return Response({'error': 'Produto não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        fiscal = ProdutoFiscal.objects.filter(produto_id=produto_id, ativo=True).values().first()
+        variacoes = list(ProdutoVariacao.objects.filter(produto_id=produto_id, ativo=True).values())
+        substitutos = list(ProdutoSubstituto.objects.filter(produto_id=produto_id, ativo=True).values())
+        composicao = list(ProdutoComposicao.objects.filter(produto_pai_id=produto_id, ativo=True).values())
+        custos_local = list(ProdutoCustoLocal.objects.filter(produto_id=produto_id).values())
+        ultimo_preco = ProdutoHistoricoPreco.objects.filter(produto_id=produto_id).order_by('-data_inicio').values().first()
+
+        return Response({
+            'produto': {
+                'id': produto.id,
+                'codigo': produto.codigo,
+                'nome': produto.nome,
+                'descricao': produto.descricao,
+                'referencia': produto.referencia,
+                'sku': produto.sku,
+                'ean': produto.ean,
+                'unidade_medida': produto.unidade_medida,
+                'preco_custo': float(produto.preco_custo or 0),
+                'preco_venda': float(produto.preco_venda or 0),
+                'estoque_minimo': produto.estoque_minimo,
+                'ponto_reposicao': produto.ponto_reposicao,
+                'lead_time_dias': produto.lead_time_dias,
+            },
+            'fiscal': fiscal,
+            'variacoes': variacoes,
+            'composicao': composicao,
+            'substitutos': substitutos,
+            'custos_local': custos_local,
+            'ultimo_preco': ultimo_preco,
         })
