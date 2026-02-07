@@ -936,6 +936,58 @@ class ComprasDevolucaoListaView(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 
+class ComprasCancelarDevolucaoView(APIView):
+    """Cancela uma devolução de compra e estorna o saldo de estoque."""
+
+    def post(self, request, *args, **kwargs):
+        payload = request.data or {}
+        movimento_id = payload.get('movimento_id')
+
+        if not movimento_id:
+            return Response(
+                {'error': 'Informe o movimento_id da devolução.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            movimento = MovimentacoesEstoque.objects.select_related(
+                'tipo_movimentacao', 'nota_fiscal_entrada'
+            ).get(id=movimento_id, tipo_movimentacao__tipo='S')
+        except MovimentacoesEstoque.DoesNotExist:
+            return Response(
+                {'error': 'Movimento de devolução não encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not movimento.nota_fiscal_entrada_id:
+            return Response(
+                {'error': 'Movimento informado não pertence a uma devolução de compra.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not movimento.local_origem_id:
+            return Response(
+                {'error': 'Movimento sem local de origem configurado.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        with transaction.atomic():
+            _atualizar_saldo_estoque(
+                produto_id=movimento.produto_id,
+                local_id=movimento.local_origem_id,
+                delta_quantidade=(movimento.quantidade or Decimal('0.000')),
+                custo_unitario=movimento.custo_unitario,
+                data_movimentacao=movimento.data_movimentacao
+            )
+
+            movimento.delete()
+
+        return Response(
+            {'status': 'cancelado', 'movimento_id': movimento_id},
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasParcelasContaPagarView(APIView):
     """Gera parcelas de contas a pagar vinculadas à nota fiscal de entrada."""
 
