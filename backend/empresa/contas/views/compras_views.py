@@ -13,8 +13,38 @@ from ..models.access import (
     ItensNfEntrada,
     MovimentacoesEstoque,
     NotasFiscaisEntrada,
+    SaldosEstoque,
     TiposMovimentacaoEstoque,
 )
+
+
+def _atualizar_saldo_estoque(produto_id, local_id, delta_quantidade, custo_unitario, data_movimentacao):
+    if not produto_id or not local_id:
+        return
+
+    saldo, _ = SaldosEstoque.objects.get_or_create(
+        produto_id=produto_id,
+        local_id=local_id,
+        lote_id=None,
+        defaults={
+            'quantidade': Decimal('0.000'),
+            'custo_medio': Decimal('0.0000')
+        }
+    )
+
+    quantidade_atual = saldo.quantidade or Decimal('0.000')
+    nova_quantidade = quantidade_atual + delta_quantidade
+
+    if delta_quantidade > 0 and custo_unitario is not None:
+        custo_atual = saldo.custo_medio or Decimal('0.0000')
+        valor_atual = quantidade_atual * custo_atual
+        valor_entrada = delta_quantidade * custo_unitario
+        if nova_quantidade > 0:
+            saldo.custo_medio = (valor_atual + valor_entrada) / nova_quantidade
+
+    saldo.quantidade = nova_quantidade
+    saldo.ultima_movimentacao = data_movimentacao
+    saldo.save()
 
 
 class ComprasResumoView(APIView):
@@ -300,6 +330,7 @@ class ComprasCadastroView(APIView):
             local_destino_id = estoque_data.get('local_destino_id')
 
             for item in nota.itens.all():
+                quantidade_item = item.quantidade or Decimal('0.0000')
                 MovimentacoesEstoque.objects.create(
                     data_movimentacao=data_movimentacao,
                     tipo_movimentacao=tipo_movimentacao,
@@ -307,12 +338,20 @@ class ComprasCadastroView(APIView):
                     lote_id=None,
                     local_origem_id=None,
                     local_destino_id=local_destino_id,
-                    quantidade=item.quantidade or Decimal('0.0000'),
+                    quantidade=quantidade_item,
                     custo_unitario=item.valor_unitario,
                     valor_total=item.valor_total,
                     nota_fiscal_entrada=nota,
                     observacoes='Entrada automática via compras',
                     documento_referencia=str(nota.numero_nota)
+                )
+
+                _atualizar_saldo_estoque(
+                    produto_id=item.produto_id,
+                    local_id=local_destino_id,
+                    delta_quantidade=quantidade_item,
+                    custo_unitario=item.valor_unitario,
+                    data_movimentacao=data_movimentacao
                 )
 
         return Response(
@@ -483,12 +522,26 @@ class ComprasAtualizarView(APIView):
 
             nota.save()
 
+            movimentos_anteriores = list(
+                MovimentacoesEstoque.objects.filter(nota_fiscal_entrada=nota)
+            )
+
+            for movimento in movimentos_anteriores:
+                _atualizar_saldo_estoque(
+                    produto_id=movimento.produto_id,
+                    local_id=movimento.local_destino_id,
+                    delta_quantidade=-(movimento.quantidade or Decimal('0.0000')),
+                    custo_unitario=movimento.custo_unitario,
+                    data_movimentacao=movimento.data_movimentacao
+                )
+
             MovimentacoesEstoque.objects.filter(nota_fiscal_entrada=nota).delete()
 
             data_movimentacao = nota.data_entrada or nota.data_emissao or timezone.now()
             local_destino_id = estoque_data.get('local_destino_id')
 
             for item in nota.itens.all():
+                quantidade_item = item.quantidade or Decimal('0.0000')
                 MovimentacoesEstoque.objects.create(
                     data_movimentacao=data_movimentacao,
                     tipo_movimentacao=tipo_movimentacao,
@@ -496,12 +549,20 @@ class ComprasAtualizarView(APIView):
                     lote_id=None,
                     local_origem_id=None,
                     local_destino_id=local_destino_id,
-                    quantidade=item.quantidade or Decimal('0.0000'),
+                    quantidade=quantidade_item,
                     custo_unitario=item.valor_unitario,
                     valor_total=item.valor_total,
                     nota_fiscal_entrada=nota,
                     observacoes='Atualização automática via compras',
                     documento_referencia=str(nota.numero_nota)
+                )
+
+                _atualizar_saldo_estoque(
+                    produto_id=item.produto_id,
+                    local_id=local_destino_id,
+                    delta_quantidade=quantidade_item,
+                    custo_unitario=item.valor_unitario,
+                    data_movimentacao=data_movimentacao
                 )
 
         return Response(
@@ -787,6 +848,17 @@ class ComprasCancelarNotaView(APIView):
             )
 
         with transaction.atomic():
+            movimentos = list(MovimentacoesEstoque.objects.filter(nota_fiscal_entrada=nota))
+
+            for movimento in movimentos:
+                _atualizar_saldo_estoque(
+                    produto_id=movimento.produto_id,
+                    local_id=movimento.local_destino_id,
+                    delta_quantidade=-(movimento.quantidade or Decimal('0.0000')),
+                    custo_unitario=movimento.custo_unitario,
+                    data_movimentacao=movimento.data_movimentacao
+                )
+
             MovimentacoesEstoque.objects.filter(nota_fiscal_entrada=nota).delete()
             nota.itens.all().delete()
             nota.delete()
