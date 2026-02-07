@@ -37,6 +37,11 @@ from .views.compras_views import (
     ComprasListaView,
     ComprasCancelarContaPagarView,
 )
+from .views.produtos_views import (
+    ProdutosComposicaoResumoView,
+    ProdutosConversaoView,
+    ProdutosPrecoView,
+)
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
@@ -134,6 +139,9 @@ urlpatterns = [
     path('compras/cancelar/<int:nota_id>/', ComprasCancelarNotaView.as_view(), name='compras-cancelar'),
     path('compras/', ComprasListaView.as_view(), name='compras-lista'),
     path('compras/conta-pagar/cancelar/', ComprasCancelarContaPagarView.as_view(), name='compras-conta-pagar-cancelar'),
+    path('produtos/preco/', ProdutosPrecoView.as_view(), name='produtos-preco'),
+    path('produtos/conversao/', ProdutosConversaoView.as_view(), name='produtos-conversao'),
+    path('produtos/composicao/<int:produto_id>/', ProdutosComposicaoResumoView.as_view(), name='produtos-composicao-resumo'),
     
     path('', include(router.urls)),
 ]
