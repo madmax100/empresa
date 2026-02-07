@@ -916,3 +916,116 @@ class VendasComissaoResumoView(APIView):
         resumo['valor_total'] = float(resumo['valor_total'] or Decimal('0.00'))
 
         return Response({'resumo': resumo})
+
+
+class VendasExpedicaoPendentesView(APIView):
+    def get(self, request, *args, **kwargs):
+        pedidos = (
+            PedidosVenda.objects
+            .filter(status='APROVADO')
+            .select_related('cliente', 'vendedor')
+            .prefetch_related('itens')
+            .order_by('-data_emissao')
+        )
+
+        resultados = []
+        for pedido in pedidos[:200]:
+            resultados.append({
+                'id': pedido.id,
+                'numero_pedido': pedido.numero_pedido,
+                'cliente_id': pedido.cliente_id,
+                'cliente_nome': getattr(pedido.cliente, 'nome', None),
+                'data_emissao': pedido.data_emissao,
+                'itens': pedido.itens.count(),
+                'valor_total': float(pedido.valor_total or Decimal('0.00')),
+            })
+
+        return Response({'resultados': resultados, 'total': pedidos.count()})
+
+
+class VendasExpedicaoConfirmarView(APIView):
+    def post(self, request, *args, **kwargs):
+        pedido_id = request.data.get('pedido_id')
+        local_id = request.data.get('local_id')
+        tipo_movimentacao_id = request.data.get('tipo_movimentacao_id')
+        data_movimentacao = request.data.get('data_movimentacao')
+
+        pedido = PedidosVenda.objects.filter(id=pedido_id).prefetch_related('itens').first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        if pedido.status != 'APROVADO':
+            return Response({'error': 'Somente pedidos aprovados podem ser expedidos.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not local_id:
+            return Response({'error': 'Informe o local_id para expedição.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if data_movimentacao:
+            try:
+                data_movimentacao = datetime.fromisoformat(data_movimentacao)
+            except (TypeError, ValueError):
+                return Response({'error': 'data_movimentacao inválida.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data_movimentacao = timezone.now()
+
+        tipo_movimentacao = None
+        if tipo_movimentacao_id:
+            tipo_movimentacao = TiposMovimentacaoEstoque.objects.filter(id=tipo_movimentacao_id).first()
+        if not tipo_movimentacao:
+            tipo_movimentacao = TiposMovimentacaoEstoque.objects.filter(tipo='S', ativo=True).first()
+
+        with transaction.atomic():
+            for item in pedido.itens.all():
+                saldo = SaldosEstoque.objects.filter(produto=item.produto, local_id=local_id).first()
+                custo_unitario = saldo.custo_medio if saldo else item.valor_unitario
+
+                MovimentacoesEstoque.objects.create(
+                    data_movimentacao=data_movimentacao,
+                    tipo_movimentacao=tipo_movimentacao,
+                    produto=item.produto,
+                    local_origem_id=local_id,
+                    quantidade=item.quantidade,
+                    custo_unitario=custo_unitario,
+                    valor_total=item.valor_total,
+                    documento_referencia=f'EXPEDICAO {pedido.numero_pedido or pedido.id}'
+                )
+
+                _atualizar_saldo_estoque(
+                    produto_id=item.produto_id,
+                    local_id=local_id,
+                    delta_quantidade=-item.quantidade,
+                    custo_unitario=custo_unitario,
+                    data_movimentacao=data_movimentacao
+                )
+
+            pedido.status = 'EXPEDIDO'
+            pedido.save()
+
+        return Response({'message': 'Pedido expedido com sucesso.'})
+
+
+class VendasExpedicaoEstornoView(APIView):
+    def post(self, request, *args, **kwargs):
+        pedido_id = request.data.get('pedido_id')
+        local_id = request.data.get('local_id')
+
+        pedido = PedidosVenda.objects.filter(id=pedido_id).prefetch_related('itens').first()
+        if not pedido:
+            return Response({'error': 'Pedido não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        if pedido.status != 'EXPEDIDO':
+            return Response({'error': 'Apenas pedidos expedidos podem ser estornados.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        movimentos = MovimentacoesEstoque.objects.filter(documento_referencia__contains=f'EXPEDICAO {pedido.numero_pedido or pedido.id}')
+
+        with transaction.atomic():
+            for mov in movimentos:
+                _atualizar_saldo_estoque(
+                    produto_id=mov.produto_id,
+                    local_id=local_id,
+                    delta_quantidade=mov.quantidade,
+                    custo_unitario=mov.custo_unitario,
+                    data_movimentacao=timezone.now()
+                )
+            movimentos.delete()
+            pedido.status = 'APROVADO'
+            pedido.save()
+
+        return Response({'message': 'Expedição estornada com sucesso.'})

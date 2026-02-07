@@ -67,6 +67,9 @@ from .views.vendas_views import (
     VendasDevolucaoSaldoView,
     VendasComissaoGerarView,
     VendasComissaoResumoView,
+    VendasExpedicaoPendentesView,
+    VendasExpedicaoConfirmarView,
+    VendasExpedicaoEstornoView,
 )
 
 router = DefaultRouter()
@@ -197,6 +200,9 @@ urlpatterns = [
     path('vendas/devolucao/saldo/<int:nota_id>/', VendasDevolucaoSaldoView.as_view(), name='vendas-devolucao-saldo'),
     path('vendas/comissoes/gerar/', VendasComissaoGerarView.as_view(), name='vendas-comissoes-gerar'),
     path('vendas/comissoes/resumo/', VendasComissaoResumoView.as_view(), name='vendas-comissoes-resumo'),
+    path('vendas/expedicao/pendentes/', VendasExpedicaoPendentesView.as_view(), name='vendas-expedicao-pendentes'),
+    path('vendas/expedicao/confirmar/', VendasExpedicaoConfirmarView.as_view(), name='vendas-expedicao-confirmar'),
+    path('vendas/expedicao/estornar/', VendasExpedicaoEstornoView.as_view(), name='vendas-expedicao-estornar'),
     
     path('', include(router.urls)),
 ]

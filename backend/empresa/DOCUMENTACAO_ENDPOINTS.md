@@ -264,6 +264,9 @@ GET /contas/produtos/composicao/123/
 - **GET** `/contas/vendas/devolucao/saldo/{nota_id}/` - Saldo disponível para devolução
 - **POST** `/contas/vendas/comissoes/gerar/` - Gera comissão para pedido
 - **GET** `/contas/vendas/comissoes/resumo/` - Resumo de comissões por período
+- **GET** `/contas/vendas/expedicao/pendentes/` - Lista pedidos aprovados para expedição
+- **POST** `/contas/vendas/expedicao/confirmar/` - Confirma expedição e baixa estoque
+- **POST** `/contas/vendas/expedicao/estornar/` - Estorna expedição e devolve estoque
 
 #### **Exemplos de payloads**
 **Registrar pedido**
@@ -337,6 +340,14 @@ GET /contas/produtos/composicao/123/
 {
   "pedido_id": 55,
   "percentual": "5.00"
+}
+```
+
+**Confirmar expedição**
+```json
+{
+  "pedido_id": 55,
+  "local_id": 1
 }
 ```
 

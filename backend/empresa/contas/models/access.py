@@ -2018,6 +2018,7 @@ class PedidosVenda(models.Model):
     STATUS_CHOICES = [
         ('RASCUNHO', 'Rascunho'),
         ('APROVADO', 'Aprovado'),
+        ('EXPEDIDO', 'Expedido'),
         ('FATURADO', 'Faturado'),
         ('CANCELADO', 'Cancelado'),
     ]
