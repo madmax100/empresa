@@ -3,11 +3,18 @@ from decimal import Decimal
 
 from django.db import transaction
 from django.db.models import Count, Sum
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ..models.access import ContasPagar, ItensNfEntrada, NotasFiscaisEntrada
+from ..models.access import (
+    ContasPagar,
+    ItensNfEntrada,
+    MovimentacoesEstoque,
+    NotasFiscaisEntrada,
+    TiposMovimentacaoEstoque,
+)
 
 
 class ComprasResumoView(APIView):
@@ -192,6 +199,26 @@ class ComprasCadastroView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+        estoque_data = payload.get('estoque') or {}
+        tipo_movimentacao_id = estoque_data.get('tipo_movimentacao_id')
+        tipo_movimentacao = None
+
+        if tipo_movimentacao_id:
+            tipo_movimentacao = (
+                TiposMovimentacaoEstoque.objects.filter(id=tipo_movimentacao_id, ativo=True)
+                .first()
+            )
+        else:
+            tipo_movimentacao = (
+                TiposMovimentacaoEstoque.objects.filter(tipo='E', ativo=True).first()
+            )
+
+        if not tipo_movimentacao:
+            return Response(
+                {'error': 'Tipo de movimentação de entrada não encontrado.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         with transaction.atomic():
             nota = NotasFiscaisEntrada.objects.create(
                 numero_nota=numero_nota,
@@ -269,6 +296,25 @@ class ComprasCadastroView(APIView):
 
             nota.save()
 
+            data_movimentacao = nota.data_entrada or nota.data_emissao or timezone.now()
+            local_destino_id = estoque_data.get('local_destino_id')
+
+            for item in nota.itens.all():
+                MovimentacoesEstoque.objects.create(
+                    data_movimentacao=data_movimentacao,
+                    tipo_movimentacao=tipo_movimentacao,
+                    produto=item.produto,
+                    lote_id=None,
+                    local_origem_id=None,
+                    local_destino_id=local_destino_id,
+                    quantidade=item.quantidade or Decimal('0.0000'),
+                    custo_unitario=item.valor_unitario,
+                    valor_total=item.valor_total,
+                    nota_fiscal_entrada=nota,
+                    observacoes='Entrada automática via compras',
+                    documento_referencia=str(nota.numero_nota)
+                )
+
         return Response(
             {
                 'id': nota.id,
@@ -331,6 +377,26 @@ class ComprasAtualizarView(APIView):
                     {'error': 'Cada item deve possuir produto_id.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
+        estoque_data = payload.get('estoque') or {}
+        tipo_movimentacao_id = estoque_data.get('tipo_movimentacao_id')
+        tipo_movimentacao = None
+
+        if tipo_movimentacao_id:
+            tipo_movimentacao = (
+                TiposMovimentacaoEstoque.objects.filter(id=tipo_movimentacao_id, ativo=True)
+                .first()
+            )
+        else:
+            tipo_movimentacao = (
+                TiposMovimentacaoEstoque.objects.filter(tipo='E', ativo=True).first()
+            )
+
+        if not tipo_movimentacao:
+            return Response(
+                {'error': 'Tipo de movimentação de entrada não encontrado.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         with transaction.atomic():
             nota.numero_nota = numero_nota
@@ -416,6 +482,27 @@ class ComprasAtualizarView(APIView):
                 )
 
             nota.save()
+
+            MovimentacoesEstoque.objects.filter(nota_fiscal_entrada=nota).delete()
+
+            data_movimentacao = nota.data_entrada or nota.data_emissao or timezone.now()
+            local_destino_id = estoque_data.get('local_destino_id')
+
+            for item in nota.itens.all():
+                MovimentacoesEstoque.objects.create(
+                    data_movimentacao=data_movimentacao,
+                    tipo_movimentacao=tipo_movimentacao,
+                    produto=item.produto,
+                    lote_id=None,
+                    local_origem_id=None,
+                    local_destino_id=local_destino_id,
+                    quantidade=item.quantidade or Decimal('0.0000'),
+                    custo_unitario=item.valor_unitario,
+                    valor_total=item.valor_total,
+                    nota_fiscal_entrada=nota,
+                    observacoes='Atualização automática via compras',
+                    documento_referencia=str(nota.numero_nota)
+                )
 
         return Response(
             {
@@ -700,6 +787,7 @@ class ComprasCancelarNotaView(APIView):
             )
 
         with transaction.atomic():
+            MovimentacoesEstoque.objects.filter(nota_fiscal_entrada=nota).delete()
             nota.itens.all().delete()
             nota.delete()
 
