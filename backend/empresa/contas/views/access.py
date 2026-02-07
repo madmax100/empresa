@@ -930,6 +930,46 @@ class PosicoesEstoqueViewSet(viewsets.ModelViewSet):
 class ProdutosViewSet(viewsets.ModelViewSet):
     queryset = Produtos.objects.all()
     serializer_class = ProdutoSerializer
+
+class ProdutoFiscalViewSet(viewsets.ModelViewSet):
+    queryset = ProdutoFiscal.objects.all()
+    serializer_class = ProdutoFiscalSerializer
+
+class ProdutoVariacaoViewSet(viewsets.ModelViewSet):
+    queryset = ProdutoVariacao.objects.all()
+    serializer_class = ProdutoVariacaoSerializer
+
+class ProdutoComposicaoViewSet(viewsets.ModelViewSet):
+    queryset = ProdutoComposicao.objects.all()
+    serializer_class = ProdutoComposicaoSerializer
+
+class ProdutoConversaoUnidadeViewSet(viewsets.ModelViewSet):
+    queryset = ProdutoConversaoUnidade.objects.all()
+    serializer_class = ProdutoConversaoUnidadeSerializer
+
+class ProdutoHistoricoPrecoViewSet(viewsets.ModelViewSet):
+    queryset = ProdutoHistoricoPreco.objects.all()
+    serializer_class = ProdutoHistoricoPrecoSerializer
+
+class TabelaPrecoViewSet(viewsets.ModelViewSet):
+    queryset = TabelaPreco.objects.all()
+    serializer_class = TabelaPrecoSerializer
+
+class TabelaPrecoItemViewSet(viewsets.ModelViewSet):
+    queryset = TabelaPrecoItem.objects.all()
+    serializer_class = TabelaPrecoItemSerializer
+
+class PoliticaDescontoViewSet(viewsets.ModelViewSet):
+    queryset = PoliticaDesconto.objects.all()
+    serializer_class = PoliticaDescontoSerializer
+
+class ProdutoSubstitutoViewSet(viewsets.ModelViewSet):
+    queryset = ProdutoSubstituto.objects.all()
+    serializer_class = ProdutoSubstitutoSerializer
+
+class ProdutoCustoLocalViewSet(viewsets.ModelViewSet):
+    queryset = ProdutoCustoLocal.objects.all()
+    serializer_class = ProdutoCustoLocalSerializer
     
 class RegioesEntregaViewSet(viewsets.ModelViewSet):
     queryset = RegioesEntrega.objects.all()

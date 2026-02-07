@@ -684,10 +684,14 @@ class Produtos(models.Model):
     referencia = models.CharField(max_length=100, null=True, blank=True)
     grupo_id = models.IntegerField(null=True, blank=True)
     unidade_medida = models.CharField(max_length=10, null=True, blank=True)
+    sku = models.CharField(max_length=60, null=True, blank=True)
+    ean = models.CharField(max_length=14, null=True, blank=True)
     preco_custo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     preco_venda = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     margem_lucro = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     estoque_minimo = models.IntegerField(null=True, blank=True)
+    ponto_reposicao = models.IntegerField(null=True, blank=True)
+    lead_time_dias = models.IntegerField(null=True, blank=True)
     estoque_atual = models.IntegerField(null=True, blank=True, default=0)
     disponivel_locacao = models.BooleanField(null=True, blank=True, default=False)
     valor_locacao_diaria = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -701,6 +705,153 @@ class Produtos(models.Model):
 
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
+
+class ProdutoFiscal(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    ncm = models.CharField(max_length=20, null=True, blank=True)
+    cst = models.CharField(max_length=10, null=True, blank=True)
+    cfop = models.CharField(max_length=10, null=True, blank=True)
+    origem = models.CharField(max_length=20, null=True, blank=True)
+    unidade_tributavel = models.CharField(max_length=10, null=True, blank=True)
+    aliquota_icms = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    aliquota_ipi = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    aliquota_pis = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    aliquota_cofins = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_fiscal'
+
+    def __str__(self):
+        return f"Fiscal {self.produto_id}"
+
+class ProdutoVariacao(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='variacoes')
+    codigo = models.CharField(max_length=50)
+    descricao = models.CharField(max_length=120, null=True, blank=True)
+    atributos = models.JSONField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_variacoes'
+
+    def __str__(self):
+        return f"{self.produto_id} - {self.codigo}"
+
+class ProdutoComposicao(models.Model):
+    produto_pai_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='componentes')
+    produto_componente_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='utilizado_em')
+    quantidade = models.DecimalField(max_digits=10, decimal_places=3)
+    unidade_medida = models.CharField(max_length=10, null=True, blank=True)
+    custo_proporcional = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_composicao'
+
+    def __str__(self):
+        return f"{self.produto_pai_id} -> {self.produto_componente_id}"
+
+class ProdutoConversaoUnidade(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    unidade_origem = models.CharField(max_length=10)
+    unidade_destino = models.CharField(max_length=10)
+    fator_conversao = models.DecimalField(max_digits=12, decimal_places=6)
+    arredondamento = models.CharField(max_length=10, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_conversao_unidade'
+
+    def __str__(self):
+        return f"{self.produto_id} {self.unidade_origem}->{self.unidade_destino}"
+
+class ProdutoHistoricoPreco(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    preco_custo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    preco_venda = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    data_inicio = models.DateField()
+    data_fim = models.DateField(null=True, blank=True)
+    origem = models.CharField(max_length=40, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'produtos_historico_precos'
+
+    def __str__(self):
+        return f"Histórico {self.produto_id} ({self.data_inicio})"
+
+class TabelaPreco(models.Model):
+    descricao = models.CharField(max_length=100)
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+    moeda = models.CharField(max_length=10, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'tabelas_precos'
+
+    def __str__(self):
+        return self.descricao
+
+class TabelaPrecoItem(models.Model):
+    tabela_id = models.ForeignKey('TabelaPreco', on_delete=models.PROTECT)
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    preco = models.DecimalField(max_digits=10, decimal_places=2)
+    preco_minimo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    desconto_maximo = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    quantidade_minima = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'tabelas_precos_itens'
+
+    def __str__(self):
+        return f"{self.tabela_id} - {self.produto_id}"
+
+class PoliticaDesconto(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, null=True, blank=True)
+    tabela_id = models.ForeignKey('TabelaPreco', on_delete=models.PROTECT, null=True, blank=True)
+    cliente_id = models.ForeignKey('Clientes', on_delete=models.PROTECT, null=True, blank=True)
+    percentual = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    valor = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    quantidade_minima = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'politicas_desconto'
+
+    def __str__(self):
+        return f"Desconto {self.produto_id or self.tabela_id}"
+
+class ProdutoSubstituto(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='substitutos')
+    produto_substituto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='substitui')
+    motivo = models.CharField(max_length=120, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_substitutos'
+
+    def __str__(self):
+        return f"{self.produto_id} -> {self.produto_substituto_id}"
+
+class ProdutoCustoLocal(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    custo_medio = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    ultima_atualizacao = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'produtos_custo_local'
+
+    def __str__(self):
+        return f"{self.produto_id} - {self.local_id}"
 
 class RegioesEntrega(models.Model):
     transportadora_id = models.ForeignKey('Transportadoras', on_delete=models.PROTECT, null=True, blank=True)
