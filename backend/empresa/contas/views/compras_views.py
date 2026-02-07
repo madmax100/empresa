@@ -843,6 +843,89 @@ class ComprasContaPagarAtrasadasView(APIView):
         )
 
 
+class ComprasContaPagarResumoFornecedorView(APIView):
+    """Resumo de contas a pagar por fornecedor."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+        fornecedor_id = request.query_params.get('fornecedor_id')
+        status_param = request.query_params.get('status')
+
+        if (data_inicio and not data_fim) or (data_fim and not data_inicio):
+            return Response(
+                {'error': 'Informe data_inicio e data_fim no formato YYYY-MM-DD.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if data_inicio and data_fim and data_inicio > data_fim:
+            return Response(
+                {'error': 'A data_inicio não pode ser maior que data_fim.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        contas = ContasPagar.objects.select_related('fornecedor')
+
+        if fornecedor_id:
+            contas = contas.filter(fornecedor_id=fornecedor_id)
+
+        if status_param:
+            contas = contas.filter(status=status_param)
+
+        if data_inicio and data_fim:
+            contas = contas.filter(
+                vencimento__date__gte=data_inicio,
+                vencimento__date__lte=data_fim
+            )
+
+        resumo = (
+            contas.values('fornecedor_id', 'fornecedor__nome')
+            .annotate(
+                quantidade=Count('id'),
+                valor_total=Sum('valor'),
+                valor_total_pago=Sum('valor_total_pago')
+            )
+            .order_by('-valor_total')
+        )
+
+        response = [
+            {
+                'fornecedor_id': item['fornecedor_id'],
+                'fornecedor_nome': item['fornecedor__nome'],
+                'quantidade': item['quantidade'] or 0,
+                'valor_total': self._to_float(item['valor_total']),
+                'valor_total_pago': self._to_float(item['valor_total_pago'])
+            }
+            for item in resumo
+        ]
+
+        return Response(
+            {
+                'filtros': {
+                    'data_inicio': data_inicio.isoformat() if data_inicio else None,
+                    'data_fim': data_fim.isoformat() if data_fim else None,
+                    'fornecedor_id': fornecedor_id,
+                    'status': status_param
+                },
+                'fornecedores': response
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasDevolucaoView(APIView):
     """Registra devolução de itens de uma compra."""
 
