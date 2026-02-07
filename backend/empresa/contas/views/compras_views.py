@@ -861,6 +861,81 @@ class ComprasDevolucaoView(APIView):
         )
 
 
+class ComprasDevolucaoListaView(APIView):
+    """Lista devoluções de compra registradas no estoque."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    def get(self, request, *args, **kwargs):
+        nota_id = request.query_params.get('nota_id')
+        produto_id = request.query_params.get('produto_id')
+        data_inicio = request.query_params.get('data_inicio')
+        data_fim = request.query_params.get('data_fim')
+
+        movimentos = MovimentacoesEstoque.objects.filter(
+            nota_fiscal_entrada__isnull=False,
+            tipo_movimentacao__tipo='S'
+        ).select_related('produto', 'nota_fiscal_entrada', 'tipo_movimentacao')
+
+        if nota_id:
+            movimentos = movimentos.filter(nota_fiscal_entrada_id=nota_id)
+
+        if produto_id:
+            movimentos = movimentos.filter(produto_id=produto_id)
+
+        if data_inicio and data_fim:
+            try:
+                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+                data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
+            except ValueError:
+                return Response(
+                    {'error': 'Informe data_inicio e data_fim no formato YYYY-MM-DD.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if data_inicio > data_fim:
+                return Response(
+                    {'error': 'A data_inicio não pode ser maior que data_fim.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            movimentos = movimentos.filter(
+                data_movimentacao__date__gte=data_inicio,
+                data_movimentacao__date__lte=data_fim
+            )
+        elif data_inicio or data_fim:
+            return Response(
+                {'error': 'Informe data_inicio e data_fim no formato YYYY-MM-DD.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        movimentos = movimentos.order_by('-data_movimentacao')[:200]
+
+        response = [
+            {
+                'movimento_id': movimento.id,
+                'nota_id': movimento.nota_fiscal_entrada_id,
+                'numero_nota': (
+                    movimento.nota_fiscal_entrada.numero_nota
+                    if movimento.nota_fiscal_entrada else None
+                ),
+                'produto_id': movimento.produto_id,
+                'produto_nome': movimento.produto.nome if movimento.produto else None,
+                'data_movimentacao': movimento.data_movimentacao,
+                'quantidade': self._to_float(movimento.quantidade),
+                'custo_unitario': self._to_float(movimento.custo_unitario),
+                'valor_total': self._to_float(movimento.valor_total),
+                'tipo_movimentacao': movimento.tipo_movimentacao.descricao if movimento.tipo_movimentacao else None,
+                'observacoes': movimento.observacoes
+            }
+            for movimento in movimentos
+        ]
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
 class ComprasParcelasContaPagarView(APIView):
     """Gera parcelas de contas a pagar vinculadas à nota fiscal de entrada."""
 
