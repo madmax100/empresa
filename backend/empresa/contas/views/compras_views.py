@@ -988,6 +988,74 @@ class ComprasCancelarDevolucaoView(APIView):
         )
 
 
+class ComprasDevolucaoSaldoView(APIView):
+    """Consulta o saldo disponível para devolução por produto em uma nota."""
+
+    @staticmethod
+    def _to_float(value):
+        return float(value or Decimal('0.00'))
+
+    def get(self, request, nota_id, *args, **kwargs):
+        try:
+            nota = NotasFiscaisEntrada.objects.get(id=nota_id)
+        except NotasFiscaisEntrada.DoesNotExist:
+            return Response(
+                {'error': 'Nota fiscal de entrada não encontrada.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        itens_nota = list(nota.itens.select_related('produto'))
+        if not itens_nota:
+            return Response(
+                {'error': 'Nota fiscal sem itens cadastrados.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resumo_itens = {}
+        for item in itens_nota:
+            resumo = resumo_itens.setdefault(
+                item.produto_id,
+                {
+                    'produto_nome': item.produto.nome if item.produto else None,
+                    'quantidade': Decimal('0.000'),
+                    'valor': Decimal('0.00')
+                }
+            )
+            resumo['quantidade'] += item.quantidade or Decimal('0.000')
+            resumo['valor'] += item.valor_total or Decimal('0.00')
+
+        devolucoes = MovimentacoesEstoque.objects.filter(
+            nota_fiscal_entrada=nota,
+            tipo_movimentacao__tipo='S'
+        ).values('produto_id').annotate(quantidade=Sum('quantidade'))
+
+        devolvido_por_produto = {item['produto_id']: item['quantidade'] for item in devolucoes}
+
+        response = []
+        for produto_id, dados in resumo_itens.items():
+            quantidade_comprada = dados['quantidade']
+            quantidade_devolvida = devolvido_por_produto.get(produto_id, Decimal('0.000'))
+            quantidade_disponivel = quantidade_comprada - quantidade_devolvida
+            response.append(
+                {
+                    'produto_id': produto_id,
+                    'produto_nome': dados['produto_nome'],
+                    'quantidade_comprada': self._to_float(quantidade_comprada),
+                    'quantidade_devolvida': self._to_float(quantidade_devolvida),
+                    'quantidade_disponivel': self._to_float(quantidade_disponivel)
+                }
+            )
+
+        return Response(
+            {
+                'nota_id': nota.id,
+                'numero_nota': nota.numero_nota,
+                'itens': response
+            },
+            status=status.HTTP_200_OK
+        )
+
+
 class ComprasParcelasContaPagarView(APIView):
     """Gera parcelas de contas a pagar vinculadas à nota fiscal de entrada."""
 
