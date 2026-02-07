@@ -249,6 +249,12 @@ GET /contas/produtos/composicao/123/
 - **POST** `/contas/vendas/faturar/` - Fatura pedido (NF de saída + contas a receber + estoque)
 - **POST** `/contas/vendas/cancelar/` - Cancela pedido não faturado
 - **POST** `/contas/vendas/orcamento/converter/` - Converte orçamento em pedido
+- **GET** `/contas/vendas/` - Lista pedidos de venda com filtros
+- **GET** `/contas/vendas/resumo/` - Resumo de vendas por período e top clientes
+- **POST** `/contas/vendas/conta-receber/baixar/` - Baixa conta a receber
+- **POST** `/contas/vendas/conta-receber/estornar/` - Estorna baixa de conta a receber
+- **GET** `/contas/vendas/conta-receber/aging/` - Aging de contas a receber
+- **GET** `/contas/vendas/conta-receber/atrasadas/` - Lista contas a receber atrasadas
 
 #### **Exemplos de payloads**
 **Registrar pedido**
@@ -279,6 +285,18 @@ GET /contas/produtos/composicao/123/
   "numero_nota": "NF-2025-0021",
   "vencimento": "2025-02-10T00:00:00",
   "local_id": 1
+}
+```
+
+**Baixar conta a receber**
+```json
+{
+  "conta_id": 901,
+  "data_pagamento": "2025-02-10T10:00:00",
+  "valor_recebido": "1250.00",
+  "juros": "0.00",
+  "tarifas": "0.00",
+  "desconto": "0.00"
 }
 ```
 

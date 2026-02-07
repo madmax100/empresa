@@ -52,6 +52,12 @@ from .views.vendas_views import (
     VendasCancelarView,
     VendasConverterOrcamentoView,
     VendasFaturarView,
+    VendasListaView,
+    VendasResumoView,
+    VendasContaReceberBaixaView,
+    VendasContaReceberEstornoView,
+    VendasContaReceberAgingView,
+    VendasContaReceberAtrasadasView,
 )
 
 router = DefaultRouter()
@@ -167,6 +173,12 @@ urlpatterns = [
     path('vendas/faturar/', VendasFaturarView.as_view(), name='vendas-faturar'),
     path('vendas/cancelar/', VendasCancelarView.as_view(), name='vendas-cancelar'),
     path('vendas/orcamento/converter/', VendasConverterOrcamentoView.as_view(), name='vendas-orcamento-converter'),
+    path('vendas/', VendasListaView.as_view(), name='vendas-lista'),
+    path('vendas/resumo/', VendasResumoView.as_view(), name='vendas-resumo'),
+    path('vendas/conta-receber/baixar/', VendasContaReceberBaixaView.as_view(), name='vendas-conta-receber-baixar'),
+    path('vendas/conta-receber/estornar/', VendasContaReceberEstornoView.as_view(), name='vendas-conta-receber-estornar'),
+    path('vendas/conta-receber/aging/', VendasContaReceberAgingView.as_view(), name='vendas-conta-receber-aging'),
+    path('vendas/conta-receber/atrasadas/', VendasContaReceberAtrasadasView.as_view(), name='vendas-conta-receber-atrasadas'),
     
     path('', include(router.urls)),
 ]

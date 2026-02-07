@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django.db import transaction
+from django.db.models import Count, Sum
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
@@ -312,3 +313,214 @@ class VendasConverterOrcamentoView(APIView):
             {'message': 'Orçamento convertido em pedido', 'pedido_id': pedido.id},
             status=status.HTTP_201_CREATED
         )
+
+
+class VendasListaView(APIView):
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+        cliente_id = request.query_params.get('cliente_id')
+        status_filtro = request.query_params.get('status')
+
+        pedidos = PedidosVenda.objects.all().select_related('cliente', 'vendedor')
+        if cliente_id:
+            pedidos = pedidos.filter(cliente_id=cliente_id)
+        if status_filtro:
+            pedidos = pedidos.filter(status=status_filtro)
+        if data_inicio and data_fim:
+            pedidos = pedidos.filter(data_emissao__date__gte=data_inicio, data_emissao__date__lte=data_fim)
+
+        resultados = []
+        for pedido in pedidos.order_by('-data_emissao')[:200]:
+            resultados.append({
+                'id': pedido.id,
+                'numero_pedido': pedido.numero_pedido,
+                'data_emissao': pedido.data_emissao,
+                'cliente_id': pedido.cliente_id,
+                'cliente_nome': getattr(pedido.cliente, 'nome', None),
+                'vendedor_id': pedido.vendedor_id,
+                'status': pedido.status,
+                'valor_produtos': float(pedido.valor_produtos or Decimal('0.00')),
+                'valor_total': float(pedido.valor_total or Decimal('0.00'))
+            })
+
+        return Response({'resultados': resultados, 'total': pedidos.count()})
+
+
+class VendasResumoView(APIView):
+    @staticmethod
+    def _parse_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(value, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        data_inicio = self._parse_date(request.query_params.get('data_inicio'))
+        data_fim = self._parse_date(request.query_params.get('data_fim'))
+        vendedor_id = request.query_params.get('vendedor_id')
+
+        pedidos = PedidosVenda.objects.all()
+        if vendedor_id:
+            pedidos = pedidos.filter(vendedor_id=vendedor_id)
+        if data_inicio and data_fim:
+            pedidos = pedidos.filter(data_emissao__date__gte=data_inicio, data_emissao__date__lte=data_fim)
+
+        resumo = pedidos.aggregate(
+            total_pedidos=Count('id'),
+            valor_total=Sum('valor_total'),
+            valor_produtos=Sum('valor_produtos')
+        )
+        resumo['valor_total'] = float(resumo['valor_total'] or Decimal('0.00'))
+        resumo['valor_produtos'] = float(resumo['valor_produtos'] or Decimal('0.00'))
+
+        top_clientes = list(
+            pedidos.values('cliente__id', 'cliente__nome')
+            .annotate(valor_total=Sum('valor_total'), total=Count('id'))
+            .order_by('-valor_total')[:10]
+        )
+        for cliente in top_clientes:
+            cliente['valor_total'] = float(cliente['valor_total'] or Decimal('0.00'))
+
+        return Response({'resumo': resumo, 'top_clientes': top_clientes})
+
+
+class VendasContaReceberBaixaView(APIView):
+    @staticmethod
+    def _parse_datetime(value):
+        if not value:
+            return None
+        if isinstance(value, datetime):
+            return value
+        try:
+            return datetime.fromisoformat(value)
+        except (TypeError, ValueError):
+            return None
+
+    def post(self, request, *args, **kwargs):
+        conta_id = request.data.get('conta_id')
+        data_pagamento = request.data.get('data_pagamento')
+        valor_recebido = request.data.get('valor_recebido')
+        juros = request.data.get('juros', '0.00')
+        tarifas = request.data.get('tarifas', '0.00')
+        desconto = request.data.get('desconto', '0.00')
+
+        conta = ContasReceber.objects.filter(id=conta_id).first()
+        if not conta:
+            return Response({'error': 'Conta a receber não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        if conta.status in ['P', 'C']:
+            return Response({'error': 'Conta já paga ou cancelada.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not data_pagamento or valor_recebido is None:
+            return Response({'error': 'Informe data_pagamento e valor_recebido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        conta.data_pagamento = self._parse_datetime(data_pagamento)
+        conta.recebido = Decimal(str(valor_recebido))
+        conta.juros = Decimal(str(juros))
+        conta.tarifas = Decimal(str(tarifas))
+        conta.desconto = Decimal(str(desconto))
+        conta.status = 'P'
+        conta.save()
+
+        return Response({'message': 'Conta recebida com sucesso.'})
+
+
+class VendasContaReceberEstornoView(APIView):
+    def post(self, request, *args, **kwargs):
+        conta_id = request.data.get('conta_id')
+        conta = ContasReceber.objects.filter(id=conta_id).first()
+        if not conta:
+            return Response({'error': 'Conta a receber não encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        if conta.status != 'P':
+            return Response({'error': 'Apenas contas pagas podem ser estornadas.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        conta.status = 'A'
+        conta.data_pagamento = None
+        conta.recebido = Decimal('0.00')
+        conta.juros = Decimal('0.00')
+        conta.tarifas = Decimal('0.00')
+        conta.desconto = Decimal('0.00')
+        conta.save()
+
+        return Response({'message': 'Estorno realizado com sucesso.'})
+
+
+class VendasContaReceberAgingView(APIView):
+    def get(self, request, *args, **kwargs):
+        data_referencia = request.query_params.get('data_referencia')
+        cliente_id = request.query_params.get('cliente_id')
+
+        if data_referencia:
+            try:
+                data_ref = datetime.strptime(data_referencia, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'data_referencia inválida.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data_ref = timezone.now().date()
+
+        contas = ContasReceber.objects.filter(status='A')
+        if cliente_id:
+            contas = contas.filter(cliente_id=cliente_id)
+
+        buckets = [
+            {'label': '0-30', 'inicio': 0, 'fim': 30},
+            {'label': '31-60', 'inicio': 31, 'fim': 60},
+            {'label': '61-90', 'inicio': 61, 'fim': 90},
+            {'label': '91+', 'inicio': 91, 'fim': None},
+        ]
+
+        resposta = []
+        for bucket in buckets:
+            limite_inferior = data_ref - timedelta(days=bucket['inicio'])
+            if bucket['fim'] is None:
+                filtro = contas.filter(vencimento__date__lte=limite_inferior)
+            else:
+                limite_superior = data_ref - timedelta(days=bucket['fim'])
+                filtro = contas.filter(vencimento__date__lte=limite_inferior, vencimento__date__gte=limite_superior)
+            total = filtro.aggregate(valor_total=Sum('valor'))['valor_total'] or Decimal('0.00')
+            resposta.append({'faixa': bucket['label'], 'valor_total': float(total), 'quantidade': filtro.count()})
+
+        return Response({'data_referencia': data_ref, 'aging': resposta})
+
+
+class VendasContaReceberAtrasadasView(APIView):
+    def get(self, request, *args, **kwargs):
+        data_referencia = request.query_params.get('data_referencia')
+        cliente_id = request.query_params.get('cliente_id')
+
+        if data_referencia:
+            try:
+                data_ref = datetime.strptime(data_referencia, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'data_referencia inválida.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data_ref = timezone.now().date()
+
+        contas = ContasReceber.objects.filter(status='A', vencimento__date__lt=data_ref)
+        if cliente_id:
+            contas = contas.filter(cliente_id=cliente_id)
+
+        resultados = []
+        for conta in contas.select_related('cliente').order_by('vencimento'):
+            dias = (data_ref - conta.vencimento.date()).days if conta.vencimento else 0
+            resultados.append({
+                'id': conta.id,
+                'cliente_id': conta.cliente_id,
+                'cliente_nome': getattr(conta.cliente, 'nome', None),
+                'vencimento': conta.vencimento,
+                'dias_atraso': dias,
+                'valor': float(conta.valor or Decimal('0.00'))
+            })
+
+        return Response({'resultados': resultados, 'total': contas.count()})
