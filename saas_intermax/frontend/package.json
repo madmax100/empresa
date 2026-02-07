@@ -1,0 +1,10 @@
+{
+  "name": "intermax-saas-frontend",
+  "private": true,
+  "version": "0.2.0",
+  "scripts": {
+    "dev": "python -m http.server 5173",
+    "build": "echo 'static build: no-op'",
+    "preview": "python -m http.server 5173"
+  }
+}
