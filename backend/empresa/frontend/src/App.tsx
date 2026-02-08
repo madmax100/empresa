@@ -34,11 +34,19 @@ import AtivosPatrimonioPage from './pages/AtivosPatrimonioPage';
 import ManutencoesAtivosPage from './pages/ManutencoesAtivosPage';
 import DepreciacoesAtivosPage from './pages/DepreciacoesAtivosPage';
 import OperacoesAtivosPage from './pages/OperacoesAtivosPage';
+import BeneficiosRhPage from './pages/BeneficiosRhPage';
+import VinculosBeneficiosRhPage from './pages/VinculosBeneficiosRhPage';
+import RegistrosPontoPage from './pages/RegistrosPontoPage';
+import FolhasPagamentoPage from './pages/FolhasPagamentoPage';
+import ItensFolhaPagamentoPage from './pages/ItensFolhaPagamentoPage';
+import AdmissoesRhPage from './pages/AdmissoesRhPage';
+import DesligamentosRhPage from './pages/DesligamentosRhPage';
+import OperacoesRhPage from './pages/OperacoesRhPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao' | 'ativos-patrimonio' | 'manutencoes-ativos' | 'depreciacoes-ativos' | 'operacoes-ativos'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao' | 'ativos-patrimonio' | 'manutencoes-ativos' | 'depreciacoes-ativos' | 'operacoes-ativos' | 'beneficios-rh' | 'vinculos-beneficios-rh' | 'registros-ponto' | 'folhas-pagamento' | 'itens-folha-pagamento' | 'admissoes-rh' | 'desligamentos-rh' | 'operacoes-rh'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -751,6 +759,166 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('beneficios-rh')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'beneficios-rh' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'beneficios-rh' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🎁 Benefícios
+          </button>
+
+          <button
+            onClick={() => setActivePanel('vinculos-beneficios-rh')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'vinculos-beneficios-rh' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'vinculos-beneficios-rh' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🔗 Vínculos Benefícios
+          </button>
+
+          <button
+            onClick={() => setActivePanel('registros-ponto')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'registros-ponto' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'registros-ponto' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            ⏱️ Registros Ponto
+          </button>
+
+          <button
+            onClick={() => setActivePanel('folhas-pagamento')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'folhas-pagamento' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'folhas-pagamento' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Folhas Pagamento
+          </button>
+
+          <button
+            onClick={() => setActivePanel('itens-folha-pagamento')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'itens-folha-pagamento' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'itens-folha-pagamento' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📋 Itens Folha
+          </button>
+
+          <button
+            onClick={() => setActivePanel('admissoes-rh')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'admissoes-rh' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'admissoes-rh' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            ✅ Admissões
+          </button>
+
+          <button
+            onClick={() => setActivePanel('desligamentos-rh')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'desligamentos-rh' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'desligamentos-rh' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📴 Desligamentos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('operacoes-rh')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'operacoes-rh' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'operacoes-rh' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            👥 Operações RH
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -886,6 +1054,14 @@ function App() {
         {activePanel === 'manutencoes-ativos' && <ManutencoesAtivosPage />}
         {activePanel === 'depreciacoes-ativos' && <DepreciacoesAtivosPage />}
         {activePanel === 'operacoes-ativos' && <OperacoesAtivosPage />}
+        {activePanel === 'beneficios-rh' && <BeneficiosRhPage />}
+        {activePanel === 'vinculos-beneficios-rh' && <VinculosBeneficiosRhPage />}
+        {activePanel === 'registros-ponto' && <RegistrosPontoPage />}
+        {activePanel === 'folhas-pagamento' && <FolhasPagamentoPage />}
+        {activePanel === 'itens-folha-pagamento' && <ItensFolhaPagamentoPage />}
+        {activePanel === 'admissoes-rh' && <AdmissoesRhPage />}
+        {activePanel === 'desligamentos-rh' && <DesligamentosRhPage />}
+        {activePanel === 'operacoes-rh' && <OperacoesRhPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
