@@ -112,6 +112,47 @@ class DepreciacoesAtivosSerializer(serializers.ModelSerializer):
         model = DepreciacoesAtivos
         fields = '__all__'
 
+class BeneficiosRHSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BeneficiosRH
+        fields = '__all__'
+
+
+class VinculosBeneficiosRHSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VinculosBeneficiosRH
+        fields = '__all__'
+
+
+class RegistrosPontoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegistrosPonto
+        fields = '__all__'
+
+
+class FolhasPagamentoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FolhasPagamento
+        fields = '__all__'
+
+
+class ItensFolhaPagamentoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensFolhaPagamento
+        fields = '__all__'
+
+
+class AdmissoesRHSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdmissoesRH
+        fields = '__all__'
+
+
+class DesligamentosRHSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DesligamentosRH
+        fields = '__all__'
+
 class ContratoLocacaoSerializer(serializers.ModelSerializer):
     cliente = ClienteSerializer(read_only=True)
     

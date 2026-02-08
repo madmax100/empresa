@@ -302,6 +302,81 @@ http://localhost:8000
 
 ---
 
+### **👥 RH Completo**
+
+#### **Benefícios**
+- **GET** `/contas/beneficios-rh/` - Lista benefícios
+- **POST** `/contas/beneficios-rh/` - Cria benefício
+- **GET** `/contas/beneficios-rh/{id}/` - Busca benefício
+- **PUT** `/contas/beneficios-rh/{id}/` - Atualiza benefício
+- **DELETE** `/contas/beneficios-rh/{id}/` - Remove benefício
+
+#### **Vínculos de Benefícios**
+- **GET** `/contas/vinculos-beneficios-rh/` - Lista vínculos
+- **POST** `/contas/vinculos-beneficios-rh/` - Cria vínculo
+- **GET** `/contas/vinculos-beneficios-rh/{id}/` - Busca vínculo
+- **PUT** `/contas/vinculos-beneficios-rh/{id}/` - Atualiza vínculo
+- **DELETE** `/contas/vinculos-beneficios-rh/{id}/` - Remove vínculo
+
+#### **Registros de Ponto**
+- **GET** `/contas/registros-ponto/` - Lista registros de ponto
+- **POST** `/contas/registros-ponto/` - Cria registro
+- **GET** `/contas/registros-ponto/{id}/` - Busca registro
+- **PUT** `/contas/registros-ponto/{id}/` - Atualiza registro
+- **DELETE** `/contas/registros-ponto/{id}/` - Remove registro
+
+#### **Folhas de Pagamento**
+- **GET** `/contas/folhas-pagamento/` - Lista folhas
+- **POST** `/contas/folhas-pagamento/` - Cria folha
+- **GET** `/contas/folhas-pagamento/{id}/` - Busca folha
+- **PUT** `/contas/folhas-pagamento/{id}/` - Atualiza folha
+- **DELETE** `/contas/folhas-pagamento/{id}/` - Remove folha
+
+#### **Itens da Folha**
+- **GET** `/contas/itens-folha-pagamento/` - Lista itens
+- **POST** `/contas/itens-folha-pagamento/` - Cria item
+- **GET** `/contas/itens-folha-pagamento/{id}/` - Busca item
+- **PUT** `/contas/itens-folha-pagamento/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-folha-pagamento/{id}/` - Remove item
+
+#### **Admissões**
+- **GET** `/contas/admissoes-rh/` - Lista admissões
+- **POST** `/contas/admissoes-rh/` - Cria admissão
+- **GET** `/contas/admissoes-rh/{id}/` - Busca admissão
+- **PUT** `/contas/admissoes-rh/{id}/` - Atualiza admissão
+- **DELETE** `/contas/admissoes-rh/{id}/` - Remove admissão
+
+#### **Desligamentos**
+- **GET** `/contas/desligamentos-rh/` - Lista desligamentos
+- **POST** `/contas/desligamentos-rh/` - Cria desligamento
+- **GET** `/contas/desligamentos-rh/{id}/` - Busca desligamento
+- **PUT** `/contas/desligamentos-rh/{id}/` - Atualiza desligamento
+- **DELETE** `/contas/desligamentos-rh/{id}/` - Remove desligamento
+
+#### **Operações de RH**
+- **POST** `/contas/rh/folha/gerar/` - Gera folha por competência
+- **POST** `/contas/rh/folha/fechar/` - Fecha folha
+- **GET** `/contas/rh/beneficios/resumo/` - Resumo de benefícios ativos
+
+#### **Exemplos de payloads**
+**Gerar folha**
+```json
+{
+  "competencia": "2025-01-01"
+}
+```
+
+**Abrir vínculo de benefício**
+```json
+{
+  "funcionario": 10,
+  "beneficio": 2,
+  "valor": "500.00"
+}
+```
+
+---
+
 ### **📦 Gestão de Produtos**
 
 #### **Produtos**

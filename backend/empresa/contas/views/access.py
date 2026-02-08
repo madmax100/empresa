@@ -9,9 +9,9 @@ from datetime import date, timedelta, datetime
 import time
 
 
-from ..models.access import ApontamentosProducao, ApuracoesFiscais, AtividadesCRM, AtivosPatrimonio, Categorias, CategoriasProdutos, Clientes, ComissoesVenda, ConsumosProducao, ContagensInventario, ContasPagar, ContasReceber, ContratosLocacao, CotacoesCompra, CustosAdicionaisFrete, DepreciacoesAtivos, Despesas, Empresas, EtapasFunil, Fornecedores, Fretes, Funcionarios, Grupos, HistoricoRastreamento, ImpostosFiscais, Inventarios, ItensApuracaoFiscal, ItensContratoLocacao, ItensCotacaoCompra, ItensNfEntrada, ItensNfSaida, ItensOrcamentoVenda, ItensOrdemProducao, ItensPedidoCompra, ItensPedidoVenda, ItensPropostaVenda, ItensRequisicaoCompra, Leads, LocaisEstoque, Lotes, ManutencoesAtivos, Marcas, MovimentacoesEstoque, NotasFiscaisEntrada, NotasFiscaisSaida, Oportunidades, OcorrenciasFrete, OrdensProducao, OrcamentosVenda, PagamentosFuncionarios, PedidosCompra, PedidosVenda, PosicoesEstoque, Produtos, PropostasVenda, RegioesEntrega, RequisicoesCompra, SaldosEstoque, TabelasFrete, TiposMovimentacaoEstoque, Transportadoras
+from ..models.access import AdmissoesRH, ApontamentosProducao, ApuracoesFiscais, AtividadesCRM, AtivosPatrimonio, BeneficiosRH, Categorias, CategoriasProdutos, Clientes, ComissoesVenda, ConsumosProducao, ContagensInventario, ContasPagar, ContasReceber, ContratosLocacao, CotacoesCompra, CustosAdicionaisFrete, DepreciacoesAtivos, DesligamentosRH, Despesas, Empresas, EtapasFunil, FolhasPagamento, Fornecedores, Fretes, Funcionarios, Grupos, HistoricoRastreamento, ImpostosFiscais, Inventarios, ItensApuracaoFiscal, ItensContratoLocacao, ItensCotacaoCompra, ItensFolhaPagamento, ItensNfEntrada, ItensNfSaida, ItensOrcamentoVenda, ItensOrdemProducao, ItensPedidoCompra, ItensPedidoVenda, ItensPropostaVenda, ItensRequisicaoCompra, Leads, LocaisEstoque, Lotes, ManutencoesAtivos, Marcas, MovimentacoesEstoque, NotasFiscaisEntrada, NotasFiscaisSaida, Oportunidades, OcorrenciasFrete, OrdensProducao, OrcamentosVenda, PagamentosFuncionarios, PedidosCompra, PedidosVenda, PosicoesEstoque, Produtos, PropostasVenda, RegioesEntrega, RegistrosPonto, RequisicoesCompra, SaldosEstoque, TabelasFrete, TiposMovimentacaoEstoque, Transportadoras, VinculosBeneficiosRH
 
-from ..serializers.access import ApontamentosProducaoSerializer, ApuracoesFiscaisSerializer, AtividadesCRMSerializer, AtivosPatrimonioSerializer, ComissoesVendaSerializer, ConsumosProducaoSerializer, CotacoesCompraSerializer, DepreciacoesAtivosSerializer, EtapasFunilSerializer, ImpostosFiscaisSerializer, ItemContratoLocacaoSerializer, ProdutoSerializer, CategoriaSerializer, CategoriasProdutosSerializer, ClienteSerializer, ContagensInventarioSerializer, ContasPagarSerializer, ContasReceberSerializer, ContratoLocacaoSerializer, CustosAdicionaisFreteSerializer, DespesasSerializer, EmpresasSerializer, FornecedoresSerializer, FretesSerializer, FuncionariosSerializer, GruposSerializer, HistoricoRastreamentoSerializer, InventariosSerializer, ItensApuracaoFiscalSerializer, ItensCotacaoCompraSerializer, ItensNfEntradaSerializer, ItensNfSaidaSerializer, ItensOrcamentoVendaSerializer, ItensOrdemProducaoSerializer, ItensPedidoCompraSerializer, ItensPedidoVendaSerializer, ItensPropostaVendaSerializer, ItensRequisicaoCompraSerializer, LeadsSerializer, LocaisEstoqueSerializer, LotesSerializer, ManutencoesAtivosSerializer, MarcasSerializer, MovimentacoesEstoqueSerializer, NotasFiscaisEntradaSerializer, NotasFiscaisSaidaSerializer, OcorrenciasFreteSerializer, OportunidadesSerializer, OrdensProducaoSerializer, OrcamentosVendaSerializer, PagamentosFuncionariosSerializer, PedidosCompraSerializer, PedidosVendaSerializer, PosicoesEstoqueSerializer, PropostasVendaSerializer, RegioesEntregaSerializer, RequisicoesCompraSerializer, SaldosEstoqueSerializer, TabelasFreteSerializer, TiposMovimentacaoEstoqueSerializer, TransportadorasSerializer
+from ..serializers.access import AdmissoesRHSerializer, ApontamentosProducaoSerializer, ApuracoesFiscaisSerializer, AtividadesCRMSerializer, AtivosPatrimonioSerializer, BeneficiosRHSerializer, ComissoesVendaSerializer, ConsumosProducaoSerializer, CotacoesCompraSerializer, DepreciacoesAtivosSerializer, DesligamentosRHSerializer, EtapasFunilSerializer, FolhasPagamentoSerializer, ImpostosFiscaisSerializer, ItemContratoLocacaoSerializer, ProdutoSerializer, CategoriaSerializer, CategoriasProdutosSerializer, ClienteSerializer, ContagensInventarioSerializer, ContasPagarSerializer, ContasReceberSerializer, ContratoLocacaoSerializer, CustosAdicionaisFreteSerializer, DespesasSerializer, EmpresasSerializer, FornecedoresSerializer, FretesSerializer, FuncionariosSerializer, GruposSerializer, HistoricoRastreamentoSerializer, InventariosSerializer, ItensApuracaoFiscalSerializer, ItensCotacaoCompraSerializer, ItensFolhaPagamentoSerializer, ItensNfEntradaSerializer, ItensNfSaidaSerializer, ItensOrcamentoVendaSerializer, ItensOrdemProducaoSerializer, ItensPedidoCompraSerializer, ItensPedidoVendaSerializer, ItensPropostaVendaSerializer, ItensRequisicaoCompraSerializer, LeadsSerializer, LocaisEstoqueSerializer, LotesSerializer, ManutencoesAtivosSerializer, MarcasSerializer, MovimentacoesEstoqueSerializer, NotasFiscaisEntradaSerializer, NotasFiscaisSaidaSerializer, OcorrenciasFreteSerializer, OportunidadesSerializer, OrdensProducaoSerializer, OrcamentosVendaSerializer, PagamentosFuncionariosSerializer, PedidosCompraSerializer, PedidosVendaSerializer, PosicoesEstoqueSerializer, PropostasVendaSerializer, RegioesEntregaSerializer, RegistrosPontoSerializer, RequisicoesCompraSerializer, SaldosEstoqueSerializer, TabelasFreteSerializer, TiposMovimentacaoEstoqueSerializer, TransportadorasSerializer, VinculosBeneficiosRHSerializer
 
 class CategoriasViewSet(viewsets.ModelViewSet):
     queryset = Categorias.objects.all()
@@ -946,6 +946,34 @@ class ManutencoesAtivosViewSet(viewsets.ModelViewSet):
 class DepreciacoesAtivosViewSet(viewsets.ModelViewSet):
     queryset = DepreciacoesAtivos.objects.all()
     serializer_class = DepreciacoesAtivosSerializer
+
+class BeneficiosRHViewSet(viewsets.ModelViewSet):
+    queryset = BeneficiosRH.objects.all()
+    serializer_class = BeneficiosRHSerializer
+
+class VinculosBeneficiosRHViewSet(viewsets.ModelViewSet):
+    queryset = VinculosBeneficiosRH.objects.all()
+    serializer_class = VinculosBeneficiosRHSerializer
+
+class RegistrosPontoViewSet(viewsets.ModelViewSet):
+    queryset = RegistrosPonto.objects.all()
+    serializer_class = RegistrosPontoSerializer
+
+class FolhasPagamentoViewSet(viewsets.ModelViewSet):
+    queryset = FolhasPagamento.objects.all()
+    serializer_class = FolhasPagamentoSerializer
+
+class ItensFolhaPagamentoViewSet(viewsets.ModelViewSet):
+    queryset = ItensFolhaPagamento.objects.all()
+    serializer_class = ItensFolhaPagamentoSerializer
+
+class AdmissoesRHViewSet(viewsets.ModelViewSet):
+    queryset = AdmissoesRH.objects.all()
+    serializer_class = AdmissoesRHSerializer
+
+class DesligamentosRHViewSet(viewsets.ModelViewSet):
+    queryset = DesligamentosRH.objects.all()
+    serializer_class = DesligamentosRHSerializer
     
 class ItensNfEntradaViewSet(viewsets.ModelViewSet):
     queryset = ItensNfEntrada.objects.all()

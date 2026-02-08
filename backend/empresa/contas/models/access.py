@@ -806,6 +806,138 @@ class PagamentosFuncionarios(models.Model):
     def __str__(self):
         return f"Pagamento {self.funcionario_id} - {self.competencia}"
 
+
+class BeneficiosRH(models.Model):
+    nome = models.CharField(max_length=100)
+    descricao = models.TextField(null=True, blank=True)
+    valor_padrao = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'beneficios_rh'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
+class VinculosBeneficiosRH(models.Model):
+    funcionario = models.ForeignKey('Funcionarios', on_delete=models.PROTECT, related_name='beneficios')
+    beneficio = models.ForeignKey('BeneficiosRH', on_delete=models.PROTECT, related_name='vinculos')
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+    valor = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'vinculos_beneficios_rh'
+        indexes = [
+            models.Index(fields=['funcionario']),
+            models.Index(fields=['beneficio']),
+        ]
+
+    def __str__(self):
+        return f"{self.funcionario_id} - {self.beneficio_id}"
+
+
+class RegistrosPonto(models.Model):
+    funcionario = models.ForeignKey('Funcionarios', on_delete=models.PROTECT, related_name='pontos')
+    data = models.DateField()
+    entrada = models.DateTimeField(null=True, blank=True)
+    saida = models.DateTimeField(null=True, blank=True)
+    horas_trabalhadas = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0.00'))
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'registros_ponto'
+        ordering = ['-data']
+        indexes = [
+            models.Index(fields=['funcionario', 'data']),
+        ]
+
+    def __str__(self):
+        return f"Ponto {self.funcionario_id} {self.data}"
+
+
+class FolhasPagamento(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Aberta'),
+        ('F', 'Fechada'),
+    ]
+
+    competencia = models.DateField()
+    data_fechamento = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    total_bruto = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    total_descontos = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    total_liquido = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'folhas_pagamento'
+        ordering = ['-competencia']
+        indexes = [
+            models.Index(fields=['competencia']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Folha {self.competencia}"
+
+
+class ItensFolhaPagamento(models.Model):
+    folha = models.ForeignKey('FolhasPagamento', on_delete=models.CASCADE, related_name='itens')
+    funcionario = models.ForeignKey('Funcionarios', on_delete=models.PROTECT)
+    salario_base = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    horas_extras = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    descontos = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    beneficios = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    valor_liquido = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'itens_folha_pagamento'
+        indexes = [
+            models.Index(fields=['folha']),
+            models.Index(fields=['funcionario']),
+        ]
+
+    def __str__(self):
+        return f"Item Folha {self.folha_id} - {self.funcionario_id}"
+
+
+class AdmissoesRH(models.Model):
+    funcionario = models.ForeignKey('Funcionarios', on_delete=models.PROTECT, related_name='admissoes')
+    data_admissao = models.DateField()
+    cargo = models.CharField(max_length=100, null=True, blank=True)
+    salario = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'admissoes_rh'
+        ordering = ['-data_admissao']
+        indexes = [
+            models.Index(fields=['funcionario']),
+        ]
+
+    def __str__(self):
+        return f"Admissão {self.funcionario_id} {self.data_admissao}"
+
+
+class DesligamentosRH(models.Model):
+    funcionario = models.ForeignKey('Funcionarios', on_delete=models.PROTECT, related_name='desligamentos')
+    data_desligamento = models.DateField()
+    motivo = models.CharField(max_length=100, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'desligamentos_rh'
+        ordering = ['-data_desligamento']
+        indexes = [
+            models.Index(fields=['funcionario']),
+        ]
+
+    def __str__(self):
+        return f"Desligamento {self.funcionario_id} {self.data_desligamento}"
+
 class PosicoesEstoque(models.Model):
     local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
     codigo = models.CharField(max_length=20)
