@@ -253,6 +253,55 @@ http://localhost:8000
 
 ---
 
+### **🏢 Ativos / Patrimônio / Manutenção**
+
+#### **Ativos Patrimoniais**
+- **GET** `/contas/ativos-patrimonio/` - Lista ativos
+- **POST** `/contas/ativos-patrimonio/` - Cria ativo
+- **GET** `/contas/ativos-patrimonio/{id}/` - Busca ativo
+- **PUT** `/contas/ativos-patrimonio/{id}/` - Atualiza ativo
+- **DELETE** `/contas/ativos-patrimonio/{id}/` - Remove ativo
+
+#### **Manutenções**
+- **GET** `/contas/manutencoes-ativos/` - Lista manutenções
+- **POST** `/contas/manutencoes-ativos/` - Cria manutenção
+- **GET** `/contas/manutencoes-ativos/{id}/` - Busca manutenção
+- **PUT** `/contas/manutencoes-ativos/{id}/` - Atualiza manutenção
+- **DELETE** `/contas/manutencoes-ativos/{id}/` - Remove manutenção
+
+#### **Depreciações**
+- **GET** `/contas/depreciacoes-ativos/` - Lista depreciações
+- **POST** `/contas/depreciacoes-ativos/` - Cria depreciação
+- **GET** `/contas/depreciacoes-ativos/{id}/` - Busca depreciação
+- **PUT** `/contas/depreciacoes-ativos/{id}/` - Atualiza depreciação
+- **DELETE** `/contas/depreciacoes-ativos/{id}/` - Remove depreciação
+
+#### **Operações**
+- **POST** `/contas/ativos/depreciacao/gerar/` - Gera depreciação mensal
+- **GET** `/contas/ativos/resumo/` - Resumo de ativos e custos
+- **POST** `/contas/ativos/manutencao/abrir/` - Abre manutenção
+- **POST** `/contas/ativos/manutencao/finalizar/` - Finaliza manutenção
+- **POST** `/contas/ativos/manutencao/cancelar/` - Cancela manutenção
+
+#### **Exemplos de payloads**
+**Gerar depreciação**
+```json
+{
+  "competencia": "2025-01-01"
+}
+```
+
+**Abrir manutenção**
+```json
+{
+  "ativo_id": 10,
+  "tipo": "Corretiva",
+  "custo_previsto": "1500.00"
+}
+```
+
+---
+
 ### **📦 Gestão de Produtos**
 
 #### **Produtos**

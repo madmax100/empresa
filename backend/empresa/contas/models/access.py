@@ -1848,6 +1848,84 @@ class ApontamentosProducao(models.Model):
 
     def __str__(self):
         return f"Apontamento {self.ordem_id}"
+
+
+class AtivosPatrimonio(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Ativo'),
+        ('I', 'Inativo'),
+        ('B', 'Baixado'),
+    ]
+
+    codigo = models.CharField(max_length=30, db_index=True)
+    descricao = models.CharField(max_length=150)
+    categoria = models.CharField(max_length=100, null=True, blank=True)
+    localizacao = models.CharField(max_length=150, null=True, blank=True)
+    data_aquisicao = models.DateField(null=True, blank=True)
+    valor_aquisicao = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    vida_util_meses = models.IntegerField(null=True, blank=True)
+    valor_residual = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'ativos_patrimonio'
+        ordering = ['descricao']
+        indexes = [
+            models.Index(fields=['codigo']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descricao}"
+
+
+class ManutencoesAtivos(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Aberta'),
+        ('E', 'Em execução'),
+        ('F', 'Finalizada'),
+        ('C', 'Cancelada'),
+    ]
+
+    ativo = models.ForeignKey('AtivosPatrimonio', on_delete=models.PROTECT, related_name='manutencoes')
+    tipo = models.CharField(max_length=50)
+    data_abertura = models.DateTimeField(null=True, blank=True)
+    data_fechamento = models.DateTimeField(null=True, blank=True)
+    responsavel_id = models.IntegerField(null=True, blank=True)
+    custo_previsto = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    custo_real = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'manutencoes_ativos'
+        ordering = ['-data_abertura']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['ativo']),
+        ]
+
+    def __str__(self):
+        return f"Manutenção {self.id} - {self.ativo_id}"
+
+
+class DepreciacoesAtivos(models.Model):
+    ativo = models.ForeignKey('AtivosPatrimonio', on_delete=models.CASCADE, related_name='depreciacoes')
+    competencia = models.DateField()
+    valor_depreciado = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_acumulado = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'depreciacoes_ativos'
+        ordering = ['-competencia']
+        indexes = [
+            models.Index(fields=['ativo']),
+            models.Index(fields=['competencia']),
+        ]
+
+    def __str__(self):
+        return f"Depreciação {self.ativo_id} {self.competencia}"
 class LocaisEstoque(models.Model):
     codigo = models.CharField(max_length=20)
     descricao = models.CharField(max_length=100)

@@ -56,6 +56,13 @@ from .views.fiscal_views import (
     FiscalApuracaoGerarView,
     FiscalApuracaoResumoView,
 )
+from .views.ativos_views import (
+    AtivosDepreciacaoGerarView,
+    AtivosResumoView,
+    ManutencaoAbrirView,
+    ManutencaoCancelarView,
+    ManutencaoFinalizarView,
+)
 from .views.producao_views import (
     ProducaoApontarView,
     ProducaoConsumoApontarView,
@@ -127,6 +134,9 @@ router.register(r'ordens-producao', OrdensProducaoViewSet)
 router.register(r'itens-ordem-producao', ItensOrdemProducaoViewSet)
 router.register(r'consumos-producao', ConsumosProducaoViewSet)
 router.register(r'apontamentos-producao', ApontamentosProducaoViewSet)
+router.register(r'ativos-patrimonio', AtivosPatrimonioViewSet)
+router.register(r'manutencoes-ativos', ManutencoesAtivosViewSet)
+router.register(r'depreciacoes-ativos', DepreciacoesAtivosViewSet)
 router.register(r'etapas-funil', EtapasFunilViewSet)
 router.register(r'leads', LeadsViewSet)
 router.register(r'oportunidades', OportunidadesViewSet)
@@ -229,6 +239,11 @@ urlpatterns = [
     path('producao/ordens/resumo/', ProducaoResumoView.as_view(), name='producao-ordens-resumo'),
     path('producao/consumo/apontar/', ProducaoConsumoApontarView.as_view(), name='producao-consumo-apontar'),
     path('producao/apontar/', ProducaoApontarView.as_view(), name='producao-apontar'),
+    path('ativos/depreciacao/gerar/', AtivosDepreciacaoGerarView.as_view(), name='ativos-depreciacao-gerar'),
+    path('ativos/resumo/', AtivosResumoView.as_view(), name='ativos-resumo'),
+    path('ativos/manutencao/abrir/', ManutencaoAbrirView.as_view(), name='ativos-manutencao-abrir'),
+    path('ativos/manutencao/finalizar/', ManutencaoFinalizarView.as_view(), name='ativos-manutencao-finalizar'),
+    path('ativos/manutencao/cancelar/', ManutencaoCancelarView.as_view(), name='ativos-manutencao-cancelar'),
     path('compras/requisicoes/registrar/', ComprasRequisicaoCadastrarView.as_view(), name='compras-requisicoes-registrar'),
     path('compras/requisicoes/aprovar/', ComprasRequisicaoAprovarView.as_view(), name='compras-requisicoes-aprovar'),
     path('compras/cotacoes/registrar/', ComprasCotacaoCadastrarView.as_view(), name='compras-cotacoes-registrar'),

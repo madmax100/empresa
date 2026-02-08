@@ -95,6 +95,23 @@ class ApontamentosProducaoSerializer(serializers.ModelSerializer):
         model = ApontamentosProducao
         fields = '__all__'
 
+class AtivosPatrimonioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AtivosPatrimonio
+        fields = '__all__'
+
+
+class ManutencoesAtivosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ManutencoesAtivos
+        fields = '__all__'
+
+
+class DepreciacoesAtivosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DepreciacoesAtivos
+        fields = '__all__'
+
 class ContratoLocacaoSerializer(serializers.ModelSerializer):
     cliente = ClienteSerializer(read_only=True)
     
