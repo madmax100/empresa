@@ -56,6 +56,15 @@ from .views.fiscal_views import (
     FiscalApuracaoGerarView,
     FiscalApuracaoResumoView,
 )
+from .views.contabilidade_views import (
+    BalanceteView,
+    CentroCustoViewSet,
+    ItemLancamentoContabilViewSet,
+    LancamentoContabilViewSet,
+    PeriodoContabilViewSet,
+    PlanoContasViewSet,
+    RazaoContaView,
+)
 from .views.ativos_views import (
     AtivosDepreciacaoGerarView,
     AtivosResumoView,
@@ -193,6 +202,11 @@ router.register(r'saldos_estoque', SaldosEstoqueViewSet)
 router.register(r'tabelas_frete', TabelasFreteViewSet)
 router.register(r'tipos_movimentacao_estoque', TiposMovimentacaoEstoqueViewSet)
 router.register(r'transportadoras', TransportadorasViewSet)
+router.register(r'planos-contas', PlanoContasViewSet)
+router.register(r'centros-custo', CentroCustoViewSet)
+router.register(r'periodos-contabeis', PeriodoContabilViewSet)
+router.register(r'lancamentos-contabeis', LancamentoContabilViewSet)
+router.register(r'itens-lancamento-contabil', ItemLancamentoContabilViewSet)
 router.register(r'fluxo-caixa', FluxoCaixaViewSet, basename='fluxo-caixa')
 router.register(r'fluxo-caixa-lucro', FluxoCaixaLucroViewSet, basename='fluxo-caixa-lucro')
 router.register(r'fluxo-caixa-realizado', FluxoCaixaRealizadoViewSet, basename='fluxo-caixa-realizado')
@@ -242,6 +256,8 @@ urlpatterns = [
     path('crm/oportunidades/resumo/', CrmOportunidadesResumoView.as_view(), name='crm-oportunidades-resumo'),
     path('fiscal/apuracao/gerar/', FiscalApuracaoGerarView.as_view(), name='fiscal-apuracao-gerar'),
     path('fiscal/apuracao/resumo/', FiscalApuracaoResumoView.as_view(), name='fiscal-apuracao-resumo'),
+    path('contabilidade/balancete/', BalanceteView.as_view(), name='contabilidade-balancete'),
+    path('contabilidade/razao/<int:conta_id>/', RazaoContaView.as_view(), name='contabilidade-razao'),
     path('producao/ordens/gerar/', ProducaoOrdemGerarView.as_view(), name='producao-ordens-gerar'),
     path('producao/ordens/aprovar/', ProducaoOrdemAprovarView.as_view(), name='producao-ordens-aprovar'),
     path('producao/ordens/iniciar/', ProducaoOrdemIniciarView.as_view(), name='producao-ordens-iniciar'),

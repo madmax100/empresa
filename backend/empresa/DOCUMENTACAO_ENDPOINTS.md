@@ -12,10 +12,11 @@ http://localhost:8000
 1. [🔧 Endpoints CRUD Básicos](#-endpoints-crud-básicos)
 2. [📊 Endpoints de Relatórios](#-endpoints-de-relatórios)
 3. [💰 Endpoints Financeiros](#-endpoints-financeiros)
-4. [📦 Endpoints de Estoque](#-endpoints-de-estoque)
-5. [📈 Endpoints de Fluxo de Caixa](#-endpoints-de-fluxo-de-caixa)
-6. [🆕 Novos Endpoints Implementados](#-novos-endpoints-implementados)
-7. [📝 Exemplos de Uso](#-exemplos-de-uso)
+4. [📘 Endpoints de Contabilidade](#-endpoints-de-contabilidade)
+5. [📦 Endpoints de Estoque](#-endpoints-de-estoque)
+6. [📈 Endpoints de Fluxo de Caixa](#-endpoints-de-fluxo-de-caixa)
+7. [🆕 Novos Endpoints Implementados](#-novos-endpoints-implementados)
+8. [📝 Exemplos de Uso](#-exemplos-de-uso)
 
 ---
 
@@ -1004,6 +1005,49 @@ GET /contas/produtos/composicao/123/
 - **GET** `/contas/pagamentos_funcionarios/{id}/` - Busca pagamento específico
 - **PUT** `/contas/pagamentos_funcionarios/{id}/` - Atualiza pagamento
 - **DELETE** `/contas/pagamentos_funcionarios/{id}/` - Remove pagamento
+
+---
+
+## 📘 **ENDPOINTS DE CONTABILIDADE**
+
+### **Plano de Contas**
+- **GET** `/contas/planos-contas/` - Lista contas contábeis
+- **POST** `/contas/planos-contas/` - Cria conta contábil
+- **GET** `/contas/planos-contas/{id}/` - Busca conta contábil
+- **PUT** `/contas/planos-contas/{id}/` - Atualiza conta contábil
+- **DELETE** `/contas/planos-contas/{id}/` - Remove conta contábil
+
+### **Centros de Custo**
+- **GET** `/contas/centros-custo/` - Lista centros de custo
+- **POST** `/contas/centros-custo/` - Cria centro de custo
+- **GET** `/contas/centros-custo/{id}/` - Busca centro de custo
+- **PUT** `/contas/centros-custo/{id}/` - Atualiza centro de custo
+- **DELETE** `/contas/centros-custo/{id}/` - Remove centro de custo
+
+### **Períodos Contábeis**
+- **GET** `/contas/periodos-contabeis/` - Lista períodos
+- **POST** `/contas/periodos-contabeis/` - Cria período
+- **GET** `/contas/periodos-contabeis/{id}/` - Busca período
+- **PUT** `/contas/periodos-contabeis/{id}/` - Atualiza período
+- **DELETE** `/contas/periodos-contabeis/{id}/` - Remove período
+
+### **Lançamentos Contábeis**
+- **GET** `/contas/lancamentos-contabeis/` - Lista lançamentos
+- **POST** `/contas/lancamentos-contabeis/` - Cria lançamento
+- **GET** `/contas/lancamentos-contabeis/{id}/` - Busca lançamento
+- **PUT** `/contas/lancamentos-contabeis/{id}/` - Atualiza lançamento
+- **DELETE** `/contas/lancamentos-contabeis/{id}/` - Remove lançamento
+
+### **Itens de Lançamento**
+- **GET** `/contas/itens-lancamento-contabil/` - Lista itens
+- **POST** `/contas/itens-lancamento-contabil/` - Cria item
+- **GET** `/contas/itens-lancamento-contabil/{id}/` - Busca item
+- **PUT** `/contas/itens-lancamento-contabil/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-lancamento-contabil/{id}/` - Remove item
+
+### **Relatórios Contábeis**
+- **GET** `/contas/contabilidade/balancete/?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD`
+- **GET** `/contas/contabilidade/razao/{conta_id}/?data_inicio=YYYY-MM-DD&data_fim=YYYY-MM-DD`
 
 ---
 
