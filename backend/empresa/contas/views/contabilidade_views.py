@@ -36,7 +36,7 @@ class PeriodoContabilViewSet(viewsets.ModelViewSet):
 
 
 class LancamentoContabilViewSet(viewsets.ModelViewSet):
-    queryset = LancamentoContabil.objects.all()
+    queryset = LancamentoContabil.objects.prefetch_related('itens')
     serializer_class = LancamentoContabilSerializer
 
 
