@@ -42,11 +42,26 @@ import ItensFolhaPagamentoPage from './pages/ItensFolhaPagamentoPage';
 import AdmissoesRhPage from './pages/AdmissoesRhPage';
 import DesligamentosRhPage from './pages/DesligamentosRhPage';
 import OperacoesRhPage from './pages/OperacoesRhPage';
+import ProdutosPage from './pages/ProdutosPage';
+import CategoriasProdutosPage from './pages/CategoriasProdutosPage';
+import MarcasPage from './pages/MarcasPage';
+import GruposPage from './pages/GruposPage';
+import ProdutosFiscalPage from './pages/ProdutosFiscalPage';
+import ProdutosVariacoesPage from './pages/ProdutosVariacoesPage';
+import ProdutosComposicaoPage from './pages/ProdutosComposicaoPage';
+import ProdutosConversaoUnidadePage from './pages/ProdutosConversaoUnidadePage';
+import ProdutosHistoricoPrecoPage from './pages/ProdutosHistoricoPrecoPage';
+import TabelasPrecosPage from './pages/TabelasPrecosPage';
+import TabelasPrecosItensPage from './pages/TabelasPrecosItensPage';
+import PoliticasDescontoPage from './pages/PoliticasDescontoPage';
+import ProdutosSubstitutosPage from './pages/ProdutosSubstitutosPage';
+import ProdutosCustoLocalPage from './pages/ProdutosCustoLocalPage';
+import ProdutosOperacoesPage from './pages/ProdutosOperacoesPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao' | 'ativos-patrimonio' | 'manutencoes-ativos' | 'depreciacoes-ativos' | 'operacoes-ativos' | 'beneficios-rh' | 'vinculos-beneficios-rh' | 'registros-ponto' | 'folhas-pagamento' | 'itens-folha-pagamento' | 'admissoes-rh' | 'desligamentos-rh' | 'operacoes-rh'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao' | 'ativos-patrimonio' | 'manutencoes-ativos' | 'depreciacoes-ativos' | 'operacoes-ativos' | 'beneficios-rh' | 'vinculos-beneficios-rh' | 'registros-ponto' | 'folhas-pagamento' | 'itens-folha-pagamento' | 'admissoes-rh' | 'desligamentos-rh' | 'operacoes-rh' | 'produtos' | 'categorias-produtos' | 'marcas' | 'grupos' | 'produtos-fiscal' | 'produtos-variacoes' | 'produtos-composicao' | 'produtos-conversao-unidade' | 'produtos-historico-preco' | 'tabelas-precos' | 'tabelas-precos-itens' | 'politicas-desconto' | 'produtos-substitutos' | 'produtos-custo-local' | 'produtos-operacoes'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -919,6 +934,306 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('produtos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📦 Produtos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('categorias-produtos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'categorias-produtos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'categorias-produtos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🗂️ Categorias
+          </button>
+
+          <button
+            onClick={() => setActivePanel('marcas')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'marcas' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'marcas' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🏷️ Marcas
+          </button>
+
+          <button
+            onClick={() => setActivePanel('grupos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'grupos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'grupos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧩 Grupos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-fiscal')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-fiscal' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-fiscal' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Fiscal Produto
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-variacoes')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-variacoes' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-variacoes' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧷 Variações
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-composicao')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-composicao' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-composicao' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧱 Composição
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-conversao-unidade')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-conversao-unidade' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-conversao-unidade' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📐 Conversões
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-historico-preco')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-historico-preco' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-historico-preco' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📊 Histórico Preço
+          </button>
+
+          <button
+            onClick={() => setActivePanel('tabelas-precos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'tabelas-precos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'tabelas-precos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📑 Tabelas Preço
+          </button>
+
+          <button
+            onClick={() => setActivePanel('tabelas-precos-itens')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'tabelas-precos-itens' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'tabelas-precos-itens' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🗒️ Itens Tabela
+          </button>
+
+          <button
+            onClick={() => setActivePanel('politicas-desconto')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'politicas-desconto' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'politicas-desconto' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            💸 Políticas Desconto
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-substitutos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-substitutos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-substitutos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🔁 Substitutos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-custo-local')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-custo-local' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-custo-local' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧮 Custo por Local
+          </button>
+
+          <button
+            onClick={() => setActivePanel('produtos-operacoes')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'produtos-operacoes' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'produtos-operacoes' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            ⚙️ Operações Produto
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -1062,6 +1377,21 @@ function App() {
         {activePanel === 'admissoes-rh' && <AdmissoesRhPage />}
         {activePanel === 'desligamentos-rh' && <DesligamentosRhPage />}
         {activePanel === 'operacoes-rh' && <OperacoesRhPage />}
+        {activePanel === 'produtos' && <ProdutosPage />}
+        {activePanel === 'categorias-produtos' && <CategoriasProdutosPage />}
+        {activePanel === 'marcas' && <MarcasPage />}
+        {activePanel === 'grupos' && <GruposPage />}
+        {activePanel === 'produtos-fiscal' && <ProdutosFiscalPage />}
+        {activePanel === 'produtos-variacoes' && <ProdutosVariacoesPage />}
+        {activePanel === 'produtos-composicao' && <ProdutosComposicaoPage />}
+        {activePanel === 'produtos-conversao-unidade' && <ProdutosConversaoUnidadePage />}
+        {activePanel === 'produtos-historico-preco' && <ProdutosHistoricoPrecoPage />}
+        {activePanel === 'tabelas-precos' && <TabelasPrecosPage />}
+        {activePanel === 'tabelas-precos-itens' && <TabelasPrecosItensPage />}
+        {activePanel === 'politicas-desconto' && <PoliticasDescontoPage />}
+        {activePanel === 'produtos-substitutos' && <ProdutosSubstitutosPage />}
+        {activePanel === 'produtos-custo-local' && <ProdutosCustoLocalPage />}
+        {activePanel === 'produtos-operacoes' && <ProdutosOperacoesPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
