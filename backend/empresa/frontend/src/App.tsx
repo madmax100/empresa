@@ -57,11 +57,17 @@ import PoliticasDescontoPage from './pages/PoliticasDescontoPage';
 import ProdutosSubstitutosPage from './pages/ProdutosSubstitutosPage';
 import ProdutosCustoLocalPage from './pages/ProdutosCustoLocalPage';
 import ProdutosOperacoesPage from './pages/ProdutosOperacoesPage';
+import OrcamentosVendaPage from './pages/OrcamentosVendaPage';
+import ItensOrcamentoVendaPage from './pages/ItensOrcamentoVendaPage';
+import PedidosVendaPage from './pages/PedidosVendaPage';
+import ItensPedidoVendaPage from './pages/ItensPedidoVendaPage';
+import ComissoesVendaPage from './pages/ComissoesVendaPage';
+import OperacoesVendasPage from './pages/OperacoesVendasPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao' | 'ativos-patrimonio' | 'manutencoes-ativos' | 'depreciacoes-ativos' | 'operacoes-ativos' | 'beneficios-rh' | 'vinculos-beneficios-rh' | 'registros-ponto' | 'folhas-pagamento' | 'itens-folha-pagamento' | 'admissoes-rh' | 'desligamentos-rh' | 'operacoes-rh' | 'produtos' | 'categorias-produtos' | 'marcas' | 'grupos' | 'produtos-fiscal' | 'produtos-variacoes' | 'produtos-composicao' | 'produtos-conversao-unidade' | 'produtos-historico-preco' | 'tabelas-precos' | 'tabelas-precos-itens' | 'politicas-desconto' | 'produtos-substitutos' | 'produtos-custo-local' | 'produtos-operacoes'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao' | 'ativos-patrimonio' | 'manutencoes-ativos' | 'depreciacoes-ativos' | 'operacoes-ativos' | 'beneficios-rh' | 'vinculos-beneficios-rh' | 'registros-ponto' | 'folhas-pagamento' | 'itens-folha-pagamento' | 'admissoes-rh' | 'desligamentos-rh' | 'operacoes-rh' | 'produtos' | 'categorias-produtos' | 'marcas' | 'grupos' | 'produtos-fiscal' | 'produtos-variacoes' | 'produtos-composicao' | 'produtos-conversao-unidade' | 'produtos-historico-preco' | 'tabelas-precos' | 'tabelas-precos-itens' | 'politicas-desconto' | 'produtos-substitutos' | 'produtos-custo-local' | 'produtos-operacoes' | 'orcamentos-venda' | 'itens-orcamento-venda' | 'pedidos-venda' | 'itens-pedido-venda' | 'comissoes-venda' | 'operacoes-vendas'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -1234,6 +1240,126 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('orcamentos-venda')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'orcamentos-venda' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'orcamentos-venda' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Orçamentos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('itens-orcamento-venda')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'itens-orcamento-venda' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'itens-orcamento-venda' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Itens Orçamento
+          </button>
+
+          <button
+            onClick={() => setActivePanel('pedidos-venda')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'pedidos-venda' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'pedidos-venda' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🛒 Pedidos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('itens-pedido-venda')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'itens-pedido-venda' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'itens-pedido-venda' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧺 Itens Pedido
+          </button>
+
+          <button
+            onClick={() => setActivePanel('comissoes-venda')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'comissoes-venda' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'comissoes-venda' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            💰 Comissões
+          </button>
+
+          <button
+            onClick={() => setActivePanel('operacoes-vendas')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'operacoes-vendas' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'operacoes-vendas' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Operações Vendas
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -1392,6 +1518,12 @@ function App() {
         {activePanel === 'produtos-substitutos' && <ProdutosSubstitutosPage />}
         {activePanel === 'produtos-custo-local' && <ProdutosCustoLocalPage />}
         {activePanel === 'produtos-operacoes' && <ProdutosOperacoesPage />}
+        {activePanel === 'orcamentos-venda' && <OrcamentosVendaPage />}
+        {activePanel === 'itens-orcamento-venda' && <ItensOrcamentoVendaPage />}
+        {activePanel === 'pedidos-venda' && <PedidosVendaPage />}
+        {activePanel === 'itens-pedido-venda' && <ItensPedidoVendaPage />}
+        {activePanel === 'comissoes-venda' && <ComissoesVendaPage />}
+        {activePanel === 'operacoes-vendas' && <OperacoesVendasPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
