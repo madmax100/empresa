@@ -56,6 +56,17 @@ from .views.fiscal_views import (
     FiscalApuracaoGerarView,
     FiscalApuracaoResumoView,
 )
+from .views.producao_views import (
+    ProducaoApontarView,
+    ProducaoConsumoApontarView,
+    ProducaoOrdemAprovarView,
+    ProducaoOrdemCancelarView,
+    ProducaoOrdemFinalizarView,
+    ProducaoOrdemGerarView,
+    ProducaoOrdemIniciarView,
+    ProducaoOrdensListaView,
+    ProducaoResumoView,
+)
 from .views.produtos_views import (
     ProdutosAlertasView,
     ProdutosComposicaoResumoView,
@@ -112,6 +123,10 @@ router.register(r'itens_contrato_locacao', ItensContratoLocacaoViewSet)
 router.register(r'impostos-fiscais', ImpostosFiscaisViewSet)
 router.register(r'apuracoes-fiscais', ApuracoesFiscaisViewSet)
 router.register(r'itens-apuracao-fiscal', ItensApuracaoFiscalViewSet)
+router.register(r'ordens-producao', OrdensProducaoViewSet)
+router.register(r'itens-ordem-producao', ItensOrdemProducaoViewSet)
+router.register(r'consumos-producao', ConsumosProducaoViewSet)
+router.register(r'apontamentos-producao', ApontamentosProducaoViewSet)
 router.register(r'etapas-funil', EtapasFunilViewSet)
 router.register(r'leads', LeadsViewSet)
 router.register(r'oportunidades', OportunidadesViewSet)
@@ -205,6 +220,15 @@ urlpatterns = [
     path('crm/oportunidades/resumo/', CrmOportunidadesResumoView.as_view(), name='crm-oportunidades-resumo'),
     path('fiscal/apuracao/gerar/', FiscalApuracaoGerarView.as_view(), name='fiscal-apuracao-gerar'),
     path('fiscal/apuracao/resumo/', FiscalApuracaoResumoView.as_view(), name='fiscal-apuracao-resumo'),
+    path('producao/ordens/gerar/', ProducaoOrdemGerarView.as_view(), name='producao-ordens-gerar'),
+    path('producao/ordens/aprovar/', ProducaoOrdemAprovarView.as_view(), name='producao-ordens-aprovar'),
+    path('producao/ordens/iniciar/', ProducaoOrdemIniciarView.as_view(), name='producao-ordens-iniciar'),
+    path('producao/ordens/finalizar/', ProducaoOrdemFinalizarView.as_view(), name='producao-ordens-finalizar'),
+    path('producao/ordens/cancelar/', ProducaoOrdemCancelarView.as_view(), name='producao-ordens-cancelar'),
+    path('producao/ordens/lista/', ProducaoOrdensListaView.as_view(), name='producao-ordens-lista'),
+    path('producao/ordens/resumo/', ProducaoResumoView.as_view(), name='producao-ordens-resumo'),
+    path('producao/consumo/apontar/', ProducaoConsumoApontarView.as_view(), name='producao-consumo-apontar'),
+    path('producao/apontar/', ProducaoApontarView.as_view(), name='producao-apontar'),
     path('compras/requisicoes/registrar/', ComprasRequisicaoCadastrarView.as_view(), name='compras-requisicoes-registrar'),
     path('compras/requisicoes/aprovar/', ComprasRequisicaoAprovarView.as_view(), name='compras-requisicoes-aprovar'),
     path('compras/cotacoes/registrar/', ComprasCotacaoCadastrarView.as_view(), name='compras-cotacoes-registrar'),

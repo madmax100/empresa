@@ -72,6 +72,29 @@ class ItensApuracaoFiscalSerializer(serializers.ModelSerializer):
         model = ItensApuracaoFiscal
         fields = '__all__'
 
+class OrdensProducaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrdensProducao
+        fields = '__all__'
+
+
+class ItensOrdemProducaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensOrdemProducao
+        fields = '__all__'
+
+
+class ConsumosProducaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConsumosProducao
+        fields = '__all__'
+
+
+class ApontamentosProducaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApontamentosProducao
+        fields = '__all__'
+
 class ContratoLocacaoSerializer(serializers.ModelSerializer):
     cliente = ClienteSerializer(read_only=True)
     

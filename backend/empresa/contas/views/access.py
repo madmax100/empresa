@@ -9,9 +9,9 @@ from datetime import date, timedelta, datetime
 import time
 
 
-from ..models.access import ApuracoesFiscais, AtividadesCRM, Categorias, CategoriasProdutos, Clientes, ComissoesVenda, ContagensInventario, ContasPagar, ContasReceber, ContratosLocacao, CotacoesCompra, CustosAdicionaisFrete, Despesas, Empresas, EtapasFunil, Fornecedores, Fretes, Funcionarios, Grupos, HistoricoRastreamento, ImpostosFiscais, Inventarios, ItensApuracaoFiscal, ItensContratoLocacao, ItensCotacaoCompra, ItensNfEntrada, ItensNfSaida, ItensOrcamentoVenda, ItensPedidoCompra, ItensPedidoVenda, ItensPropostaVenda, ItensRequisicaoCompra, Leads, LocaisEstoque, Lotes, Marcas, MovimentacoesEstoque, NotasFiscaisEntrada, NotasFiscaisSaida, Oportunidades, OcorrenciasFrete, OrcamentosVenda, PagamentosFuncionarios, PedidosCompra, PedidosVenda, PosicoesEstoque, Produtos, PropostasVenda, RegioesEntrega, RequisicoesCompra, SaldosEstoque, TabelasFrete, TiposMovimentacaoEstoque, Transportadoras
+from ..models.access import ApontamentosProducao, ApuracoesFiscais, AtividadesCRM, Categorias, CategoriasProdutos, Clientes, ComissoesVenda, ConsumosProducao, ContagensInventario, ContasPagar, ContasReceber, ContratosLocacao, CotacoesCompra, CustosAdicionaisFrete, Despesas, Empresas, EtapasFunil, Fornecedores, Fretes, Funcionarios, Grupos, HistoricoRastreamento, ImpostosFiscais, Inventarios, ItensApuracaoFiscal, ItensContratoLocacao, ItensCotacaoCompra, ItensNfEntrada, ItensNfSaida, ItensOrcamentoVenda, ItensOrdemProducao, ItensPedidoCompra, ItensPedidoVenda, ItensPropostaVenda, ItensRequisicaoCompra, Leads, LocaisEstoque, Lotes, Marcas, MovimentacoesEstoque, NotasFiscaisEntrada, NotasFiscaisSaida, Oportunidades, OcorrenciasFrete, OrdensProducao, OrcamentosVenda, PagamentosFuncionarios, PedidosCompra, PedidosVenda, PosicoesEstoque, Produtos, PropostasVenda, RegioesEntrega, RequisicoesCompra, SaldosEstoque, TabelasFrete, TiposMovimentacaoEstoque, Transportadoras
 
-from ..serializers.access import ApuracoesFiscaisSerializer, AtividadesCRMSerializer, ComissoesVendaSerializer, CotacoesCompraSerializer, EtapasFunilSerializer, ImpostosFiscaisSerializer, ItemContratoLocacaoSerializer, ProdutoSerializer, CategoriaSerializer, CategoriasProdutosSerializer, ClienteSerializer, ContagensInventarioSerializer, ContasPagarSerializer, ContasReceberSerializer, ContratoLocacaoSerializer, CustosAdicionaisFreteSerializer, DespesasSerializer, EmpresasSerializer, FornecedoresSerializer, FretesSerializer, FuncionariosSerializer, GruposSerializer, HistoricoRastreamentoSerializer, InventariosSerializer, ItensApuracaoFiscalSerializer, ItensCotacaoCompraSerializer, ItensNfEntradaSerializer, ItensNfSaidaSerializer, ItensOrcamentoVendaSerializer, ItensPedidoCompraSerializer, ItensPedidoVendaSerializer, ItensPropostaVendaSerializer, ItensRequisicaoCompraSerializer, LeadsSerializer, LocaisEstoqueSerializer, LotesSerializer, MarcasSerializer, MovimentacoesEstoqueSerializer, NotasFiscaisEntradaSerializer, NotasFiscaisSaidaSerializer, OcorrenciasFreteSerializer, OportunidadesSerializer, OrcamentosVendaSerializer, PagamentosFuncionariosSerializer, PedidosCompraSerializer, PedidosVendaSerializer, PosicoesEstoqueSerializer, PropostasVendaSerializer, RegioesEntregaSerializer, RequisicoesCompraSerializer, SaldosEstoqueSerializer, TabelasFreteSerializer, TiposMovimentacaoEstoqueSerializer, TransportadorasSerializer
+from ..serializers.access import ApontamentosProducaoSerializer, ApuracoesFiscaisSerializer, AtividadesCRMSerializer, ComissoesVendaSerializer, ConsumosProducaoSerializer, CotacoesCompraSerializer, EtapasFunilSerializer, ImpostosFiscaisSerializer, ItemContratoLocacaoSerializer, ProdutoSerializer, CategoriaSerializer, CategoriasProdutosSerializer, ClienteSerializer, ContagensInventarioSerializer, ContasPagarSerializer, ContasReceberSerializer, ContratoLocacaoSerializer, CustosAdicionaisFreteSerializer, DespesasSerializer, EmpresasSerializer, FornecedoresSerializer, FretesSerializer, FuncionariosSerializer, GruposSerializer, HistoricoRastreamentoSerializer, InventariosSerializer, ItensApuracaoFiscalSerializer, ItensCotacaoCompraSerializer, ItensNfEntradaSerializer, ItensNfSaidaSerializer, ItensOrcamentoVendaSerializer, ItensOrdemProducaoSerializer, ItensPedidoCompraSerializer, ItensPedidoVendaSerializer, ItensPropostaVendaSerializer, ItensRequisicaoCompraSerializer, LeadsSerializer, LocaisEstoqueSerializer, LotesSerializer, MarcasSerializer, MovimentacoesEstoqueSerializer, NotasFiscaisEntradaSerializer, NotasFiscaisSaidaSerializer, OcorrenciasFreteSerializer, OportunidadesSerializer, OrdensProducaoSerializer, OrcamentosVendaSerializer, PagamentosFuncionariosSerializer, PedidosCompraSerializer, PedidosVendaSerializer, PosicoesEstoqueSerializer, PropostasVendaSerializer, RegioesEntregaSerializer, RequisicoesCompraSerializer, SaldosEstoqueSerializer, TabelasFreteSerializer, TiposMovimentacaoEstoqueSerializer, TransportadorasSerializer
 
 class CategoriasViewSet(viewsets.ModelViewSet):
     queryset = Categorias.objects.all()
@@ -918,6 +918,22 @@ class ApuracoesFiscaisViewSet(viewsets.ModelViewSet):
 class ItensApuracaoFiscalViewSet(viewsets.ModelViewSet):
     queryset = ItensApuracaoFiscal.objects.all()
     serializer_class = ItensApuracaoFiscalSerializer
+
+class OrdensProducaoViewSet(viewsets.ModelViewSet):
+    queryset = OrdensProducao.objects.all()
+    serializer_class = OrdensProducaoSerializer
+
+class ItensOrdemProducaoViewSet(viewsets.ModelViewSet):
+    queryset = ItensOrdemProducao.objects.all()
+    serializer_class = ItensOrdemProducaoSerializer
+
+class ConsumosProducaoViewSet(viewsets.ModelViewSet):
+    queryset = ConsumosProducao.objects.all()
+    serializer_class = ConsumosProducaoSerializer
+
+class ApontamentosProducaoViewSet(viewsets.ModelViewSet):
+    queryset = ApontamentosProducao.objects.all()
+    serializer_class = ApontamentosProducaoSerializer
     
 class ItensNfEntradaViewSet(viewsets.ModelViewSet):
     queryset = ItensNfEntrada.objects.all()

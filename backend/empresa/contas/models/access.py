@@ -1768,6 +1768,86 @@ class ItensApuracaoFiscal(models.Model):
     def __str__(self):
         return f"Item Apuração {self.apuracao_id} - {self.imposto}"
 
+
+class OrdensProducao(models.Model):
+    STATUS_CHOICES = [
+        ('R', 'Rascunho'),
+        ('A', 'Aprovada'),
+        ('E', 'Em produção'),
+        ('F', 'Finalizada'),
+        ('X', 'Cancelada'),
+    ]
+
+    numero_ordem = models.CharField(max_length=30, db_index=True)
+    produto_final = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    quantidade_planejada = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    quantidade_produzida = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    data_inicio = models.DateTimeField(null=True, blank=True)
+    data_fim = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'ordens_producao'
+        ordering = ['-data_inicio']
+        indexes = [
+            models.Index(fields=['numero_ordem']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"OP {self.numero_ordem}"
+
+
+class ItensOrdemProducao(models.Model):
+    ordem = models.ForeignKey('OrdensProducao', on_delete=models.CASCADE, related_name='itens')
+    produto_insumo = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+
+    class Meta:
+        db_table = 'itens_ordem_producao'
+        indexes = [
+            models.Index(fields=['produto_insumo']),
+        ]
+
+    def __str__(self):
+        return f"Insumo {self.produto_insumo_id} OP {self.ordem_id}"
+
+
+class ConsumosProducao(models.Model):
+    ordem = models.ForeignKey('OrdensProducao', on_delete=models.CASCADE, related_name='consumos')
+    produto = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    data_consumo = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'consumos_producao'
+        ordering = ['-data_consumo']
+        indexes = [
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Consumo {self.ordem_id} - {self.produto_id}"
+
+
+class ApontamentosProducao(models.Model):
+    ordem = models.ForeignKey('OrdensProducao', on_delete=models.CASCADE, related_name='apontamentos')
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    data_apontamento = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'apontamentos_producao'
+        ordering = ['-data_apontamento']
+        indexes = [
+            models.Index(fields=['ordem']),
+        ]
+
+    def __str__(self):
+        return f"Apontamento {self.ordem_id}"
 class LocaisEstoque(models.Model):
     codigo = models.CharField(max_length=20)
     descricao = models.CharField(max_length=100)

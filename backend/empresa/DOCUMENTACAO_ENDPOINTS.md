@@ -174,6 +174,85 @@ http://localhost:8000
 
 ---
 
+### **🏭 Produção / MRP**
+
+#### **Ordens de Produção**
+- **GET** `/contas/ordens-producao/` - Lista ordens
+- **POST** `/contas/ordens-producao/` - Cria ordem
+- **GET** `/contas/ordens-producao/{id}/` - Busca ordem
+- **PUT** `/contas/ordens-producao/{id}/` - Atualiza ordem
+- **DELETE** `/contas/ordens-producao/{id}/` - Remove ordem
+
+#### **Itens da Ordem (Insumos)**
+- **GET** `/contas/itens-ordem-producao/` - Lista itens da ordem
+- **POST** `/contas/itens-ordem-producao/` - Cria item
+- **GET** `/contas/itens-ordem-producao/{id}/` - Busca item
+- **PUT** `/contas/itens-ordem-producao/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-ordem-producao/{id}/` - Remove item
+
+#### **Consumos de Produção**
+- **GET** `/contas/consumos-producao/` - Lista consumos
+- **POST** `/contas/consumos-producao/` - Cria consumo
+- **GET** `/contas/consumos-producao/{id}/` - Busca consumo
+- **PUT** `/contas/consumos-producao/{id}/` - Atualiza consumo
+- **DELETE** `/contas/consumos-producao/{id}/` - Remove consumo
+
+#### **Apontamentos de Produção**
+- **GET** `/contas/apontamentos-producao/` - Lista apontamentos
+- **POST** `/contas/apontamentos-producao/` - Cria apontamento
+- **GET** `/contas/apontamentos-producao/{id}/` - Busca apontamento
+- **PUT** `/contas/apontamentos-producao/{id}/` - Atualiza apontamento
+- **DELETE** `/contas/apontamentos-producao/{id}/` - Remove apontamento
+
+#### **Operações de Produção**
+- **POST** `/contas/producao/ordens/gerar/` - Gera ordem com insumos
+- **POST** `/contas/producao/ordens/aprovar/` - Aprova ordem
+- **POST** `/contas/producao/ordens/iniciar/` - Inicia produção
+- **POST** `/contas/producao/ordens/finalizar/` - Finaliza ordem
+- **POST** `/contas/producao/ordens/cancelar/` - Cancela ordem
+- **GET** `/contas/producao/ordens/lista/` - Lista ordens com filtros
+- **GET** `/contas/producao/ordens/resumo/` - Resumo por período
+- **POST** `/contas/producao/consumo/apontar/` - Aponta consumo (baixa estoque)
+- **POST** `/contas/producao/apontar/` - Aponta produção (entrada estoque)
+
+#### **Exemplos de payloads**
+**Gerar ordem**
+```json
+{
+  "ordem": {
+    "numero_ordem": "OP-2025-001",
+    "produto_final_id": 120,
+    "local_id": 1,
+    "quantidade_planejada": "10.00"
+  },
+  "itens": [
+    { "produto_insumo_id": 45, "quantidade": "2.50" }
+  ]
+}
+```
+
+**Apontar consumo**
+```json
+{
+  "ordem_id": 12,
+  "local_id": 1,
+  "itens": [
+    { "produto_id": 45, "quantidade": "2.50" }
+  ]
+}
+```
+
+**Apontar produção**
+```json
+{
+  "ordem_id": 12,
+  "local_id": 1,
+  "quantidade": "10.00"
+}
+```
+
+---
+
 ### **📦 Gestão de Produtos**
 
 #### **Produtos**
