@@ -60,6 +60,82 @@ http://localhost:8000
 
 ---
 
+### **🤝 CRM / Comercial**
+
+#### **Etapas do Funil**
+- **GET** `/contas/etapas-funil/` - Lista etapas
+- **POST** `/contas/etapas-funil/` - Cria etapa
+- **GET** `/contas/etapas-funil/{id}/` - Busca etapa
+- **PUT** `/contas/etapas-funil/{id}/` - Atualiza etapa
+- **DELETE** `/contas/etapas-funil/{id}/` - Remove etapa
+
+#### **Leads**
+- **GET** `/contas/leads/` - Lista leads
+- **POST** `/contas/leads/` - Cria lead
+- **GET** `/contas/leads/{id}/` - Busca lead
+- **PUT** `/contas/leads/{id}/` - Atualiza lead
+- **DELETE** `/contas/leads/{id}/` - Remove lead
+
+#### **Oportunidades**
+- **GET** `/contas/oportunidades/` - Lista oportunidades
+- **POST** `/contas/oportunidades/` - Cria oportunidade
+- **GET** `/contas/oportunidades/{id}/` - Busca oportunidade
+- **PUT** `/contas/oportunidades/{id}/` - Atualiza oportunidade
+- **DELETE** `/contas/oportunidades/{id}/` - Remove oportunidade
+
+#### **Atividades do CRM**
+- **GET** `/contas/atividades-crm/` - Lista atividades
+- **POST** `/contas/atividades-crm/` - Cria atividade
+- **GET** `/contas/atividades-crm/{id}/` - Busca atividade
+- **PUT** `/contas/atividades-crm/{id}/` - Atualiza atividade
+- **DELETE** `/contas/atividades-crm/{id}/` - Remove atividade
+
+#### **Propostas de Venda (CRM)**
+- **GET** `/contas/propostas-venda/` - Lista propostas
+- **POST** `/contas/propostas-venda/` - Cria proposta
+- **GET** `/contas/propostas-venda/{id}/` - Busca proposta
+- **PUT** `/contas/propostas-venda/{id}/` - Atualiza proposta
+- **DELETE** `/contas/propostas-venda/{id}/` - Remove proposta
+
+#### **Itens da Proposta**
+- **GET** `/contas/itens-proposta-venda/` - Lista itens
+- **POST** `/contas/itens-proposta-venda/` - Cria item
+- **GET** `/contas/itens-proposta-venda/{id}/` - Busca item
+- **PUT** `/contas/itens-proposta-venda/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-proposta-venda/{id}/` - Remove item
+
+#### **Operações de CRM**
+- **GET** `/contas/crm/funil/resumo/` - Resumo do funil por etapa e status
+- **GET** `/contas/crm/atividades/pendentes/` - Lista atividades pendentes
+- **GET** `/contas/crm/oportunidades/resumo/` - Resumo geral de oportunidades
+
+#### **Exemplos de payloads**
+**Criar oportunidade**
+```json
+{
+  "titulo": "Contrato ERP 2025",
+  "lead": 4,
+  "etapa": 2,
+  "valor_estimado": "25000.00",
+  "probabilidade": "60.00",
+  "status": "A",
+  "responsavel_id": 7
+}
+```
+
+**Criar atividade**
+```json
+{
+  "oportunidade": 12,
+  "tipo": "Reunião",
+  "data_agendada": "2025-02-18T10:00:00",
+  "usuario_id": 7,
+  "descricao": "Apresentar proposta comercial"
+}
+```
+
+---
+
 ### **📦 Gestão de Produtos**
 
 #### **Produtos**
@@ -93,6 +169,358 @@ http://localhost:8000
 - **GET** `/contas/grupos/{id}/` - Busca grupo específico
 - **PUT** `/contas/grupos/{id}/` - Atualiza grupo
 - **DELETE** `/contas/grupos/{id}/` - Remove grupo
+
+#### **Fiscal por Produto**
+- **GET** `/contas/produtos-fiscal/` - Lista dados fiscais por produto
+- **POST** `/contas/produtos-fiscal/` - Cria cadastro fiscal de produto
+- **GET** `/contas/produtos-fiscal/{id}/` - Busca cadastro fiscal específico
+- **PUT** `/contas/produtos-fiscal/{id}/` - Atualiza cadastro fiscal
+- **DELETE** `/contas/produtos-fiscal/{id}/` - Remove cadastro fiscal
+
+#### **Variações de Produto**
+- **GET** `/contas/produtos-variacoes/` - Lista variações
+- **POST** `/contas/produtos-variacoes/` - Cria variação
+- **GET** `/contas/produtos-variacoes/{id}/` - Busca variação específica
+- **PUT** `/contas/produtos-variacoes/{id}/` - Atualiza variação
+- **DELETE** `/contas/produtos-variacoes/{id}/` - Remove variação
+
+#### **Composição (BOM/Kits)**
+- **GET** `/contas/produtos-composicao/` - Lista composições
+- **POST** `/contas/produtos-composicao/` - Cria composição
+- **GET** `/contas/produtos-composicao/{id}/` - Busca composição
+- **PUT** `/contas/produtos-composicao/{id}/` - Atualiza composição
+- **DELETE** `/contas/produtos-composicao/{id}/` - Remove composição
+- **GET** `/contas/produtos/composicao/{produto_id}/` - Resumo de composição com custo estimado
+
+#### **Conversões de Unidade**
+- **GET** `/contas/produtos-conversao-unidade/` - Lista conversões
+- **POST** `/contas/produtos-conversao-unidade/` - Cria conversão
+- **GET** `/contas/produtos-conversao-unidade/{id}/` - Busca conversão
+- **PUT** `/contas/produtos-conversao-unidade/{id}/` - Atualiza conversão
+- **DELETE** `/contas/produtos-conversao-unidade/{id}/` - Remove conversão
+- **POST** `/contas/produtos/conversao/` - Calcula conversão de unidade
+
+#### **Histórico de Preços**
+- **GET** `/contas/produtos-historico-preco/` - Lista histórico de preços
+- **POST** `/contas/produtos-historico-preco/` - Cria histórico de preço
+- **GET** `/contas/produtos-historico-preco/{id}/` - Busca histórico específico
+- **PUT** `/contas/produtos-historico-preco/{id}/` - Atualiza histórico
+- **DELETE** `/contas/produtos-historico-preco/{id}/` - Remove histórico
+- **GET** `/contas/produtos/historico-preco/{produto_id}/` - Consulta histórico por produto
+
+#### **Tabelas de Preço**
+- **GET** `/contas/tabelas-precos/` - Lista tabelas de preço
+- **POST** `/contas/tabelas-precos/` - Cria tabela de preço
+- **GET** `/contas/tabelas-precos/{id}/` - Busca tabela de preço
+- **PUT** `/contas/tabelas-precos/{id}/` - Atualiza tabela de preço
+- **DELETE** `/contas/tabelas-precos/{id}/` - Remove tabela de preço
+
+#### **Itens de Tabela de Preço**
+- **GET** `/contas/tabelas-precos-itens/` - Lista itens de tabela
+- **POST** `/contas/tabelas-precos-itens/` - Cria item de tabela
+- **GET** `/contas/tabelas-precos-itens/{id}/` - Busca item específico
+- **PUT** `/contas/tabelas-precos-itens/{id}/` - Atualiza item
+- **DELETE** `/contas/tabelas-precos-itens/{id}/` - Remove item
+
+#### **Políticas de Desconto**
+- **GET** `/contas/politicas-desconto/` - Lista políticas de desconto
+- **POST** `/contas/politicas-desconto/` - Cria política de desconto
+- **GET** `/contas/politicas-desconto/{id}/` - Busca política específica
+- **PUT** `/contas/politicas-desconto/{id}/` - Atualiza política
+- **DELETE** `/contas/politicas-desconto/{id}/` - Remove política
+
+#### **Preço Efetivo**
+- **POST** `/contas/produtos/preco/` - Calcula preço efetivo com tabela e descontos
+
+#### **Substitutos de Produto**
+- **GET** `/contas/produtos-substitutos/` - Lista substitutos
+- **POST** `/contas/produtos-substitutos/` - Cria substituto
+- **GET** `/contas/produtos-substitutos/{id}/` - Busca substituto
+- **PUT** `/contas/produtos-substitutos/{id}/` - Atualiza substituto
+- **DELETE** `/contas/produtos-substitutos/{id}/` - Remove substituto
+- **GET** `/contas/produtos/substitutos/{produto_id}/` - Consulta substitutos por produto
+
+#### **Custo por Local**
+- **GET** `/contas/produtos-custo-local/` - Lista custos por local
+- **POST** `/contas/produtos-custo-local/` - Cria custo por local
+- **GET** `/contas/produtos-custo-local/{id}/` - Busca custo específico
+- **PUT** `/contas/produtos-custo-local/{id}/` - Atualiza custo por local
+- **DELETE** `/contas/produtos-custo-local/{id}/` - Remove custo por local
+
+#### **Alertas Operacionais**
+- **GET** `/contas/produtos/alertas/` - Retorna alertas (estoque crítico, sem preço, sem EAN/SKU)
+
+#### **Ficha Técnica do Produto**
+- **GET** `/contas/produtos/ficha/{produto_id}/` - Consolida dados de cadastro (fiscal, variações, composição, substitutos e custos)
+
+#### **Exemplos de payloads**
+**Preço efetivo**
+```json
+{
+  "produto_id": 123,
+  "tabela_id": 4,
+  "cliente_id": 10,
+  "quantidade": 5,
+  "data_base": "2025-01-10"
+}
+```
+
+**Conversão de unidade**
+```json
+{
+  "produto_id": 123,
+  "unidade_origem": "CX",
+  "unidade_destino": "UN",
+  "quantidade": 2
+}
+```
+
+**Resumo de composição**
+```json
+GET /contas/produtos/composicao/123/
+```
+
+---
+
+### **🛒 Gestão de Vendas**
+
+#### **Orçamentos de Venda**
+- **GET** `/contas/orcamentos-venda/` - Lista orçamentos de venda
+- **POST** `/contas/orcamentos-venda/` - Cria novo orçamento
+- **GET** `/contas/orcamentos-venda/{id}/` - Busca orçamento específico
+- **PUT** `/contas/orcamentos-venda/{id}/` - Atualiza orçamento
+- **DELETE** `/contas/orcamentos-venda/{id}/` - Remove orçamento
+
+#### **Itens do Orçamento**
+- **GET** `/contas/itens-orcamento-venda/` - Lista itens do orçamento
+- **POST** `/contas/itens-orcamento-venda/` - Cria item do orçamento
+- **GET** `/contas/itens-orcamento-venda/{id}/` - Busca item específico
+- **PUT** `/contas/itens-orcamento-venda/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-orcamento-venda/{id}/` - Remove item
+
+#### **Pedidos de Venda**
+- **GET** `/contas/pedidos-venda/` - Lista pedidos de venda
+- **POST** `/contas/pedidos-venda/` - Cria pedido de venda
+- **GET** `/contas/pedidos-venda/{id}/` - Busca pedido específico
+- **PUT** `/contas/pedidos-venda/{id}/` - Atualiza pedido
+- **DELETE** `/contas/pedidos-venda/{id}/` - Remove pedido
+
+#### **Itens do Pedido**
+- **GET** `/contas/itens-pedido-venda/` - Lista itens do pedido
+- **POST** `/contas/itens-pedido-venda/` - Cria item do pedido
+- **GET** `/contas/itens-pedido-venda/{id}/` - Busca item específico
+- **PUT** `/contas/itens-pedido-venda/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-pedido-venda/{id}/` - Remove item
+
+#### **Comissões de Venda**
+- **GET** `/contas/comissoes-venda/` - Lista comissões
+- **POST** `/contas/comissoes-venda/` - Cria comissão
+- **GET** `/contas/comissoes-venda/{id}/` - Busca comissão
+- **PUT** `/contas/comissoes-venda/{id}/` - Atualiza comissão
+- **DELETE** `/contas/comissoes-venda/{id}/` - Remove comissão
+
+#### **Operações de Vendas**
+- **POST** `/contas/vendas/registrar/` - Cria pedido com itens
+- **POST** `/contas/vendas/aprovar/` - Aprova pedido
+- **POST** `/contas/vendas/faturar/` - Fatura pedido (NF de saída + contas a receber + estoque)
+- **POST** `/contas/vendas/cancelar/` - Cancela pedido não faturado
+- **POST** `/contas/vendas/orcamento/converter/` - Converte orçamento em pedido
+- **GET** `/contas/vendas/` - Lista pedidos de venda com filtros
+- **GET** `/contas/vendas/resumo/` - Resumo de vendas por período e top clientes
+- **POST** `/contas/vendas/conta-receber/baixar/` - Baixa conta a receber
+- **POST** `/contas/vendas/conta-receber/estornar/` - Estorna baixa de conta a receber
+- **GET** `/contas/vendas/conta-receber/aging/` - Aging de contas a receber
+- **GET** `/contas/vendas/conta-receber/atrasadas/` - Lista contas a receber atrasadas
+- **GET** `/contas/vendas/detalhe/{pedido_id}/` - Detalha pedido com itens
+- **POST** `/contas/vendas/atualizar/{pedido_id}/` - Atualiza pedido em rascunho
+- **POST** `/contas/vendas/faturamento/estornar/` - Estorna faturamento e devolve estoque
+- **POST** `/contas/vendas/devolucao/` - Registra devolução de venda
+- **GET** `/contas/vendas/devolucao/lista/` - Lista devoluções de venda
+- **POST** `/contas/vendas/devolucao/cancelar/` - Cancela devolução de venda
+- **GET** `/contas/vendas/devolucao/saldo/{nota_id}/` - Saldo disponível para devolução
+- **POST** `/contas/vendas/comissoes/gerar/` - Gera comissão para pedido
+- **GET** `/contas/vendas/comissoes/resumo/` - Resumo de comissões por período
+- **GET** `/contas/vendas/expedicao/pendentes/` - Lista pedidos aprovados para expedição
+- **POST** `/contas/vendas/expedicao/confirmar/` - Confirma expedição e baixa estoque
+- **POST** `/contas/vendas/expedicao/estornar/` - Estorna expedição e devolve estoque
+
+#### **Exemplos de payloads**
+**Registrar pedido**
+```json
+{
+  "numero_pedido": "PV-2025-001",
+  "cliente_id": 10,
+  "vendedor_id": 3,
+  "forma_pagamento": "Boleto",
+  "condicoes_pagamento": "30 dias",
+  "frete": "50.00",
+  "desconto": "10.00",
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "2",
+      "valor_unitario": "150.00",
+      "desconto": "0.00"
+    }
+  ]
+}
+```
+
+**Faturar pedido**
+```json
+{
+  "pedido_id": 55,
+  "numero_nota": "NF-2025-0021",
+  "vencimento": "2025-02-10T00:00:00",
+  "local_id": 1
+}
+```
+
+**Baixar conta a receber**
+```json
+{
+  "conta_id": 901,
+  "data_pagamento": "2025-02-10T10:00:00",
+  "valor_recebido": "1250.00",
+  "juros": "0.00",
+  "tarifas": "0.00",
+  "desconto": "0.00"
+}
+```
+
+**Estornar faturamento**
+```json
+{
+  "pedido_id": 55,
+  "numero_nota": "NF-2025-0021",
+  "local_id": 1
+}
+```
+
+**Registrar devolução**
+```json
+{
+  "nota_id": 321,
+  "local_id": 1,
+  "itens": [
+    {
+      "produto_id": 123,
+      "quantidade": "1.00"
+    }
+  ]
+}
+```
+
+**Gerar comissão**
+```json
+{
+  "pedido_id": 55,
+  "percentual": "5.00"
+}
+```
+
+**Confirmar expedição**
+```json
+{
+  "pedido_id": 55,
+  "local_id": 1
+}
+```
+
+---
+
+### **🧾 Gestão de Compras Avançadas**
+
+#### **Requisições de Compra**
+- **GET** `/contas/requisicoes-compra/` - Lista requisições
+- **POST** `/contas/requisicoes-compra/` - Cria requisição
+- **GET** `/contas/requisicoes-compra/{id}/` - Busca requisição
+- **PUT** `/contas/requisicoes-compra/{id}/` - Atualiza requisição
+- **DELETE** `/contas/requisicoes-compra/{id}/` - Remove requisição
+
+#### **Itens da Requisição**
+- **GET** `/contas/itens-requisicao-compra/` - Lista itens de requisição
+- **POST** `/contas/itens-requisicao-compra/` - Cria item
+- **GET** `/contas/itens-requisicao-compra/{id}/` - Busca item
+- **PUT** `/contas/itens-requisicao-compra/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-requisicao-compra/{id}/` - Remove item
+
+#### **Cotações de Compra**
+- **GET** `/contas/cotacoes-compra/` - Lista cotações
+- **POST** `/contas/cotacoes-compra/` - Cria cotação
+- **GET** `/contas/cotacoes-compra/{id}/` - Busca cotação
+- **PUT** `/contas/cotacoes-compra/{id}/` - Atualiza cotação
+- **DELETE** `/contas/cotacoes-compra/{id}/` - Remove cotação
+
+#### **Itens da Cotação**
+- **GET** `/contas/itens-cotacao-compra/` - Lista itens de cotação
+- **POST** `/contas/itens-cotacao-compra/` - Cria item
+- **GET** `/contas/itens-cotacao-compra/{id}/` - Busca item
+- **PUT** `/contas/itens-cotacao-compra/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-cotacao-compra/{id}/` - Remove item
+
+#### **Pedidos de Compra**
+- **GET** `/contas/pedidos-compra/` - Lista pedidos de compra
+- **POST** `/contas/pedidos-compra/` - Cria pedido
+- **GET** `/contas/pedidos-compra/{id}/` - Busca pedido
+- **PUT** `/contas/pedidos-compra/{id}/` - Atualiza pedido
+- **DELETE** `/contas/pedidos-compra/{id}/` - Remove pedido
+
+#### **Itens do Pedido**
+- **GET** `/contas/itens-pedido-compra/` - Lista itens do pedido
+- **POST** `/contas/itens-pedido-compra/` - Cria item
+- **GET** `/contas/itens-pedido-compra/{id}/` - Busca item
+- **PUT** `/contas/itens-pedido-compra/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-pedido-compra/{id}/` - Remove item
+
+#### **Operações de Compras Avançadas**
+- **POST** `/contas/compras/requisicoes/registrar/` - Registra requisição com itens
+- **POST** `/contas/compras/requisicoes/aprovar/` - Aprova requisição
+- **POST** `/contas/compras/cotacoes/registrar/` - Registra cotação (com ou sem requisição)
+- **POST** `/contas/compras/cotacoes/aprovar/` - Aprova cotação
+- **POST** `/contas/compras/pedidos/gerar/` - Gera pedido (por cotação ou requisição)
+- **POST** `/contas/compras/pedidos/aprovar/` - Aprova pedido
+- **POST** `/contas/compras/pedidos/enviar/` - Marca pedido como enviado
+- **POST** `/contas/compras/pedidos/cancelar/` - Cancela pedido
+- **GET** `/contas/compras/pedidos/lista/` - Lista pedidos com filtros
+- **GET** `/contas/compras/pedidos/detalhe/{pedido_id}/` - Detalha pedido com itens
+
+#### **Exemplos de payloads**
+**Registrar requisição**
+```json
+{
+  "requisicao": {
+    "numero_requisicao": "REQ-2025-001",
+    "solicitante_id": 12,
+    "fornecedor_sugerido_id": 7,
+    "prioridade": "Alta"
+  },
+  "itens": [
+    { "produto_id": 123, "quantidade": "3", "preco_estimado": "120.00" }
+  ]
+}
+```
+
+**Registrar cotação**
+```json
+{
+  "cotacao": {
+    "requisicao_id": 10,
+    "fornecedor_id": 7,
+    "validade": "2025-02-15"
+  }
+}
+```
+
+**Gerar pedido**
+```json
+{
+  "pedido": {
+    "cotacao_id": 5,
+    "condicoes_pagamento": "30/60"
+  }
+}
+```
 
 ---
 
