@@ -90,6 +90,147 @@ class Clientes(models.Model):
     def __str__(self):
         return str(self.nome)
 
+
+class EtapasFunil(models.Model):
+    nome = models.CharField(max_length=100)
+    ordem = models.IntegerField(default=0)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'etapas_funil'
+        ordering = ['ordem', 'nome']
+
+    def __str__(self):
+        return self.nome
+
+
+class Leads(models.Model):
+    STATUS_CHOICES = [
+        ('N', 'Novo'),
+        ('C', 'Contactado'),
+        ('Q', 'Qualificado'),
+        ('D', 'Descartado'),
+    ]
+
+    nome = models.CharField(max_length=100)
+    email = models.CharField(max_length=100, null=True, blank=True)
+    telefone = models.CharField(max_length=30, null=True, blank=True)
+    origem = models.CharField(max_length=50, null=True, blank=True)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='N')
+    responsavel_id = models.IntegerField(null=True, blank=True)
+    data_cadastro = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'leads'
+        ordering = ['-data_cadastro']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['responsavel_id']),
+        ]
+
+    def __str__(self):
+        return self.nome
+
+
+class Oportunidades(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Aberta'),
+        ('G', 'Ganha'),
+        ('P', 'Perdida'),
+    ]
+
+    titulo = models.CharField(max_length=150)
+    lead = models.ForeignKey('Leads', on_delete=models.PROTECT, null=True, blank=True)
+    cliente = models.ForeignKey('Clientes', on_delete=models.PROTECT, null=True, blank=True)
+    etapa = models.ForeignKey('EtapasFunil', on_delete=models.PROTECT, null=True, blank=True)
+    valor_estimado = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    probabilidade = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    origem = models.CharField(max_length=50, null=True, blank=True)
+    responsavel_id = models.IntegerField(null=True, blank=True)
+    data_criacao = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    data_fechamento = models.DateTimeField(null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'oportunidades'
+        ordering = ['-data_criacao']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['responsavel_id']),
+        ]
+
+    def __str__(self):
+        return self.titulo
+
+
+class AtividadesCRM(models.Model):
+    oportunidade = models.ForeignKey('Oportunidades', on_delete=models.CASCADE, related_name='atividades')
+    tipo = models.CharField(max_length=50)
+    data_agendada = models.DateTimeField(null=True, blank=True)
+    concluida = models.BooleanField(default=False)
+    data_conclusao = models.DateTimeField(null=True, blank=True)
+    usuario_id = models.IntegerField(null=True, blank=True)
+    descricao = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'atividades_crm'
+        ordering = ['-data_agendada']
+        indexes = [
+            models.Index(fields=['concluida']),
+            models.Index(fields=['usuario_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.tipo} - {self.oportunidade_id}"
+
+
+class PropostasVenda(models.Model):
+    STATUS_CHOICES = [
+        ('R', 'Rascunho'),
+        ('E', 'Enviada'),
+        ('A', 'Aceita'),
+        ('N', 'Negada'),
+    ]
+
+    oportunidade = models.ForeignKey('Oportunidades', on_delete=models.PROTECT, related_name='propostas')
+    numero = models.CharField(max_length=30, db_index=True)
+    data_emissao = models.DateTimeField(null=True, blank=True)
+    validade = models.DateField(null=True, blank=True)
+    valor_total = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'propostas_venda'
+        ordering = ['-data_emissao']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['numero']),
+        ]
+
+    def __str__(self):
+        return f"Proposta {self.numero}"
+
+
+class ItensPropostaVenda(models.Model):
+    proposta = models.ForeignKey('PropostasVenda', on_delete=models.CASCADE, related_name='itens')
+    produto = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    valor_unitario = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    desconto = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_total = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'itens_proposta_venda'
+        indexes = [
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item Proposta {self.proposta_id}"
+
 class ContagensInventario(models.Model):
     inventario_id = models.ForeignKey('Inventarios', on_delete=models.PROTECT, null=True, blank=True)
     produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, null=True, blank=True)
@@ -684,10 +825,14 @@ class Produtos(models.Model):
     referencia = models.CharField(max_length=100, null=True, blank=True)
     grupo_id = models.IntegerField(null=True, blank=True)
     unidade_medida = models.CharField(max_length=10, null=True, blank=True)
+    sku = models.CharField(max_length=60, null=True, blank=True)
+    ean = models.CharField(max_length=14, null=True, blank=True)
     preco_custo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     preco_venda = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     margem_lucro = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     estoque_minimo = models.IntegerField(null=True, blank=True)
+    ponto_reposicao = models.IntegerField(null=True, blank=True)
+    lead_time_dias = models.IntegerField(null=True, blank=True)
     estoque_atual = models.IntegerField(null=True, blank=True, default=0)
     disponivel_locacao = models.BooleanField(null=True, blank=True, default=False)
     valor_locacao_diaria = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -701,6 +846,153 @@ class Produtos(models.Model):
 
     def __str__(self):
         return f"{self.codigo} - {self.nome}"
+
+class ProdutoFiscal(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    ncm = models.CharField(max_length=20, null=True, blank=True)
+    cst = models.CharField(max_length=10, null=True, blank=True)
+    cfop = models.CharField(max_length=10, null=True, blank=True)
+    origem = models.CharField(max_length=20, null=True, blank=True)
+    unidade_tributavel = models.CharField(max_length=10, null=True, blank=True)
+    aliquota_icms = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    aliquota_ipi = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    aliquota_pis = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    aliquota_cofins = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_fiscal'
+
+    def __str__(self):
+        return f"Fiscal {self.produto_id}"
+
+class ProdutoVariacao(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='variacoes')
+    codigo = models.CharField(max_length=50)
+    descricao = models.CharField(max_length=120, null=True, blank=True)
+    atributos = models.JSONField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_variacoes'
+
+    def __str__(self):
+        return f"{self.produto_id} - {self.codigo}"
+
+class ProdutoComposicao(models.Model):
+    produto_pai_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='componentes')
+    produto_componente_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='utilizado_em')
+    quantidade = models.DecimalField(max_digits=10, decimal_places=3)
+    unidade_medida = models.CharField(max_length=10, null=True, blank=True)
+    custo_proporcional = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_composicao'
+
+    def __str__(self):
+        return f"{self.produto_pai_id} -> {self.produto_componente_id}"
+
+class ProdutoConversaoUnidade(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    unidade_origem = models.CharField(max_length=10)
+    unidade_destino = models.CharField(max_length=10)
+    fator_conversao = models.DecimalField(max_digits=12, decimal_places=6)
+    arredondamento = models.CharField(max_length=10, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_conversao_unidade'
+
+    def __str__(self):
+        return f"{self.produto_id} {self.unidade_origem}->{self.unidade_destino}"
+
+class ProdutoHistoricoPreco(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    preco_custo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    preco_venda = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    data_inicio = models.DateField()
+    data_fim = models.DateField(null=True, blank=True)
+    origem = models.CharField(max_length=40, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'produtos_historico_precos'
+
+    def __str__(self):
+        return f"Histórico {self.produto_id} ({self.data_inicio})"
+
+class TabelaPreco(models.Model):
+    descricao = models.CharField(max_length=100)
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+    moeda = models.CharField(max_length=10, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'tabelas_precos'
+
+    def __str__(self):
+        return self.descricao
+
+class TabelaPrecoItem(models.Model):
+    tabela_id = models.ForeignKey('TabelaPreco', on_delete=models.PROTECT)
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    preco = models.DecimalField(max_digits=10, decimal_places=2)
+    preco_minimo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    desconto_maximo = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    quantidade_minima = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'tabelas_precos_itens'
+
+    def __str__(self):
+        return f"{self.tabela_id} - {self.produto_id}"
+
+class PoliticaDesconto(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, null=True, blank=True)
+    tabela_id = models.ForeignKey('TabelaPreco', on_delete=models.PROTECT, null=True, blank=True)
+    cliente_id = models.ForeignKey('Clientes', on_delete=models.PROTECT, null=True, blank=True)
+    percentual = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    valor = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    quantidade_minima = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    data_inicio = models.DateField(null=True, blank=True)
+    data_fim = models.DateField(null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'politicas_desconto'
+
+    def __str__(self):
+        return f"Desconto {self.produto_id or self.tabela_id}"
+
+class ProdutoSubstituto(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='substitutos')
+    produto_substituto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT, related_name='substitui')
+    motivo = models.CharField(max_length=120, null=True, blank=True)
+    ativo = models.BooleanField(null=True, blank=True, default=True)
+
+    class Meta:
+        db_table = 'produtos_substitutos'
+
+    def __str__(self):
+        return f"{self.produto_id} -> {self.produto_substituto_id}"
+
+class ProdutoCustoLocal(models.Model):
+    produto_id = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    custo_medio = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    ultima_atualizacao = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'produtos_custo_local'
+
+    def __str__(self):
+        return f"{self.produto_id} - {self.local_id}"
 
 class RegioesEntrega(models.Model):
     transportadora_id = models.ForeignKey('Transportadoras', on_delete=models.PROTECT, null=True, blank=True)
@@ -1195,6 +1487,196 @@ class ItensNfEntrada(models.Model):
         super().save(*args, **kwargs)
 
 
+class RequisicoesCompra(models.Model):
+    STATUS_CHOICES = [
+        ('R', 'Rascunho'),
+        ('A', 'Aprovada'),
+        ('C', 'Cotada'),
+        ('X', 'Cancelada'),
+    ]
+
+    numero_requisicao = models.CharField(max_length=30, db_index=True)
+    solicitante_id = models.IntegerField(null=True, blank=True)
+    fornecedor_sugerido = models.ForeignKey(
+        'Fornecedores',
+        on_delete=models.PROTECT,
+        related_name='requisicoes_compra',
+        null=True,
+        blank=True
+    )
+    data_solicitacao = models.DateTimeField(null=True, blank=True)
+    data_aprovacao = models.DateTimeField(null=True, blank=True)
+    prioridade = models.CharField(max_length=20, null=True, blank=True)
+    valor_estimado = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'requisicoes_compra'
+        ordering = ['-data_solicitacao']
+        indexes = [
+            models.Index(fields=['numero_requisicao']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"REQ {self.numero_requisicao}"
+
+
+class ItensRequisicaoCompra(models.Model):
+    requisicao = models.ForeignKey(
+        RequisicoesCompra,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    produto = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    preco_estimado = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_total = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'itens_requisicao_compra'
+        indexes = [
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item REQ {self.requisicao_id}"
+
+
+class CotacoesCompra(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Aberta'),
+        ('P', 'Aprovada'),
+        ('X', 'Cancelada'),
+    ]
+
+    requisicao = models.ForeignKey(
+        RequisicoesCompra,
+        on_delete=models.PROTECT,
+        related_name='cotacoes',
+        null=True,
+        blank=True
+    )
+    fornecedor = models.ForeignKey(
+        'Fornecedores',
+        on_delete=models.PROTECT,
+        related_name='cotacoes_compra'
+    )
+    data_cotacao = models.DateTimeField(null=True, blank=True)
+    validade = models.DateField(null=True, blank=True)
+    condicoes_pagamento = models.CharField(max_length=100, null=True, blank=True)
+    valor_total = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'cotacoes_compra'
+        ordering = ['-data_cotacao']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['fornecedor']),
+        ]
+
+    def __str__(self):
+        return f"COT {self.id} - {self.fornecedor}"
+
+
+class ItensCotacaoCompra(models.Model):
+    cotacao = models.ForeignKey(
+        CotacoesCompra,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    produto = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    valor_unitario = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_total = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    prazo_entrega_dias = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'itens_cotacao_compra'
+        indexes = [
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item COT {self.cotacao_id}"
+
+
+class PedidosCompra(models.Model):
+    STATUS_CHOICES = [
+        ('R', 'Rascunho'),
+        ('A', 'Aprovado'),
+        ('E', 'Enviado'),
+        ('F', 'Recebido'),
+        ('X', 'Cancelado'),
+    ]
+
+    numero_pedido = models.CharField(max_length=30, db_index=True)
+    requisicao = models.ForeignKey(
+        RequisicoesCompra,
+        on_delete=models.PROTECT,
+        related_name='pedidos',
+        null=True,
+        blank=True
+    )
+    cotacao = models.ForeignKey(
+        CotacoesCompra,
+        on_delete=models.PROTECT,
+        related_name='pedidos',
+        null=True,
+        blank=True
+    )
+    fornecedor = models.ForeignKey(
+        'Fornecedores',
+        on_delete=models.PROTECT,
+        related_name='pedidos_compra'
+    )
+    data_emissao = models.DateTimeField(null=True, blank=True)
+    data_prevista = models.DateField(null=True, blank=True)
+    data_aprovacao = models.DateTimeField(null=True, blank=True)
+    condicoes_pagamento = models.CharField(max_length=100, null=True, blank=True)
+    valor_total = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'pedidos_compra'
+        ordering = ['-data_emissao']
+        indexes = [
+            models.Index(fields=['numero_pedido']),
+            models.Index(fields=['status']),
+            models.Index(fields=['fornecedor']),
+        ]
+
+    def __str__(self):
+        return f"PC {self.numero_pedido}"
+
+
+class ItensPedidoCompra(models.Model):
+    pedido = models.ForeignKey(
+        PedidosCompra,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    produto = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    valor_unitario = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    desconto = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_total = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'itens_pedido_compra'
+        indexes = [
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item PC {self.pedido_id}"
+
+
 class Fretes(models.Model):
     transportadora = models.ForeignKey('Transportadoras', on_delete=models.PROTECT, null=True, blank=True)
     numero = models.CharField(max_length=20)
@@ -1220,6 +1702,230 @@ class Fretes(models.Model):
     def __str__(self):
         return f"Frete {self.id} - {self.tipo_operacao}"
 
+
+class ImpostosFiscais(models.Model):
+    codigo = models.CharField(max_length=20, db_index=True)
+    nome = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=20, null=True, blank=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'impostos_fiscais'
+        ordering = ['nome']
+        indexes = [
+            models.Index(fields=['codigo']),
+            models.Index(fields=['tipo']),
+        ]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.nome}"
+
+
+class ApuracoesFiscais(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Aberta'),
+        ('F', 'Fechada'),
+    ]
+
+    data_inicio = models.DateField()
+    data_fim = models.DateField()
+    data_apuracao = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    total_debitos = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    total_creditos = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    saldo = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'apuracoes_fiscais'
+        ordering = ['-data_apuracao']
+        indexes = [
+            models.Index(fields=['data_inicio', 'data_fim']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Apuração {self.id} ({self.data_inicio} - {self.data_fim})"
+
+
+class ItensApuracaoFiscal(models.Model):
+    apuracao = models.ForeignKey(
+        ApuracoesFiscais,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    imposto = models.ForeignKey('ImpostosFiscais', on_delete=models.PROTECT)
+    valor_debito = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_credito = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    saldo = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'itens_apuracao_fiscal'
+        indexes = [
+            models.Index(fields=['imposto']),
+        ]
+
+    def __str__(self):
+        return f"Item Apuração {self.apuracao_id} - {self.imposto}"
+
+
+class OrdensProducao(models.Model):
+    STATUS_CHOICES = [
+        ('R', 'Rascunho'),
+        ('A', 'Aprovada'),
+        ('E', 'Em produção'),
+        ('F', 'Finalizada'),
+        ('X', 'Cancelada'),
+    ]
+
+    numero_ordem = models.CharField(max_length=30, db_index=True)
+    produto_final = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    quantidade_planejada = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    quantidade_produzida = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    data_inicio = models.DateTimeField(null=True, blank=True)
+    data_fim = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='R')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'ordens_producao'
+        ordering = ['-data_inicio']
+        indexes = [
+            models.Index(fields=['numero_ordem']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"OP {self.numero_ordem}"
+
+
+class ItensOrdemProducao(models.Model):
+    ordem = models.ForeignKey('OrdensProducao', on_delete=models.CASCADE, related_name='itens')
+    produto_insumo = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+
+    class Meta:
+        db_table = 'itens_ordem_producao'
+        indexes = [
+            models.Index(fields=['produto_insumo']),
+        ]
+
+    def __str__(self):
+        return f"Insumo {self.produto_insumo_id} OP {self.ordem_id}"
+
+
+class ConsumosProducao(models.Model):
+    ordem = models.ForeignKey('OrdensProducao', on_delete=models.CASCADE, related_name='consumos')
+    produto = models.ForeignKey('Produtos', on_delete=models.PROTECT)
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    data_consumo = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'consumos_producao'
+        ordering = ['-data_consumo']
+        indexes = [
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Consumo {self.ordem_id} - {self.produto_id}"
+
+
+class ApontamentosProducao(models.Model):
+    ordem = models.ForeignKey('OrdensProducao', on_delete=models.CASCADE, related_name='apontamentos')
+    local_id = models.ForeignKey('LocaisEstoque', on_delete=models.PROTECT, null=True, blank=True)
+    quantidade = models.DecimalField(max_digits=15, decimal_places=4, default=Decimal('0.0000'))
+    data_apontamento = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'apontamentos_producao'
+        ordering = ['-data_apontamento']
+        indexes = [
+            models.Index(fields=['ordem']),
+        ]
+
+    def __str__(self):
+        return f"Apontamento {self.ordem_id}"
+
+
+class AtivosPatrimonio(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Ativo'),
+        ('I', 'Inativo'),
+        ('B', 'Baixado'),
+    ]
+
+    codigo = models.CharField(max_length=30, db_index=True)
+    descricao = models.CharField(max_length=150)
+    categoria = models.CharField(max_length=100, null=True, blank=True)
+    localizacao = models.CharField(max_length=150, null=True, blank=True)
+    data_aquisicao = models.DateField(null=True, blank=True)
+    valor_aquisicao = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    vida_util_meses = models.IntegerField(null=True, blank=True)
+    valor_residual = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'ativos_patrimonio'
+        ordering = ['descricao']
+        indexes = [
+            models.Index(fields=['codigo']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descricao}"
+
+
+class ManutencoesAtivos(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Aberta'),
+        ('E', 'Em execução'),
+        ('F', 'Finalizada'),
+        ('C', 'Cancelada'),
+    ]
+
+    ativo = models.ForeignKey('AtivosPatrimonio', on_delete=models.PROTECT, related_name='manutencoes')
+    tipo = models.CharField(max_length=50)
+    data_abertura = models.DateTimeField(null=True, blank=True)
+    data_fechamento = models.DateTimeField(null=True, blank=True)
+    responsavel_id = models.IntegerField(null=True, blank=True)
+    custo_previsto = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    custo_real = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'manutencoes_ativos'
+        ordering = ['-data_abertura']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['ativo']),
+        ]
+
+    def __str__(self):
+        return f"Manutenção {self.id} - {self.ativo_id}"
+
+
+class DepreciacoesAtivos(models.Model):
+    ativo = models.ForeignKey('AtivosPatrimonio', on_delete=models.CASCADE, related_name='depreciacoes')
+    competencia = models.DateField()
+    valor_depreciado = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_acumulado = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'depreciacoes_ativos'
+        ordering = ['-competencia']
+        indexes = [
+            models.Index(fields=['ativo']),
+            models.Index(fields=['competencia']),
+        ]
+
+    def __str__(self):
+        return f"Depreciação {self.ativo_id} {self.competencia}"
 class LocaisEstoque(models.Model):
     codigo = models.CharField(max_length=20)
     descricao = models.CharField(max_length=100)
@@ -1685,6 +2391,458 @@ class ItensNfSaida(models.Model):
                 
             self.valor_total = total
 
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+class OrcamentosVenda(models.Model):
+    STATUS_CHOICES = [
+        ('ABERTO', 'Aberto'),
+        ('APROVADO', 'Aprovado'),
+        ('REJEITADO', 'Rejeitado'),
+        ('EXPIRADO', 'Expirado'),
+        ('CONVERTIDO', 'Convertido'),
+    ]
+
+    numero_orcamento = models.CharField(
+        max_length=30,
+        verbose_name='Número do Orçamento',
+        null=True,
+        blank=True
+    )
+    cliente = models.ForeignKey(
+        'Clientes',
+        on_delete=models.PROTECT,
+        related_name='orcamentos_venda',
+        verbose_name='Cliente',
+        null=True,
+        blank=True
+    )
+    vendedor = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='orcamentos_venda',
+        verbose_name='Vendedor',
+        null=True,
+        blank=True
+    )
+    data_emissao = models.DateTimeField(
+        verbose_name='Data de Emissão',
+        null=True,
+        blank=True
+    )
+    validade = models.DateField(
+        verbose_name='Validade',
+        null=True,
+        blank=True
+    )
+    valor_produtos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor dos Produtos',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    frete = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Frete',
+        default=Decimal('0.00')
+    )
+    impostos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Impostos',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ABERTO',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'orcamentos_venda'
+        verbose_name = 'Orçamento de Venda'
+        verbose_name_plural = 'Orçamentos de Venda'
+        ordering = ['-data_emissao', '-id']
+        indexes = [
+            models.Index(fields=['numero_orcamento']),
+            models.Index(fields=['data_emissao']),
+            models.Index(fields=['cliente']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Orçamento {self.numero_orcamento or self.id} - {self.cliente}"
+
+    def clean(self):
+        self.valor_total = (
+            self.valor_produtos +
+            self.frete +
+            self.impostos -
+            self.desconto
+        )
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ItensOrcamentoVenda(models.Model):
+    orcamento = models.ForeignKey(
+        'OrcamentosVenda',
+        on_delete=models.CASCADE,
+        related_name='itens',
+        verbose_name='Orçamento'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_orcamento_venda',
+        verbose_name='Produto'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        verbose_name='Quantidade',
+        default=Decimal('0.0000')
+    )
+    valor_unitario = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Unitário',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+
+    class Meta:
+        db_table = 'itens_orcamento_venda'
+        verbose_name = 'Item do Orçamento'
+        verbose_name_plural = 'Itens do Orçamento'
+        ordering = ['orcamento', 'id']
+        indexes = [
+            models.Index(fields=['orcamento', 'produto']),
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Orçamento {self.orcamento_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_unitario) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class PedidosVenda(models.Model):
+    STATUS_CHOICES = [
+        ('RASCUNHO', 'Rascunho'),
+        ('APROVADO', 'Aprovado'),
+        ('EXPEDIDO', 'Expedido'),
+        ('FATURADO', 'Faturado'),
+        ('CANCELADO', 'Cancelado'),
+    ]
+
+    numero_pedido = models.CharField(
+        max_length=30,
+        verbose_name='Número do Pedido',
+        null=True,
+        blank=True
+    )
+    cliente = models.ForeignKey(
+        'Clientes',
+        on_delete=models.PROTECT,
+        related_name='pedidos_venda',
+        verbose_name='Cliente',
+        null=True,
+        blank=True
+    )
+    vendedor = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='pedidos_venda',
+        verbose_name='Vendedor',
+        null=True,
+        blank=True
+    )
+    orcamento = models.ForeignKey(
+        'OrcamentosVenda',
+        on_delete=models.SET_NULL,
+        related_name='pedidos_venda',
+        verbose_name='Orçamento',
+        null=True,
+        blank=True
+    )
+    data_emissao = models.DateTimeField(
+        verbose_name='Data de Emissão',
+        null=True,
+        blank=True
+    )
+    data_aprovacao = models.DateTimeField(
+        verbose_name='Data de Aprovação',
+        null=True,
+        blank=True
+    )
+    data_faturamento = models.DateTimeField(
+        verbose_name='Data de Faturamento',
+        null=True,
+        blank=True
+    )
+    forma_pagamento = models.CharField(
+        max_length=50,
+        verbose_name='Forma de Pagamento',
+        null=True,
+        blank=True
+    )
+    condicoes_pagamento = models.CharField(
+        max_length=100,
+        verbose_name='Condições de Pagamento',
+        null=True,
+        blank=True
+    )
+    prazo_entrega = models.CharField(
+        max_length=100,
+        verbose_name='Prazo de Entrega',
+        null=True,
+        blank=True
+    )
+    valor_produtos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor dos Produtos',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    frete = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Frete',
+        default=Decimal('0.00')
+    )
+    impostos = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Impostos',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+    observacoes = models.TextField(
+        verbose_name='Observações',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='RASCUNHO',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'pedidos_venda'
+        verbose_name = 'Pedido de Venda'
+        verbose_name_plural = 'Pedidos de Venda'
+        ordering = ['-data_emissao', '-id']
+        indexes = [
+            models.Index(fields=['numero_pedido']),
+            models.Index(fields=['data_emissao']),
+            models.Index(fields=['cliente']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Pedido {self.numero_pedido or self.id} - {self.cliente}"
+
+    def clean(self):
+        self.valor_total = (
+            self.valor_produtos +
+            self.frete +
+            self.impostos -
+            self.desconto
+        )
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ItensPedidoVenda(models.Model):
+    pedido = models.ForeignKey(
+        'PedidosVenda',
+        on_delete=models.CASCADE,
+        related_name='itens',
+        verbose_name='Pedido'
+    )
+    produto = models.ForeignKey(
+        'Produtos',
+        on_delete=models.PROTECT,
+        related_name='itens_pedido_venda',
+        verbose_name='Produto'
+    )
+    quantidade = models.DecimalField(
+        max_digits=15,
+        decimal_places=4,
+        verbose_name='Quantidade',
+        default=Decimal('0.0000')
+    )
+    valor_unitario = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Unitário',
+        default=Decimal('0.00')
+    )
+    desconto = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Desconto',
+        default=Decimal('0.00')
+    )
+    valor_total = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Total',
+        default=Decimal('0.00')
+    )
+
+    class Meta:
+        db_table = 'itens_pedido_venda'
+        verbose_name = 'Item do Pedido'
+        verbose_name_plural = 'Itens do Pedido'
+        ordering = ['pedido', 'id']
+        indexes = [
+            models.Index(fields=['pedido', 'produto']),
+            models.Index(fields=['produto']),
+        ]
+
+    def __str__(self):
+        return f"Item {self.id} - Pedido {self.pedido_id}"
+
+    def clean(self):
+        self.valor_total = (self.quantidade * self.valor_unitario) - (self.desconto or Decimal('0.00'))
+        super().clean()
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+
+class ComissoesVenda(models.Model):
+    STATUS_CHOICES = [
+        ('ABERTA', 'Aberta'),
+        ('PAGA', 'Paga'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+
+    pedido = models.ForeignKey(
+        'PedidosVenda',
+        on_delete=models.CASCADE,
+        related_name='comissoes',
+        verbose_name='Pedido'
+    )
+    vendedor = models.ForeignKey(
+        'Funcionarios',
+        on_delete=models.PROTECT,
+        related_name='comissoes_venda',
+        verbose_name='Vendedor'
+    )
+    percentual = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        verbose_name='Percentual',
+        default=Decimal('0.00')
+    )
+    valor_base = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Base',
+        default=Decimal('0.00')
+    )
+    valor_comissao = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        verbose_name='Valor Comissão',
+        default=Decimal('0.00')
+    )
+    data_lancamento = models.DateTimeField(
+        verbose_name='Data de Lançamento',
+        null=True,
+        blank=True
+    )
+    data_pagamento = models.DateTimeField(
+        verbose_name='Data de Pagamento',
+        null=True,
+        blank=True
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='ABERTA',
+        verbose_name='Status'
+    )
+
+    class Meta:
+        db_table = 'comissoes_venda'
+        verbose_name = 'Comissão de Venda'
+        verbose_name_plural = 'Comissões de Venda'
+        ordering = ['-data_lancamento', '-id']
+        indexes = [
+            models.Index(fields=['pedido']),
+            models.Index(fields=['vendedor']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Comissão {self.id} - Pedido {self.pedido_id}"
+
+    def clean(self):
+        if self.valor_base and self.percentual:
+            self.valor_comissao = (self.valor_base * self.percentual) / Decimal('100.00')
         super().clean()
 
     def save(self, *args, **kwargs):
