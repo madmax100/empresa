@@ -25,11 +25,16 @@ import ImpostosFiscaisPage from './pages/ImpostosFiscaisPage';
 import ApuracoesFiscaisPage from './pages/ApuracoesFiscaisPage';
 import ItensApuracaoFiscalPage from './pages/ItensApuracaoFiscalPage';
 import FiscalOperacoesPage from './pages/FiscalOperacoesPage';
+import OrdensProducaoPage from './pages/OrdensProducaoPage';
+import ItensOrdemProducaoPage from './pages/ItensOrdemProducaoPage';
+import ConsumosProducaoPage from './pages/ConsumosProducaoPage';
+import ApontamentosProducaoPage from './pages/ApontamentosProducaoPage';
+import OperacoesProducaoPage from './pages/OperacoesProducaoPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -562,6 +567,106 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('ordens-producao')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'ordens-producao' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'ordens-producao' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🏭 Ordens Produção
+          </button>
+
+          <button
+            onClick={() => setActivePanel('itens-ordem-producao')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'itens-ordem-producao' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'itens-ordem-producao' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧰 Itens Ordem
+          </button>
+
+          <button
+            onClick={() => setActivePanel('consumos-producao')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'consumos-producao' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'consumos-producao' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧪 Consumos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('apontamentos-producao')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'apontamentos-producao' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'apontamentos-producao' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📌 Apontamentos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('operacoes-producao')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'operacoes-producao' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'operacoes-producao' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🏗️ Operações Produção
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -688,6 +793,11 @@ function App() {
         {activePanel === 'apuracoes-fiscais' && <ApuracoesFiscaisPage />}
         {activePanel === 'itens-apuracao-fiscal' && <ItensApuracaoFiscalPage />}
         {activePanel === 'fiscal-operacoes' && <FiscalOperacoesPage />}
+        {activePanel === 'ordens-producao' && <OrdensProducaoPage />}
+        {activePanel === 'itens-ordem-producao' && <ItensOrdemProducaoPage />}
+        {activePanel === 'consumos-producao' && <ConsumosProducaoPage />}
+        {activePanel === 'apontamentos-producao' && <ApontamentosProducaoPage />}
+        {activePanel === 'operacoes-producao' && <OperacoesProducaoPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
