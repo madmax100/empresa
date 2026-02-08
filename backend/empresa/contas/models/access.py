@@ -1702,6 +1702,72 @@ class Fretes(models.Model):
     def __str__(self):
         return f"Frete {self.id} - {self.tipo_operacao}"
 
+
+class ImpostosFiscais(models.Model):
+    codigo = models.CharField(max_length=20, db_index=True)
+    nome = models.CharField(max_length=100)
+    tipo = models.CharField(max_length=20, null=True, blank=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'impostos_fiscais'
+        ordering = ['nome']
+        indexes = [
+            models.Index(fields=['codigo']),
+            models.Index(fields=['tipo']),
+        ]
+
+    def __str__(self):
+        return f"{self.codigo} - {self.nome}"
+
+
+class ApuracoesFiscais(models.Model):
+    STATUS_CHOICES = [
+        ('A', 'Aberta'),
+        ('F', 'Fechada'),
+    ]
+
+    data_inicio = models.DateField()
+    data_fim = models.DateField()
+    data_apuracao = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
+    total_debitos = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    total_creditos = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    saldo = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    observacoes = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'apuracoes_fiscais'
+        ordering = ['-data_apuracao']
+        indexes = [
+            models.Index(fields=['data_inicio', 'data_fim']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        return f"Apuração {self.id} ({self.data_inicio} - {self.data_fim})"
+
+
+class ItensApuracaoFiscal(models.Model):
+    apuracao = models.ForeignKey(
+        ApuracoesFiscais,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    imposto = models.ForeignKey('ImpostosFiscais', on_delete=models.PROTECT)
+    valor_debito = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    valor_credito = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+    saldo = models.DecimalField(max_digits=15, decimal_places=2, default=Decimal('0.00'))
+
+    class Meta:
+        db_table = 'itens_apuracao_fiscal'
+        indexes = [
+            models.Index(fields=['imposto']),
+        ]
+
+    def __str__(self):
+        return f"Item Apuração {self.apuracao_id} - {self.imposto}"
+
 class LocaisEstoque(models.Model):
     codigo = models.CharField(max_length=20)
     descricao = models.CharField(max_length=100)

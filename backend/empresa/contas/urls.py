@@ -52,6 +52,10 @@ from .views.crm_views import (
     CrmFunilResumoView,
     CrmOportunidadesResumoView,
 )
+from .views.fiscal_views import (
+    FiscalApuracaoGerarView,
+    FiscalApuracaoResumoView,
+)
 from .views.produtos_views import (
     ProdutosAlertasView,
     ProdutosComposicaoResumoView,
@@ -105,6 +109,9 @@ router.register(r'grupos', GruposViewSet)
 router.register(r'historico_rastreamento', HistoricoRastreamentoViewSet)
 router.register(r'inventarios', InventariosViewSet)
 router.register(r'itens_contrato_locacao', ItensContratoLocacaoViewSet)
+router.register(r'impostos-fiscais', ImpostosFiscaisViewSet)
+router.register(r'apuracoes-fiscais', ApuracoesFiscaisViewSet)
+router.register(r'itens-apuracao-fiscal', ItensApuracaoFiscalViewSet)
 router.register(r'etapas-funil', EtapasFunilViewSet)
 router.register(r'leads', LeadsViewSet)
 router.register(r'oportunidades', OportunidadesViewSet)
@@ -196,6 +203,8 @@ urlpatterns = [
     path('crm/funil/resumo/', CrmFunilResumoView.as_view(), name='crm-funil-resumo'),
     path('crm/atividades/pendentes/', CrmAtividadesPendentesView.as_view(), name='crm-atividades-pendentes'),
     path('crm/oportunidades/resumo/', CrmOportunidadesResumoView.as_view(), name='crm-oportunidades-resumo'),
+    path('fiscal/apuracao/gerar/', FiscalApuracaoGerarView.as_view(), name='fiscal-apuracao-gerar'),
+    path('fiscal/apuracao/resumo/', FiscalApuracaoResumoView.as_view(), name='fiscal-apuracao-resumo'),
     path('compras/requisicoes/registrar/', ComprasRequisicaoCadastrarView.as_view(), name='compras-requisicoes-registrar'),
     path('compras/requisicoes/aprovar/', ComprasRequisicaoAprovarView.as_view(), name='compras-requisicoes-aprovar'),
     path('compras/cotacoes/registrar/', ComprasCotacaoCadastrarView.as_view(), name='compras-cotacoes-registrar'),

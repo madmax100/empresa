@@ -55,6 +55,23 @@ class ItensPropostaVendaSerializer(serializers.ModelSerializer):
         model = ItensPropostaVenda
         fields = '__all__'
 
+class ImpostosFiscaisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ImpostosFiscais
+        fields = '__all__'
+
+
+class ApuracoesFiscaisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApuracoesFiscais
+        fields = '__all__'
+
+
+class ItensApuracaoFiscalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensApuracaoFiscal
+        fields = '__all__'
+
 class ContratoLocacaoSerializer(serializers.ModelSerializer):
     cliente = ClienteSerializer(read_only=True)
     

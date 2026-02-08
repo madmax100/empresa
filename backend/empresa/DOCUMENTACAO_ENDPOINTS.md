@@ -136,6 +136,44 @@ http://localhost:8000
 
 ---
 
+### **🧾 Fiscal / Tributário**
+
+#### **Impostos Fiscais**
+- **GET** `/contas/impostos-fiscais/` - Lista impostos
+- **POST** `/contas/impostos-fiscais/` - Cria imposto
+- **GET** `/contas/impostos-fiscais/{id}/` - Busca imposto
+- **PUT** `/contas/impostos-fiscais/{id}/` - Atualiza imposto
+- **DELETE** `/contas/impostos-fiscais/{id}/` - Remove imposto
+
+#### **Apurações Fiscais**
+- **GET** `/contas/apuracoes-fiscais/` - Lista apurações
+- **POST** `/contas/apuracoes-fiscais/` - Cria apuração
+- **GET** `/contas/apuracoes-fiscais/{id}/` - Busca apuração
+- **PUT** `/contas/apuracoes-fiscais/{id}/` - Atualiza apuração
+- **DELETE** `/contas/apuracoes-fiscais/{id}/` - Remove apuração
+
+#### **Itens de Apuração**
+- **GET** `/contas/itens-apuracao-fiscal/` - Lista itens de apuração
+- **POST** `/contas/itens-apuracao-fiscal/` - Cria item
+- **GET** `/contas/itens-apuracao-fiscal/{id}/` - Busca item
+- **PUT** `/contas/itens-apuracao-fiscal/{id}/` - Atualiza item
+- **DELETE** `/contas/itens-apuracao-fiscal/{id}/` - Remove item
+
+#### **Operações Fiscais**
+- **POST** `/contas/fiscal/apuracao/gerar/` - Gera apuração (ICMS/IPI) por período
+- **GET** `/contas/fiscal/apuracao/resumo/` - Resumo de apurações por período
+
+#### **Exemplo de payload**
+**Gerar apuração**
+```json
+{
+  "data_inicio": "2025-01-01",
+  "data_fim": "2025-01-31"
+}
+```
+
+---
+
 ### **📦 Gestão de Produtos**
 
 #### **Produtos**
