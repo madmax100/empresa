@@ -14,11 +14,18 @@ import FornecedoresPage from './pages/FornecedoresPage';
 import FuncionariosPage from './pages/FuncionariosPage';
 import EmpresasPage from './pages/EmpresasPage';
 import TransportadorasPage from './pages/TransportadorasPage';
+import EtapasFunilPage from './pages/EtapasFunilPage';
+import LeadsPage from './pages/LeadsPage';
+import OportunidadesPage from './pages/OportunidadesPage';
+import AtividadesCrmPage from './pages/AtividadesCrmPage';
+import PropostasVendaCrmPage from './pages/PropostasVendaCrmPage';
+import ItensPropostaVendaPage from './pages/ItensPropostaVendaPage';
+import CrmResumoPage from './pages/CrmResumoPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -331,6 +338,146 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('crm-resumo')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'crm-resumo' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'crm-resumo' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🤝 CRM Resumo
+          </button>
+
+          <button
+            onClick={() => setActivePanel('etapas-funil')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'etapas-funil' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'etapas-funil' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧭 Etapas Funil
+          </button>
+
+          <button
+            onClick={() => setActivePanel('leads')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'leads' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'leads' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🗂️ Leads
+          </button>
+
+          <button
+            onClick={() => setActivePanel('oportunidades')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'oportunidades' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'oportunidades' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🎯 Oportunidades
+          </button>
+
+          <button
+            onClick={() => setActivePanel('atividades-crm')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'atividades-crm' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'atividades-crm' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📝 Atividades CRM
+          </button>
+
+          <button
+            onClick={() => setActivePanel('propostas-crm')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'propostas-crm' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'propostas-crm' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📄 Propostas CRM
+          </button>
+
+          <button
+            onClick={() => setActivePanel('itens-proposta')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'itens-proposta' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'itens-proposta' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Itens Proposta
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -446,6 +593,13 @@ function App() {
         {activePanel === 'funcionarios' && <FuncionariosPage />}
         {activePanel === 'empresas' && <EmpresasPage />}
         {activePanel === 'transportadoras' && <TransportadorasPage />}
+        {activePanel === 'crm-resumo' && <CrmResumoPage />}
+        {activePanel === 'etapas-funil' && <EtapasFunilPage />}
+        {activePanel === 'leads' && <LeadsPage />}
+        {activePanel === 'oportunidades' && <OportunidadesPage />}
+        {activePanel === 'atividades-crm' && <AtividadesCrmPage />}
+        {activePanel === 'propostas-crm' && <PropostasVendaCrmPage />}
+        {activePanel === 'itens-proposta' && <ItensPropostaVendaPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
