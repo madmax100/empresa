@@ -9,11 +9,16 @@ import ResultadosPage from './pages/ResultadosPage';
 import CustosFixosPage from './pages/CustosFixosPage';
 import CustosVariaveisPage from './pages/CustosVariaveisPage';
 import { FaturamentoPage } from './pages/FaturamentoPage';
+import ClientesPage from './pages/ClientesPage';
+import FornecedoresPage from './pages/FornecedoresPage';
+import FuncionariosPage from './pages/FuncionariosPage';
+import EmpresasPage from './pages/EmpresasPage';
+import TransportadorasPage from './pages/TransportadorasPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -226,6 +231,106 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('clientes')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'clientes' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'clientes' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧑‍🤝‍🧑 Clientes
+          </button>
+
+          <button
+            onClick={() => setActivePanel('fornecedores')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'fornecedores' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'fornecedores' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Fornecedores
+          </button>
+
+          <button
+            onClick={() => setActivePanel('funcionarios')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'funcionarios' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'funcionarios' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            👥 Funcionários
+          </button>
+
+          <button
+            onClick={() => setActivePanel('empresas')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'empresas' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'empresas' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🏭 Empresas
+          </button>
+
+          <button
+            onClick={() => setActivePanel('transportadoras')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'transportadoras' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'transportadoras' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🚚 Transportadoras
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -336,6 +441,11 @@ function App() {
         {activePanel === 'estoque-comparativo' && <EstoqueComparacao dataInicio={dataInicio} dataFim={dataFim} />}
         {activePanel === 'gerencia' && <GerenciaDashboard dataInicio={dataInicio} dataFim={dataFim} />}
         {activePanel === 'contratos' && <ContratosPage />}
+        {activePanel === 'clientes' && <ClientesPage />}
+        {activePanel === 'fornecedores' && <FornecedoresPage />}
+        {activePanel === 'funcionarios' && <FuncionariosPage />}
+        {activePanel === 'empresas' && <EmpresasPage />}
+        {activePanel === 'transportadoras' && <TransportadorasPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
