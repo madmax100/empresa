@@ -126,6 +126,119 @@ class ItensNfEntradaSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 
+class OrcamentosVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrcamentosVenda
+        fields = '__all__'
+
+
+class ItensOrcamentoVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensOrcamentoVenda
+        fields = '__all__'
+
+
+class PedidosVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PedidosVenda
+        fields = '__all__'
+
+
+class ItensPedidoVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensPedidoVenda
+        fields = '__all__'
+
+
+class ComissoesVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ComissoesVenda
+        fields = '__all__'
+
+
+class RequisicoesCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RequisicoesCompra
+        fields = '__all__'
+
+
+class ItensRequisicaoCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensRequisicaoCompra
+        fields = '__all__'
+
+
+class CotacoesCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CotacoesCompra
+        fields = '__all__'
+
+
+class ItensCotacaoCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensCotacaoCompra
+        fields = '__all__'
+
+
+class PedidosCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PedidosCompra
+        fields = '__all__'
+
+
+class ItensPedidoCompraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensPedidoCompra
+        fields = '__all__'
+
+
+class FunisVendaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FunisVenda
+        fields = '__all__'
+
+
+class EtapasFunilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EtapasFunil
+        fields = '__all__'
+
+
+class OportunidadesCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OportunidadesCRM
+        fields = '__all__'
+
+
+class AtividadesCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AtividadesCRM
+        fields = '__all__'
+
+
+class PropostasCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropostasCRM
+        fields = '__all__'
+
+
+class ItensPropostaCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItensPropostaCRM
+        fields = '__all__'
+
+
+class CampanhasCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CampanhasCRM
+        fields = '__all__'
+
+
+class LeadsCRMSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeadsCRM
+        fields = '__all__'
+
         
 class LocaisEstoqueSerializer(serializers.ModelSerializer):
     class Meta:
@@ -175,7 +288,64 @@ class PosicoesEstoqueSerializer(serializers.ModelSerializer):
 class ProdutoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Produtos
-        fields = ['id', 'nome', 'codigo']
+        fields = '__all__'
+
+    def validate_ean(self, value):
+        if value and not value.isdigit():
+            raise serializers.ValidationError('EAN deve conter apenas dígitos.')
+        if value and len(value) not in {8, 12, 13, 14}:
+            raise serializers.ValidationError('EAN deve ter 8, 12, 13 ou 14 dígitos.')
+        return value
+
+class ProdutoFiscalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProdutoFiscal
+        fields = '__all__'
+
+class ProdutoVariacaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProdutoVariacao
+        fields = '__all__'
+
+class ProdutoComposicaoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProdutoComposicao
+        fields = '__all__'
+
+class ProdutoConversaoUnidadeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProdutoConversaoUnidade
+        fields = '__all__'
+
+class ProdutoHistoricoPrecoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProdutoHistoricoPreco
+        fields = '__all__'
+
+class TabelaPrecoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TabelaPreco
+        fields = '__all__'
+
+class TabelaPrecoItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TabelaPrecoItem
+        fields = '__all__'
+
+class PoliticaDescontoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PoliticaDesconto
+        fields = '__all__'
+
+class ProdutoSubstitutoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProdutoSubstituto
+        fields = '__all__'
+
+class ProdutoCustoLocalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProdutoCustoLocal
+        fields = '__all__'
 
 class ItensNfSaidaSerializer(serializers.ModelSerializer):
     produto = ProdutoSerializer(read_only=True)  # Inclui todos os dados do produto
@@ -215,4 +385,3 @@ class TransportadorasSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transportadoras
         fields = '__all__'
-

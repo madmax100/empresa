@@ -12,6 +12,81 @@ from .views.dre_views import DREView
 from .views.access import *
 from .views.access import suprimentos_por_contrato
 from .views.comparativo_estoque import ComparativoEstoqueView
+from .views.compras_views import (
+    ComprasResumoView,
+    ComprasCadastroView,
+    ComprasAtualizarView,
+    ComprasContaPagarView,
+    ComprasContaPagarAgingView,
+    ComprasContaPagarAtrasadasView,
+    ComprasContaPagarResumoFornecedorView,
+    ComprasContaPagarPagasResumoView,
+    ComprasContaPagarFluxoView,
+    ComprasDevolucaoView,
+    ComprasDevolucaoListaView,
+    ComprasCancelarDevolucaoView,
+    ComprasAtualizarDevolucaoView,
+    ComprasDevolucaoSaldoView,
+    ComprasDevolucaoResumoView,
+    ComprasDevolucaoPorNotaView,
+    ComprasParcelasContaPagarView,
+    ComprasBaixaContaPagarView,
+    ComprasEstornoContaPagarView,
+    ComprasDetalheView,
+    ComprasCancelarNotaView,
+    ComprasListaView,
+    ComprasCancelarContaPagarView,
+    ComprasRequisicaoRegistrarView,
+    ComprasRequisicaoAprovarView,
+    ComprasRequisicaoRejeitarView,
+    ComprasCotacaoRegistrarView,
+    ComprasCotacaoAprovarView,
+    ComprasPedidoRegistrarView,
+    ComprasPedidoAprovarView,
+    ComprasPedidoCancelarView,
+    ComprasPedidoReceberView,
+)
+from .views.produtos_views import (
+    ProdutosAlertasView,
+    ProdutosComposicaoResumoView,
+    ProdutosConversaoView,
+    ProdutosFichaTecnicaView,
+    ProdutosHistoricoPrecoView,
+    ProdutosPrecoView,
+    ProdutosSubstitutosView,
+)
+from .views.vendas_views import (
+    VendasAprovarView,
+    VendasCadastroView,
+    VendasCancelarView,
+    VendasConverterOrcamentoView,
+    VendasFaturarView,
+    VendasListaView,
+    VendasResumoView,
+    VendasContaReceberBaixaView,
+    VendasContaReceberEstornoView,
+    VendasContaReceberAgingView,
+    VendasContaReceberAtrasadasView,
+    VendasDetalheView,
+    VendasAtualizarView,
+    VendasEstornoFaturamentoView,
+    VendasDevolucaoView,
+    VendasDevolucaoListaView,
+    VendasDevolucaoCancelarView,
+    VendasDevolucaoSaldoView,
+    VendasComissaoGerarView,
+    VendasComissaoResumoView,
+    VendasExpedicaoPendentesView,
+    VendasExpedicaoConfirmarView,
+    VendasExpedicaoEstornoView,
+)
+from .views.crm_views import (
+    CRMAtividadeConcluirView,
+    CRMLeadConverterView,
+    CRMOportunidadeFecharView,
+    CRMOportunidadeMoverEtapaView,
+    CRMPropostaRegistrarView,
+)
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriasViewSet)
@@ -33,6 +108,25 @@ router.register(r'inventarios', InventariosViewSet)
 router.register(r'itens_contrato_locacao', ItensContratoLocacaoViewSet)
 router.register(r'itens_nf_entrada', ItensNfEntradaViewSet)
 router.register(r'itens_nf_saida', ItensNfSaidaViewSet)
+router.register(r'orcamentos-venda', OrcamentosVendaViewSet)
+router.register(r'itens-orcamento-venda', ItensOrcamentoVendaViewSet)
+router.register(r'pedidos-venda', PedidosVendaViewSet)
+router.register(r'itens-pedido-venda', ItensPedidoVendaViewSet)
+router.register(r'comissoes-venda', ComissoesVendaViewSet)
+router.register(r'requisicoes-compra', RequisicoesCompraViewSet)
+router.register(r'itens-requisicao-compra', ItensRequisicaoCompraViewSet)
+router.register(r'cotacoes-compra', CotacoesCompraViewSet)
+router.register(r'itens-cotacao-compra', ItensCotacaoCompraViewSet)
+router.register(r'pedidos-compra', PedidosCompraViewSet)
+router.register(r'itens-pedido-compra', ItensPedidoCompraViewSet)
+router.register(r'funis-venda', FunisVendaViewSet)
+router.register(r'etapas-funil', EtapasFunilViewSet)
+router.register(r'oportunidades-crm', OportunidadesCRMViewSet)
+router.register(r'atividades-crm', AtividadesCRMViewSet)
+router.register(r'propostas-crm', PropostasCRMViewSet)
+router.register(r'itens-proposta-crm', ItensPropostaCRMViewSet)
+router.register(r'campanhas-crm', CampanhasCRMViewSet)
+router.register(r'leads-crm', LeadsCRMViewSet)
 router.register(r'locais_estoque', LocaisEstoqueViewSet)
 router.register(r'lotes', LotesViewSet)
 router.register(r'marcas', MarcasViewSet)
@@ -43,6 +137,16 @@ router.register(r'ocorrencias_frete', OcorrenciasFreteViewSet)
 router.register(r'pagamentos_funcionarios', PagamentosFuncionariosViewSet)
 router.register(r'posicoes_estoque', PosicoesEstoqueViewSet)
 router.register(r'produtos', ProdutosViewSet)
+router.register(r'produtos-fiscal', ProdutoFiscalViewSet)
+router.register(r'produtos-variacoes', ProdutoVariacaoViewSet)
+router.register(r'produtos-composicao', ProdutoComposicaoViewSet)
+router.register(r'produtos-conversao-unidade', ProdutoConversaoUnidadeViewSet)
+router.register(r'produtos-historico-preco', ProdutoHistoricoPrecoViewSet)
+router.register(r'tabelas-precos', TabelaPrecoViewSet)
+router.register(r'tabelas-precos-itens', TabelaPrecoItemViewSet)
+router.register(r'politicas-desconto', PoliticaDescontoViewSet)
+router.register(r'produtos-substitutos', ProdutoSubstitutoViewSet)
+router.register(r'produtos-custo-local', ProdutoCustoLocalViewSet)
 router.register(r'regioes_entrega', RegioesEntregaViewSet)
 router.register(r'saldos_estoque', SaldosEstoqueViewSet)
 router.register(r'tabelas_frete', TabelasFreteViewSet)
@@ -76,7 +180,73 @@ urlpatterns = [
     # DRE - Demonstrativo de Resultados
     path('dre/', DREView.as_view(), name='dre'),
     path('estoque-comparativo/', ComparativoEstoqueView.as_view(), name='estoque-comparativo'),
+    path('compras/resumo/', ComprasResumoView.as_view(), name='compras-resumo'),
+    path('compras/registrar/', ComprasCadastroView.as_view(), name='compras-registrar'),
+    path('compras/atualizar/<int:nota_id>/', ComprasAtualizarView.as_view(), name='compras-atualizar'),
+    path('compras/conta-pagar/', ComprasContaPagarView.as_view(), name='compras-conta-pagar'),
+    path('compras/conta-pagar/aging/', ComprasContaPagarAgingView.as_view(), name='compras-conta-pagar-aging'),
+    path('compras/conta-pagar/atrasadas/', ComprasContaPagarAtrasadasView.as_view(), name='compras-conta-pagar-atrasadas'),
+    path('compras/conta-pagar/resumo-fornecedor/', ComprasContaPagarResumoFornecedorView.as_view(), name='compras-conta-pagar-resumo-fornecedor'),
+    path('compras/conta-pagar/resumo-pagas/', ComprasContaPagarPagasResumoView.as_view(), name='compras-conta-pagar-resumo-pagas'),
+    path('compras/conta-pagar/fluxo/', ComprasContaPagarFluxoView.as_view(), name='compras-conta-pagar-fluxo'),
+    path('compras/devolucao/', ComprasDevolucaoView.as_view(), name='compras-devolucao'),
+    path('compras/devolucao/lista/', ComprasDevolucaoListaView.as_view(), name='compras-devolucao-lista'),
+    path('compras/devolucao/cancelar/', ComprasCancelarDevolucaoView.as_view(), name='compras-devolucao-cancelar'),
+    path('compras/devolucao/atualizar/', ComprasAtualizarDevolucaoView.as_view(), name='compras-devolucao-atualizar'),
+    path('compras/devolucao/saldo/<int:nota_id>/', ComprasDevolucaoSaldoView.as_view(), name='compras-devolucao-saldo'),
+    path('compras/devolucao/resumo/', ComprasDevolucaoResumoView.as_view(), name='compras-devolucao-resumo'),
+    path('compras/devolucao/notas/', ComprasDevolucaoPorNotaView.as_view(), name='compras-devolucao-notas'),
+    path('compras/conta-pagar/parcelas/', ComprasParcelasContaPagarView.as_view(), name='compras-conta-pagar-parcelas'),
+    path('compras/conta-pagar/baixar/', ComprasBaixaContaPagarView.as_view(), name='compras-conta-pagar-baixar'),
+    path('compras/conta-pagar/estornar/', ComprasEstornoContaPagarView.as_view(), name='compras-conta-pagar-estornar'),
+    path('compras/detalhe/<int:nota_id>/', ComprasDetalheView.as_view(), name='compras-detalhe'),
+    path('compras/cancelar/<int:nota_id>/', ComprasCancelarNotaView.as_view(), name='compras-cancelar'),
+    path('compras/', ComprasListaView.as_view(), name='compras-lista'),
+    path('compras/conta-pagar/cancelar/', ComprasCancelarContaPagarView.as_view(), name='compras-conta-pagar-cancelar'),
+    path('compras/requisicao/registrar/', ComprasRequisicaoRegistrarView.as_view(), name='compras-requisicao-registrar'),
+    path('compras/requisicao/aprovar/', ComprasRequisicaoAprovarView.as_view(), name='compras-requisicao-aprovar'),
+    path('compras/requisicao/rejeitar/', ComprasRequisicaoRejeitarView.as_view(), name='compras-requisicao-rejeitar'),
+    path('compras/cotacao/registrar/', ComprasCotacaoRegistrarView.as_view(), name='compras-cotacao-registrar'),
+    path('compras/cotacao/aprovar/', ComprasCotacaoAprovarView.as_view(), name='compras-cotacao-aprovar'),
+    path('compras/pedido/registrar/', ComprasPedidoRegistrarView.as_view(), name='compras-pedido-registrar'),
+    path('compras/pedido/aprovar/', ComprasPedidoAprovarView.as_view(), name='compras-pedido-aprovar'),
+    path('compras/pedido/cancelar/', ComprasPedidoCancelarView.as_view(), name='compras-pedido-cancelar'),
+    path('compras/pedido/receber/', ComprasPedidoReceberView.as_view(), name='compras-pedido-receber'),
+    path('produtos/preco/', ProdutosPrecoView.as_view(), name='produtos-preco'),
+    path('produtos/conversao/', ProdutosConversaoView.as_view(), name='produtos-conversao'),
+    path('produtos/composicao/<int:produto_id>/', ProdutosComposicaoResumoView.as_view(), name='produtos-composicao-resumo'),
+    path('produtos/alertas/', ProdutosAlertasView.as_view(), name='produtos-alertas'),
+    path('produtos/ficha/<int:produto_id>/', ProdutosFichaTecnicaView.as_view(), name='produtos-ficha-tecnica'),
+    path('produtos/historico-preco/<int:produto_id>/', ProdutosHistoricoPrecoView.as_view(), name='produtos-historico-preco'),
+    path('produtos/substitutos/<int:produto_id>/', ProdutosSubstitutosView.as_view(), name='produtos-substitutos'),
+    path('vendas/registrar/', VendasCadastroView.as_view(), name='vendas-registrar'),
+    path('vendas/aprovar/', VendasAprovarView.as_view(), name='vendas-aprovar'),
+    path('vendas/faturar/', VendasFaturarView.as_view(), name='vendas-faturar'),
+    path('vendas/cancelar/', VendasCancelarView.as_view(), name='vendas-cancelar'),
+    path('vendas/orcamento/converter/', VendasConverterOrcamentoView.as_view(), name='vendas-orcamento-converter'),
+    path('vendas/', VendasListaView.as_view(), name='vendas-lista'),
+    path('vendas/resumo/', VendasResumoView.as_view(), name='vendas-resumo'),
+    path('vendas/conta-receber/baixar/', VendasContaReceberBaixaView.as_view(), name='vendas-conta-receber-baixar'),
+    path('vendas/conta-receber/estornar/', VendasContaReceberEstornoView.as_view(), name='vendas-conta-receber-estornar'),
+    path('vendas/conta-receber/aging/', VendasContaReceberAgingView.as_view(), name='vendas-conta-receber-aging'),
+    path('vendas/conta-receber/atrasadas/', VendasContaReceberAtrasadasView.as_view(), name='vendas-conta-receber-atrasadas'),
+    path('vendas/detalhe/<int:pedido_id>/', VendasDetalheView.as_view(), name='vendas-detalhe'),
+    path('vendas/atualizar/<int:pedido_id>/', VendasAtualizarView.as_view(), name='vendas-atualizar'),
+    path('vendas/faturamento/estornar/', VendasEstornoFaturamentoView.as_view(), name='vendas-faturamento-estornar'),
+    path('vendas/devolucao/', VendasDevolucaoView.as_view(), name='vendas-devolucao'),
+    path('vendas/devolucao/lista/', VendasDevolucaoListaView.as_view(), name='vendas-devolucao-lista'),
+    path('vendas/devolucao/cancelar/', VendasDevolucaoCancelarView.as_view(), name='vendas-devolucao-cancelar'),
+    path('vendas/devolucao/saldo/<int:nota_id>/', VendasDevolucaoSaldoView.as_view(), name='vendas-devolucao-saldo'),
+    path('vendas/comissoes/gerar/', VendasComissaoGerarView.as_view(), name='vendas-comissoes-gerar'),
+    path('vendas/comissoes/resumo/', VendasComissaoResumoView.as_view(), name='vendas-comissoes-resumo'),
+    path('vendas/expedicao/pendentes/', VendasExpedicaoPendentesView.as_view(), name='vendas-expedicao-pendentes'),
+    path('vendas/expedicao/confirmar/', VendasExpedicaoConfirmarView.as_view(), name='vendas-expedicao-confirmar'),
+    path('vendas/expedicao/estornar/', VendasExpedicaoEstornoView.as_view(), name='vendas-expedicao-estornar'),
+    path('crm/oportunidades/mover-etapa/', CRMOportunidadeMoverEtapaView.as_view(), name='crm-oportunidade-mover-etapa'),
+    path('crm/oportunidades/fechar/', CRMOportunidadeFecharView.as_view(), name='crm-oportunidade-fechar'),
+    path('crm/atividades/concluir/', CRMAtividadeConcluirView.as_view(), name='crm-atividade-concluir'),
+    path('crm/propostas/registrar/', CRMPropostaRegistrarView.as_view(), name='crm-proposta-registrar'),
+    path('crm/leads/converter/', CRMLeadConverterView.as_view(), name='crm-lead-converter'),
     
     path('', include(router.urls)),
 ]
-
