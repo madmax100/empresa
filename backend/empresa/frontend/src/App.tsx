@@ -30,11 +30,15 @@ import ItensOrdemProducaoPage from './pages/ItensOrdemProducaoPage';
 import ConsumosProducaoPage from './pages/ConsumosProducaoPage';
 import ApontamentosProducaoPage from './pages/ApontamentosProducaoPage';
 import OperacoesProducaoPage from './pages/OperacoesProducaoPage';
+import AtivosPatrimonioPage from './pages/AtivosPatrimonioPage';
+import ManutencoesAtivosPage from './pages/ManutencoesAtivosPage';
+import DepreciacoesAtivosPage from './pages/DepreciacoesAtivosPage';
+import OperacoesAtivosPage from './pages/OperacoesAtivosPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes' | 'ordens-producao' | 'itens-ordem-producao' | 'consumos-producao' | 'apontamentos-producao' | 'operacoes-producao' | 'ativos-patrimonio' | 'manutencoes-ativos' | 'depreciacoes-ativos' | 'operacoes-ativos'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -667,6 +671,86 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('ativos-patrimonio')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'ativos-patrimonio' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'ativos-patrimonio' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🏢 Ativos
+          </button>
+
+          <button
+            onClick={() => setActivePanel('manutencoes-ativos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'manutencoes-ativos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'manutencoes-ativos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🛠️ Manutenções
+          </button>
+
+          <button
+            onClick={() => setActivePanel('depreciacoes-ativos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'depreciacoes-ativos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'depreciacoes-ativos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📉 Depreciações
+          </button>
+
+          <button
+            onClick={() => setActivePanel('operacoes-ativos')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'operacoes-ativos' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'operacoes-ativos' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Operações Ativos
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -798,6 +882,10 @@ function App() {
         {activePanel === 'consumos-producao' && <ConsumosProducaoPage />}
         {activePanel === 'apontamentos-producao' && <ApontamentosProducaoPage />}
         {activePanel === 'operacoes-producao' && <OperacoesProducaoPage />}
+        {activePanel === 'ativos-patrimonio' && <AtivosPatrimonioPage />}
+        {activePanel === 'manutencoes-ativos' && <ManutencoesAtivosPage />}
+        {activePanel === 'depreciacoes-ativos' && <DepreciacoesAtivosPage />}
+        {activePanel === 'operacoes-ativos' && <OperacoesAtivosPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
