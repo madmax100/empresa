@@ -21,11 +21,15 @@ import AtividadesCrmPage from './pages/AtividadesCrmPage';
 import PropostasVendaCrmPage from './pages/PropostasVendaCrmPage';
 import ItensPropostaVendaPage from './pages/ItensPropostaVendaPage';
 import CrmResumoPage from './pages/CrmResumoPage';
+import ImpostosFiscaisPage from './pages/ImpostosFiscaisPage';
+import ApuracoesFiscaisPage from './pages/ApuracoesFiscaisPage';
+import ItensApuracaoFiscalPage from './pages/ItensApuracaoFiscalPage';
+import FiscalOperacoesPage from './pages/FiscalOperacoesPage';
 import TestApiConnection from './components/TestApiConnection';
 import './App.css';
 
 function App() {
-  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta'>('fluxo-realizado');
+  const [activePanel, setActivePanel] = useState<'fluxo-realizado' | 'fluxo-lucro' | 'estoque' | 'estoque-comparativo' | 'gerencia' | 'contratos' | 'resultados' | 'custos-fixos' | 'custos-variaveis' | 'faturamento' | 'test-api' | 'clientes' | 'fornecedores' | 'funcionarios' | 'empresas' | 'transportadoras' | 'crm-resumo' | 'etapas-funil' | 'leads' | 'oportunidades' | 'atividades-crm' | 'propostas-crm' | 'itens-proposta' | 'impostos-fiscais' | 'apuracoes-fiscais' | 'itens-apuracao-fiscal' | 'fiscal-operacoes'>('fluxo-realizado');
 
   // Estado Global de Datas
   const [dataInicio, setDataInicio] = useState<string>(() => {
@@ -478,6 +482,86 @@ function App() {
           </button>
 
           <button
+            onClick={() => setActivePanel('impostos-fiscais')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'impostos-fiscais' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'impostos-fiscais' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Impostos Fiscais
+          </button>
+
+          <button
+            onClick={() => setActivePanel('apuracoes-fiscais')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'apuracoes-fiscais' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'apuracoes-fiscais' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            📅 Apurações Fiscais
+          </button>
+
+          <button
+            onClick={() => setActivePanel('itens-apuracao-fiscal')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'itens-apuracao-fiscal' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'itens-apuracao-fiscal' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧮 Itens Apuração
+          </button>
+
+          <button
+            onClick={() => setActivePanel('fiscal-operacoes')}
+            style={{
+              padding: '10px 20px',
+              border: 'none',
+              backgroundColor: activePanel === 'fiscal-operacoes' ? '#3b82f6' : 'transparent',
+              color: activePanel === 'fiscal-operacoes' ? 'white' : '#6b7280',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              transition: 'all 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            🧾 Operações Fiscais
+          </button>
+
+          <button
             onClick={() => setActivePanel('resultados')}
             style={{
               padding: '10px 20px',
@@ -600,6 +684,10 @@ function App() {
         {activePanel === 'atividades-crm' && <AtividadesCrmPage />}
         {activePanel === 'propostas-crm' && <PropostasVendaCrmPage />}
         {activePanel === 'itens-proposta' && <ItensPropostaVendaPage />}
+        {activePanel === 'impostos-fiscais' && <ImpostosFiscaisPage />}
+        {activePanel === 'apuracoes-fiscais' && <ApuracoesFiscaisPage />}
+        {activePanel === 'itens-apuracao-fiscal' && <ItensApuracaoFiscalPage />}
+        {activePanel === 'fiscal-operacoes' && <FiscalOperacoesPage />}
         {activePanel === 'resultados' && <ResultadosPage />}
         {activePanel === 'custos-fixos' && <CustosFixosPage />}
         {activePanel === 'custos-variaveis' && <CustosVariaveisPage />}
